@@ -11,6 +11,7 @@ config_folder = utils.get_parent_dir(__file__,1)+"/conf"
 temporary_folder = utils.get_parent_dir(__file__,1)+"/temp"
 jinja_env = Environment(loader=FileSystemLoader(template_folder))
 
+
 def docker_build(folder_path, image_repo):
     client = docker.from_env()
     client.images.build(
@@ -409,6 +410,7 @@ class StartTrainingContainerEdge(Generic):
 
         # report all necessary info for next step
         temp_conf = jinja_env.get_template("docker_edge.json")
+        edges = self.get_edge_resource(params)  # list of edge resources
         for edge in edges:
             config = self.generate_config(params)
 
@@ -416,7 +418,7 @@ class StartTrainingContainerEdge(Generic):
             self.send_command(edge,edge_command)
 
 
-        edges = self.get_edge_resource(params) # list of edge resources
+
 
         response = {}
         return response
