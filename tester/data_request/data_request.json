@@ -1,6 +1,6 @@
 {
     "edge_id": "edge001",
-    "command": "data_extract",
+    "command": "extract_data",
     "data_request":
       {
         "owner_id": "dc001",

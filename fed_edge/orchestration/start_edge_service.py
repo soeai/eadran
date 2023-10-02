@@ -79,13 +79,13 @@ class EdgeOrchestrator(object):
                         "edge_id": self.edge_id,
                         "status": "success"
                     }
-            elif req_msg['command'].lower() == 'data_extract':
+            elif req_msg['command'].lower() == 'extract_data':
                 response = self.extract_data(req_msg)
 
-            elif req_msg['command'].lower() == 'data_process':
+            elif req_msg['command'].lower() == 'process_data':
                 response = self.data_processing(req_msg)
 
-            elif req_msg['command'].lower() == 'qod_eval':
+            elif req_msg['command'].lower() == 'eval_qod':
                 response = self.qod_eval(req_msg)
 
             # send response back to server

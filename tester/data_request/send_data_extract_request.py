@@ -35,6 +35,6 @@ with open('data_request.json') as f:
     # add message header
     msg = {"type":"request",
            "requester":"dataservice",
-            "command": "process_data",
+            "command": "request_on_data",
             "content": req}
     client.send(msg)

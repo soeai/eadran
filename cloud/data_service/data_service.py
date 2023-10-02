@@ -56,8 +56,11 @@ class DataService(Resource):
         if request.is_json:
             json_msg = request.get_json(force=True)
             # send the command to orchestrator
-            orchestrator_command = {"command": "process_data",
-                                    "params": json_msg}
+            orchestrator_command = {
+                "type":"request",
+                "requester":"dataservice",
+                "command": "request_on_data",
+                "content": json_msg}
             self.queue.send(orchestrator_command)
             return jsonify({'status': "starting"})
         return jsonify({'status': 'request must enclose a json object'}), 400
@@ -65,16 +68,16 @@ class DataService(Resource):
 
 class Queue(object):
     def __init__(self, config):
-        self.amqp_connector = Amqp_Connector(config,self)
+        self.amqp_queue_out = Amqp_Connector(config, self)
 
     def send(self, msg):
-        self.amqp_connector.send_data(json.dumps(msg))
+        self.amqp_queue_out.send_data(json.dumps(msg))
 
 # may be read from config file
 orchestrator_config = json.loads(orchestrator_queue.replace("\'","\""))
 queue = Queue(orchestrator_config)
 
-api.add_resource(DataService, '/dataprocessing',resource_class_args=(queue,))
+api.add_resource(DataService, '/dataservice',resource_class_args=(queue,))
 
 if __name__ == '__main__':
     init_env_variables()

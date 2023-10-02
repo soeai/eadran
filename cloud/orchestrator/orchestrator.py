@@ -71,7 +71,7 @@ def stop_edge(params, uuid):
     pass
 
 
-def extract_data(params, request_id, orchestrator=None):
+def request_on_data(params, request_id, orchestrator=None):
     if orchestrator is not None:
         url_mgt_service = orchestrator.url_mgt_service +  "/health?id=" + params['edge_id']
         edge_check = requests.get(url_mgt_service).json()
@@ -105,8 +105,9 @@ class Orchestrator(object):
                 start_edge(req_msg['content'], self)
             elif req_msg['command'] == 'stop_edge':
                 stop_edge(req_msg['content'])
-            elif req_msg['command'] == 'process_data':
-                extract_data(req_msg['content'],request_id,self)
+            elif req_msg['command'] == 'request_on_data':
+                request_on_data(req_msg['content'], request_id, self)
+
         elif msg_type == 'response':
             logging.info("Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
 
