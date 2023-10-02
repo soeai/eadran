@@ -86,8 +86,8 @@ def extract_data(params, request_id, orchestrator=None):
 class Orchestrator(object):
     def __init__(self, config):
         self.config = utils.load_config(config)
-        self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
-        self.amqp_connector = Amqp_Connector(self.config['amqp_out'],self)
+        self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
+        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config['url_mgt_service']
         self.url_storage_service = self.config['url_storage_service']
@@ -112,10 +112,10 @@ class Orchestrator(object):
 
 
     def send(self, msg, routing_key = None):
-        self.amqp_connector.send_data(json.dumps(msg),routing_key=routing_key)
+        self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)
 
     def start_receive(self):
-        self.amqp_collector.start()
+        self.amqp_queue_in.start()
 
     def start(self):
         self.thread.start()

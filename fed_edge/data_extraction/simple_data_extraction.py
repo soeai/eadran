@@ -138,7 +138,7 @@ class TabularHandle(ABCTabular):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simple Data Extraction for CSV file')
     parser.add_argument('--request', type=str)
-    parser.add_argument('--conf', type=str, default='conf/config.json')
+    parser.add_argument('--conf', type=str, default='../conf/config.json')
     args = parser.parse_args()
 
     with open(args.conf) as f_conf:

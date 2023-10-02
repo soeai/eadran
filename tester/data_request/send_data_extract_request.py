@@ -8,7 +8,7 @@ from threading import Thread
 
 class DataService_Simulation(object):
     def __init__(self):
-        self.config = utils.load_config('temp/config.json')
+        self.config = utils.load_config('../fed_edge/data_extraction/temp/config.json')
         # self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
         self.amqp_connector = Amqp_Connector(self.config['amqp_out'],self)
         # self.thread = Thread(target=self.start_receive)
@@ -26,7 +26,7 @@ class DataService_Simulation(object):
 
 
 client = DataService_Simulation()
-with open('temp/data_request.json') as f:
+with open('data_request.json') as f:
     req = json.load(f)
     # msg = {
     #     "edge_id": "DE001",

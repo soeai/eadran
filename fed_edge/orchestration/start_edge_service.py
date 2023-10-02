@@ -29,8 +29,8 @@ class EdgeOrchestrator(object):
         self.docker_client = None
         self.edge_id = self.config['edge_id']
         self.containers = {}
-        self.amqp_collector = Amqp_Collector(self.config['amqp_in'], self)
-        self.amqp_connector = Amqp_Connector(self.config['amqp_out'], self)
+        self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
+        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
     
@@ -82,6 +82,12 @@ class EdgeOrchestrator(object):
             elif req_msg['command'].lower() == 'data_extract':
                 response = self.extract_data(req_msg)
 
+            elif req_msg['command'].lower() == 'data_process':
+                response = self.data_processing(req_msg)
+
+            elif req_msg['command'].lower() == 'qod_eval':
+                response = self.qod_eval(req_msg)
+
             # send response back to server
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
@@ -90,10 +96,10 @@ class EdgeOrchestrator(object):
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
-                self.amqp_connector.send_data(json.dumps(msg))
+                self.amqp_queue_out.send_data(json.dumps(msg))
 
     def start(self):
-        self.amqp_collector.start()
+        self.amqp_queue_in.start()
 
     def start_amqp(self):
         self.amqp_thread.start()
@@ -124,9 +130,43 @@ class EdgeOrchestrator(object):
             # save data request to file
             json.dump(req_msg['data_request'], f)
             # execute data extraction module
-        command = self.config['module']['command']
-        module_name = self.config['module']['module_name']
-        params = self.config['module']['params']
+        command = self.config['modules']['extract_data']['command']
+        module_name = self.config['modules']['extract_data']['module_name']
+        params = self.config['modules']['extract_data']['params']
+        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
+        response = json.loads(rep_msg.stdout)
+        # cleanup
+        os.remove(fname)
+        return response
+
+    def qod_eval(self, req_msg):
+        if not os.path.isdir("temp"):
+            os.mkdir('temp')
+        fname = "temp/request_{}.json".format(uuid.uuid4())
+        with open(fname, 'w') as f:
+            # save data request to file
+            json.dump(req_msg['data_request'], f)
+            # execute data extraction module
+        command = self.config['modules']['qod_eval']['command']
+        module_name = self.config['modules']['qod_eval']['module_name']
+        params = self.config['modules']['qod_eval']['params']
+        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
+        response = json.loads(rep_msg.stdout)
+        # cleanup
+        os.remove(fname)
+        return response
+
+    def data_processing(self, req_msg):
+        if not os.path.isdir("temp"):
+            os.mkdir('temp')
+        fname = "temp/request_{}.json".format(uuid.uuid4())
+        with open(fname, 'w') as f:
+            # save data request to file
+            json.dump(req_msg['data_request'], f)
+            # execute data extraction module
+        command = self.config['modules']['process_data']['command']
+        module_name = self.config['modules']['process_data']['module_name']
+        params = self.config['modules']['process_data']['params']
         rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
         response = json.loads(rep_msg.stdout)
         # cleanup
@@ -150,13 +190,13 @@ class EdgeOrchestrator(object):
                     },
                     "docker_available": docker_res  # code to check docker available or not
                 }
-            self.amqp_connector.send_data(json.dumps(health_post),routing_key=self.config['amqp_health_report'])
+            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
-    parser.add_argument('--conf', help='config file', default="conf/config.json")
+    parser.add_argument('--conf', help='config file', default="../conf/config.json")
     args = parser.parse_args()
 
     orchestrator = EdgeOrchestrator(args.conf)

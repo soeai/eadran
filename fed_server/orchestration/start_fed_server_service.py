@@ -27,8 +27,8 @@ class FedServerOrchestrator(object):
         self.docker_client = None
         self.edge_id = self.config['edge_id']
         self.containers = {}
-        self.amqp_collector = Amqp_Collector(self.config['amqp_in'], self)
-        self.amqp_connector = Amqp_Connector(self.config['amqp_out'], self)
+        self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
+        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
@@ -86,8 +86,8 @@ class FedServerOrchestrator(object):
                         "edge_id": self.edge_id,
                         "status": "success"
                     }
-            elif req_msg['command'].lower() == 'data_extract':
-                response = self.extract_data(req_msg)
+            # elif req_msg['command'].lower() == 'data_extract':
+            #     response = self.extract_data(req_msg)
 
             # send response back to server
             if response is not None:
@@ -97,10 +97,10 @@ class FedServerOrchestrator(object):
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
-                self.amqp_connector.send_data(json.dumps(msg))
+                self.amqp_queue_out.send_data(json.dumps(msg))
 
     def start(self):
-        self.amqp_collector.start()
+        self.amqp_queue_in.start()
 
     def start_amqp(self):
         self.amqp_thread.start()
@@ -157,7 +157,7 @@ class FedServerOrchestrator(object):
                     },
                     "docker_available": docker_res  # code to check docker available or not
                 }
-            self.amqp_connector.send_data(json.dumps(health_post),routing_key=self.config['amqp_health_report'])
+            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
 
 
