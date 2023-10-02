@@ -1,0 +1,17 @@
+{
+  "edge_id": "edge001",
+  "amqp_out": {
+    "end_point":"195.148.22.62",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "out_routing_key": "orchestrator.edge001",
+    "out_queue": "edge_ds001_out"
+  },
+  "amqp_in": {
+    "end_point":"195.148.22.62",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "in_routing_key": "edge.edge001",
+    "in_queue": "edge_ds001_in"
+  }
+}

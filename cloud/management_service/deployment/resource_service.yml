@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: resource-service
+spec:
+  ports:
+  - port: 8003
+    targetPort: 5000
+  selector:
+    app: resource-service

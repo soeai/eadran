@@ -1,0 +1,5 @@
+{
+    "RMQ_port": {"command_port": 6000, "mess_port": 7000},
+    "port_pool": 8000,
+    "fed_server_url": "127.0.0.1/federated_orchestration"
+}

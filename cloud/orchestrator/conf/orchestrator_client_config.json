@@ -1,0 +1,12 @@
+{
+  "amqp_collector":{
+      "class": "amqp",
+      "conf":{
+          "end_point": "195.148.22.62",
+          "exchange_name": "fedmarketplace",
+          "exchange_type": "topic",
+          "in_routing_key": "orchestrator.client.aalto1",
+          "in_queue":"collector_1"
+      }
+  }
+}

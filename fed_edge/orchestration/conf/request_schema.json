@@ -1,0 +1,241 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "edge_id": {
+      "type": "string"
+    },
+    "command": {
+      "type": "string"
+    },
+    "data_request": {
+      "type": "object",
+      "properties": {
+        "owner_id": {
+          "type": "string"
+        },
+        "dataset_id": {
+          "type": "string"
+        },
+        "__comment": {
+          "type": "string"
+        },
+        "access_info": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "access_key": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "location",
+            "access_key"
+          ]
+        },
+        "features": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "__comment": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "dtype": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__comment",
+                "name",
+                "index",
+                "dtype"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "__comment": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "dtype": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__comment",
+                "name",
+                "index",
+                "dtype"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "__comment": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "dtype": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__comment",
+                "name",
+                "index",
+                "dtype"
+              ]
+            }
+          ]
+        },
+        "label": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer"
+            },
+            "dtype": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "index",
+            "dtype"
+          ]
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string"
+            },
+            "constraints": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "feature_name": {
+                      "type": "string"
+                    },
+                    "from": {
+                      "type": "integer"
+                    },
+                    "to": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "feature_name",
+                    "from",
+                    "to"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "operator",
+            "constraints"
+          ]
+        },
+        "sample_limit": {
+          "type": "object",
+          "properties": {
+            "number": {
+              "type": "integer"
+            },
+            "method": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "number",
+            "method"
+          ]
+        },
+        "qod": {
+          "type": "object",
+          "properties": {
+            "__comment": {
+              "type": "string"
+            },
+            "__schema": {
+              "type": "string"
+            },
+            "constraints": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "metric_name": {
+                      "type": "string"
+                    },
+                    "min_value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "metric_name",
+                    "min_value"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "__comment",
+            "__schema",
+            "constraints"
+          ]
+        }
+      },
+      "required": [
+        "owner_id",
+        "dataset_id",
+        "__comment",
+        "access_info",
+        "features",
+        "label",
+        "filters",
+        "sample_limit",
+        "qod"
+      ]
+    }
+  },
+  "required": [
+    "edge_id",
+    "command",
+    "data_request"
+  ]
+}

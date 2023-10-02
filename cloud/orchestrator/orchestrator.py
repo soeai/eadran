@@ -1,0 +1,130 @@
+import argparse
+import json
+import uuid
+
+from qoa4ml.collector.amqp_collector import Amqp_Collector
+from qoa4ml.connector.amqp_connector import Amqp_Connector
+import qoa4ml.utils as utils
+from threading import Thread
+from commons.pipeline import Pipeline
+from commons.modules import BuildDocker, ResourceComputing, GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
+import logging
+import requests
+
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("pika").setLevel(logging.WARNING)
+
+
+def start_train(params, orchestrator=None):
+    # ======================= MESSAGE RECEIVE FROM CLIENT
+    # {
+    #   "consumer_id": "who request",
+    #   "model_id": "",
+    #   "datasets": [{
+    #     "dataset_id": "uuid of dataset",
+    #     "resource_id": "specific computing infrastructure for this training",
+    #     "extract_response_id": "response id from data service (file data_response_v0.1.json)"
+    #   }],
+    #   "requirement_libs": [{
+    #     "name": "tensorflow",
+    #     "version": "2.10"
+    #   }],
+    #   "model_conf":{
+    #         "storage_ref_id":"id of code that manages in storage service",
+    #         "module_name": "code for training at edges, must be attached",
+    #         "function_map":{
+    #             "train": "fit",
+    #             "evaluate": "evaluate",
+    #             "set_weights": "set_weights",
+    #             "get_weights": "get_weights"
+    #         },
+    #         "train_hyper_param":{
+    #             "epochs": 10,
+    #             "batch_size": 32
+    #         }
+    #     },
+    #   "pre_train_model": {
+    #       "url": "link to get pre-train model from storage service",
+    #       "name": "name of model on model management module/service",
+    #       "params": "optional params to download"
+    #     }
+    # }
+    # ============== END OF MESSAGE
+    logging.info("Request content: {}".format(params))
+    pipeline = Pipeline([StartFedServer(), BuildDocker(), ResourceComputing(), GenerateConfiguration(), StartTrainingContainerEdge()], params)
+    pipeline.exec()
+
+    # send something to others if needed
+    if orchestrator is not None:
+        orchestrator.send("")
+
+
+def start_edge(params, orchestrator=None):
+    pipeline = Pipeline([ResourceComputing(), GenerateConfiguration()], params)
+    pipeline.exec()
+    # send something to others if needed
+    if orchestrator is not None:
+        orchestrator.send("")
+
+
+def stop_edge(params, uuid):
+    pass
+
+
+def extract_data(params, request_id, orchestrator=None):
+    if orchestrator is not None:
+        url_mgt_service = orchestrator.url_mgt_service +  "/health?id=" + params['edge_id']
+        edge_check = requests.get(url_mgt_service).json()
+        # print(edge_check)
+        if not edge_check['status'] == "false":
+            routing = edge_check['status']['routing_key']
+            params['request_id'] = request_id
+            logging.info("Sending a request [{}] to [{}]".format(request_id, params['edge_id']))
+            orchestrator.send(params,routing_key=routing)
+
+
+class Orchestrator(object):
+    def __init__(self, config):
+        self.config = utils.load_config(config)
+        self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
+        self.amqp_connector = Amqp_Connector(self.config['amqp_out'],self)
+        self.thread = Thread(target=self.start_receive)
+        self.url_mgt_service = self.config['url_mgt_service']
+        self.url_storage_service = self.config['url_storage_service']
+
+    def message_processing(self, ch, method, props, body):
+        req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
+        msg_type = req_msg['type']
+        if msg_type == 'request':
+            logging.info("Received a message from [{}] for [{}]".format(req_msg['requester'], req_msg['command']))
+            # WILL DETAIL LATER
+            request_id = str(uuid.uuid4())
+            if req_msg['command'] == 'train_model':
+                start_train(req_msg['content'], self)
+            elif req_msg['command'] == 'start_edge':
+                start_edge(req_msg['content'], self)
+            elif req_msg['command'] == 'stop_edge':
+                stop_edge(req_msg['content'])
+            elif req_msg['command'] == 'process_data':
+                extract_data(req_msg['content'],request_id,self)
+        elif msg_type == 'response':
+            logging.info("Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
+
+
+    def send(self, msg, routing_key = None):
+        self.amqp_connector.send_data(json.dumps(msg),routing_key=routing_key)
+
+    def start_receive(self):
+        self.amqp_collector.start()
+
+    def start(self):
+        self.thread.start()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Orchestrator')
+    parser.add_argument('--conf', type=str, default='conf/config.json')
+    args = parser.parse_args()
+
+    orchestrator = Orchestrator(args.conf)
+    orchestrator.start()
