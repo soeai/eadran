@@ -12,7 +12,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 app = Flask(__name__)
 api = Api(app)
 
-mongo_client = None
+# mongo_client = None
 # orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
 #                   'exchange_name': 'fedmarketplace',
 #                   'exchange_type': 'topic',
@@ -20,29 +20,29 @@ mongo_client = None
 #                   'out_queue': 'orchestrator.queue.out'
 #                 }"""
 
-def get_node_name():
-    node_name = os.environ.get('NODE_NAME')
-    if not node_name:
-        print("NODE_NAME is not defined")
-        node_name = "Empty"
-    return node_name
-
-
-def get_instance_id():
-    pod_id = os.environ.get('POD_ID')
-    if not pod_id:
-        print("POD_ID is not defined")
-        pod_id = "Empty"
-    return pod_id
-
-
-def init_env_variables():
-    # edge_service = os.environ.get('EDGE_SERVICE')
-    # edge_service_port = os.environ.get("EDGE_SERVICE_PORT")
-    # mongo_user = os.environ.get("MONGO_USER")
-    # mongo_pass = os.environ.get("MONGO_PASS")
-    # mongo_host = os.environ.get("MONGO_HOST")
-    pass
+# def get_node_name():
+#     node_name = os.environ.get('NODE_NAME')
+#     if not node_name:
+#         print("NODE_NAME is not defined")
+#         node_name = "Empty"
+#     return node_name
+#
+#
+# def get_instance_id():
+#     pod_id = os.environ.get('POD_ID')
+#     if not pod_id:
+#         print("POD_ID is not defined")
+#         pod_id = "Empty"
+#     return pod_id
+#
+#
+# def init_env_variables():
+#     # edge_service = os.environ.get('EDGE_SERVICE')
+#     # edge_service_port = os.environ.get("EDGE_SERVICE_PORT")
+#     # mongo_user = os.environ.get("MONGO_USER")
+#     # mongo_pass = os.environ.get("MONGO_PASS")
+#     # mongo_host = os.environ.get("MONGO_HOST")
+#     pass
 
 
 class DataService(Resource):
@@ -73,13 +73,15 @@ class Queue(object):
     def send(self, msg):
         self.amqp_queue_out.send_data(json.dumps(msg))
 
+
 with open("conf/config.json") as f:
     orchestrator_config = json.load(f)['orchestrator']
+
 queue = Queue(orchestrator_config)
 
 api.add_resource(DataService, '/dataservice',resource_class_args=(queue,))
 
 if __name__ == '__main__':
-    init_env_variables()
+    # init_env_variables()
 
     app.run(debug=True, port=ServiceConfig.DATA_SERVICE_PORT)

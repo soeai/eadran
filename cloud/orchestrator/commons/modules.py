@@ -37,23 +37,24 @@ class Generic(ABC):
 
 
 class StartFedServer(Generic):
-    def __init__(self, config=None):
+    def __init__(self, orchestrator, config=None):
         if config is None:
             config = config_folder+"/fed_server.json"
         self.config = utils.load_config(config)
-        self.rmq_port = self.config["RMQ_port"] 
-        self.ports_pool = self.config["port_pool"] 
-        self.fed_server_ulr = config["fed_server_url"] # Federated Orchestration Server: REST
+        self.orchestrator = orchestrator
+        # self.rmq_port = self.config["RMQ_port"]
+        # self.ports_pool = self.config["port_pool"]
+        # self.fed_server_ulr = config["fed_server_url"] # Federated Orchestration Server: REST
         self.fed_count = 0
         
-
-    def send_start_fed_command(self,json_mess):
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
-        return requests.request("POST", self.fed_server_ulr, headers=headers, data=json.dumps(json_mess)) # assume that fed_server is a rest server 
-
+    # orchestrator send message to micro-service via queue
+    # def send_start_fed_command(self,json_mess):
+    #     # headers = {
+    #     #     'Content-Type': 'application/json'
+    #     # }
+    #     # # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
+    #     # return requests.request("POST", self.fed_server_ulr, headers=headers, data=json.dumps(json_mess)) # assume that fed_server is a rest server
+    #     pass
 
     def exec(self, params):
         try:
@@ -112,9 +113,13 @@ class StartFedServer(Generic):
                 mess["config"].append(rabbit_config)
                 self.fed_count += 1
 
-                try: 
-                    fed_response = self.send_start_fed_command(mess)
-                    fed_response["IP"] = response.json()
+                try:
+                    # send asynchronously here
+                    self.orchestrator.send(mess)
+
+                    # fed_response = ???
+                    # fed_response["IP"] = response.json()
+
                     # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
 
                 except Exception as e:
@@ -125,6 +130,8 @@ class StartFedServer(Generic):
         except Exception as e:
             print("[ERROR] - Error {} while start FedServer: {}".format(type(e),e.__traceback__))
             traceback.print_exception(*sys.exc_info())
+
+        # need to return more info here to build docker
         response["fed_response"] = fed_response
         return response
 
@@ -146,9 +153,7 @@ class BuildDocker(Generic):
             self.config = utils.load_config(config)
         else:
             self.config = None
-    
-    
-    
+
     def generate_requirements(self, reqs,folder_path):
         req_text = ""
         for req in reqs:
@@ -175,8 +180,6 @@ class BuildDocker(Generic):
         # fetch source code from git/url/object storage to folder_path
         # return True/False
         pass
-
-    
 
     def exec(self, params):
         # prepare and run command to build docker
