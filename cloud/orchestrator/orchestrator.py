@@ -6,6 +6,7 @@ from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import qoa4ml.utils as utils
 from threading import Thread
+from cloud.commons.default import ServiceConfig
 from commons.pipeline import Pipeline
 from commons.modules import BuildDocker, ResourceComputing, GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
 import logging
@@ -51,7 +52,12 @@ def start_train(params, orchestrator=None):
     # }
     # ============== END OF MESSAGE
     logging.info("Request content: {}".format(params))
-    pipeline = Pipeline([StartFedServer(), BuildDocker(), ResourceComputing(), GenerateConfiguration(), StartTrainingContainerEdge()], params)
+    pipeline = Pipeline(task_list=[StartFedServer(),
+                         BuildDocker(),
+                         ResourceComputing(),
+                         GenerateConfiguration(),
+                         StartTrainingContainerEdge()],
+                        params=params)
     pipeline.exec()
 
     # send something to others if needed
@@ -71,7 +77,7 @@ def stop_edge(params, uuid):
     pass
 
 
-def request_on_data(params, request_id, orchestrator=None):
+def request_data(params, request_id, orchestrator=None):
     if orchestrator is not None:
         url_mgt_service = orchestrator.url_mgt_service +  "/health?id=" + params['edge_id']
         edge_check = requests.get(url_mgt_service).json()
@@ -89,8 +95,10 @@ class Orchestrator(object):
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.thread = Thread(target=self.start_receive)
-        self.url_mgt_service = self.config['url_mgt_service']
-        self.url_storage_service = self.config['url_storage_service']
+        self.url_mgt_service = self.config['url_mgt_service'] + ServiceConfig.MGT_SERVICE_HOST + ":" \
+                               + str(ServiceConfig.MGT_SERVICE_PORT)
+        self.url_storage_service = self.config['url_storage_service'] + ServiceConfig.STORAGE_SERVICE_HOST \
+                            + ":" + str(ServiceConfig.STORAGE_SERVICE_PORT)
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -105,12 +113,11 @@ class Orchestrator(object):
                 start_edge(req_msg['content'], self)
             elif req_msg['command'] == 'stop_edge':
                 stop_edge(req_msg['content'])
-            elif req_msg['command'] == 'request_on_data':
-                request_on_data(req_msg['content'], request_id, self)
+            elif req_msg['command'] == 'request_data':
+                request_data(req_msg['content'], request_id, self)
 
         elif msg_type == 'response':
             logging.info("Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
-
 
     def send(self, msg, routing_key = None):
         self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)

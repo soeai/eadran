@@ -4,7 +4,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
 from qoa4ml.connector.amqp_connector import Amqp_Connector
-
+from cloud.commons.default import ServiceConfig
 from helpers.custom_logger import CustomLogger
 logger = CustomLogger().get_logger().setLevel(logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
@@ -13,12 +13,12 @@ app = Flask(__name__)
 api = Api(app)
 
 mongo_client = None
-orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
-                  'exchange_name': 'fedmarketplace',
-                  'exchange_type': 'topic',
-                  'out_routing_key': 'orchestrator.dataservice',
-                  'out_queue': 'orchestrator.queue.out'
-                }"""
+# orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
+#                   'exchange_name': 'fedmarketplace',
+#                   'exchange_type': 'topic',
+#                   'out_routing_key': 'orchestrator.dataservice',
+#                   'out_queue': 'orchestrator.queue.out'
+#                 }"""
 
 def get_node_name():
     node_name = os.environ.get('NODE_NAME')
@@ -59,7 +59,7 @@ class DataService(Resource):
             orchestrator_command = {
                 "type":"request",
                 "requester":"dataservice",
-                "command": "request_on_data",
+                "command": "request_data",
                 "content": json_msg}
             self.queue.send(orchestrator_command)
             return jsonify({'status': "starting"})
@@ -73,8 +73,8 @@ class Queue(object):
     def send(self, msg):
         self.amqp_queue_out.send_data(json.dumps(msg))
 
-# may be read from config file
-orchestrator_config = json.loads(orchestrator_queue.replace("\'","\""))
+with open("conf/config.json") as f:
+    orchestrator_config = json.load(f)['orchestrator']
 queue = Queue(orchestrator_config)
 
 api.add_resource(DataService, '/dataservice',resource_class_args=(queue,))
@@ -82,4 +82,4 @@ api.add_resource(DataService, '/dataservice',resource_class_args=(queue,))
 if __name__ == '__main__':
     init_env_variables()
 
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=ServiceConfig.DATA_SERVICE_PORT)

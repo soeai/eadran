@@ -1,7 +1,7 @@
 class Pipeline:
-    def __init__(self, obj_list, params):
+    def __init__(self, task_list, params):
         self.data = [params]
-        self.objs = obj_list
+        self.objs = task_list
 
     def exec(self):
         for m in self.objs:

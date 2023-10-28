@@ -13,6 +13,6 @@
     "out_routing_key": "edge",
     "out_queue": "orchestrator.queue.out"
   },
-  "url_mgt_service": "http://localhost:5000",
-  "url_storage_service": "http://localhost:5000"
+  "url_mgt_service": "http://",
+  "url_storage_service": "http://"
 }

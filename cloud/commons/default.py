@@ -1,0 +1,9 @@
+class ServiceConfig:
+    TRAINING_SERVICE_HOST = "localhost"
+    TRAINING_SERVICE_PORT = 5000
+    DATA_SERVICE_HOST="localhost"
+    DATA_SERVICE_PORT = 5001
+    MGT_SERVICE_HOST = "localhost"
+    MGT_SERVICE_PORT = 5002
+    STORAGE_SERVICE_HOST = "localhost"
+    STORAGE_SERVICE_PORT = 5003

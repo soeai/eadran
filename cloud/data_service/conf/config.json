@@ -1,0 +1,8 @@
+{
+  "orchestrator": {
+      "end_point":"amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp",
+      "exchange_name": "fedmarketplace",
+      "exchange_type": "topic",
+      "out_routing_key": "orchestrator.dataservice",
+      "out_queue": "orchestrator.queue.out"}
+}

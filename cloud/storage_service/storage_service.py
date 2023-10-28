@@ -1,45 +1,49 @@
 import werkzeug
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 import os, time
 from flask_restful import Resource, Api
 from werkzeug.utils import secure_filename
-
+from cloud.commons.default import ServiceConfig
 from helpers.custom_logger import CustomLogger
 from flask_restful import reqparse
+import json
 
 app = Flask(__name__)
 api = Api(app)
 
 logger = CustomLogger().get_logger()
 
-headers = {'content-type': 'application/json'}
-edge_service = "edge_service"
-edge_service_port= "8006"
+# headers = {'content-type': 'application/json'}
+# edge_service = "edge_service"
+# edge_service_port= "8006"
 
-app.config['UPLOAD_FOLDER'] = 'temp'
+with open("conf/config.json") as f:
+    confs = json.load(f)
 
-def get_node_name():
-    node_name = os.environ.get('NODE_NAME')
-    if not node_name:
-        print("NODE_NAME is not defined")
-        node_name = "Empty"
-    return node_name
-def get_instance_id():
-    pod_id = os.environ.get('POD_ID')
-    if not pod_id:
-        print("POD_ID is not defined")
-        pod_id = "Empty"
-    return pod_id
+# app.config['UPLOAD_FOLDER'] = 'temp'
 
-def init_env_variables():
-    edge_service = os.environ.get('EDGE_SERVICE')
-    edge_service_port = os.environ.get("EDGE_SERVICE_PORT")
-    if not edge_service:
-        logger.error("EDGE_SERVICE is not defined")
-        raise Exception("EDGE_SERVICE is not defined")
-    if not edge_service_port:
-        logger.error("EDGE_SERVICE_PORT is not defined")
-        raise Exception("EDGE_SERVICE_PORT is not defined")
+# def get_node_name():
+#     node_name = os.environ.get('NODE_NAME')
+#     if not node_name:
+#         print("NODE_NAME is not defined")
+#         node_name = "Empty"
+#     return node_name
+# def get_instance_id():
+#     pod_id = os.environ.get('POD_ID')
+#     if not pod_id:
+#         print("POD_ID is not defined")
+#         pod_id = "Empty"
+#     return pod_id
+#
+# def init_env_variables():
+#     edge_service = os.environ.get('EDGE_SERVICE')
+#     edge_service_port = os.environ.get("EDGE_SERVICE_PORT")
+#     if not edge_service:
+#         logger.error("EDGE_SERVICE is not defined")
+#         raise Exception("EDGE_SERVICE is not defined")
+#     if not edge_service_port:
+#         logger.error("EDGE_SERVICE_PORT is not defined")
+#         raise Exception("EDGE_SERVICE_PORT is not defined")
 
 # @app.route("/storage", methods = ['GET', 'POST'])
 # def inference():
@@ -81,8 +85,12 @@ def init_env_variables():
 
 
 class Storage(Resource):
-    def get(self, params):
-        return jsonify({'Working': True})
+    def get(self, file_id):
+        if not os.path.exists(os.path.join(confs['STORAGE_FOLDER'], file_id)):
+            return jsonify({"status": False}), 404
+
+        return send_from_directory(confs['STORAGE_FOLDER'], file_id, as_attachment=True)
+        # return jsonify({'Working': True})
 
     def post(self):
         if 'file' not in request.files:
@@ -91,26 +99,42 @@ class Storage(Resource):
         file = request.files.get("file")
         if file:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return jsonify({'status': True}), 201
+            file.save(os.path.join(confs['STORAGE_FOLDER'], filename))
+            return jsonify({'status': True})
 
-    def put(self):
-        args = parser.parse_args()
+    def put(self,file_id):
+        # args = parser.parse_args()
         # get param from args here
-        return jsonify({'Working': True}), 201
+        if 'file' not in request.files:
+            return jsonify({'status': False}), 401
 
-    def delete(self):
-        args = parser.parse_args()
+        filename = secure_filename(file_id)
+
+        if not os.path.exists(os.path.join(confs['STORAGE_FOLDER'], filename)):
+            return jsonify({"status": False}), 404
+
+        file = request.files.get("file")
+        if file:
+            file.save(os.path.join(confs['STORAGE_FOLDER'], filename))
+            return jsonify({'status': True})
+
+    def delete(self, file_id):
+        # args = parser.parse_args()
         # get param from args here
-        return jsonify({'Working': True}), 204
+        filename = secure_filename(file_id)
+        if not os.path.exists(os.path.join(confs['STORAGE_FOLDER'], filename)):
+            return jsonify({"status": False}), 404
+
+        os.remove(os.path.join(confs['STORAGE_FOLDER'], filename))
+        return jsonify({'status': True})
 
 
 api.add_resource(Storage, '/storage')
 
 if __name__ == '__main__': 
-    init_env_variables()
+    # init_env_variables()
     parser = reqparse.RequestParser()
     # Look only in the POST body
     # parser.add_argument('data', type=list, location='json')
     parser.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=ServiceConfig.STORAGE_SERVICE_PORT)

@@ -20,6 +20,7 @@ def docker_build(folder_path, image_repo):
         tag=image_repo, 
     )
 
+
 def make_temp_dir(folder_name):
     if not os.path.exists(temporary_folder):
         os.makedirs(temporary_folder)
@@ -27,6 +28,7 @@ def make_temp_dir(folder_name):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
     return folder_path
+
 
 class Generic(ABC):
     @abstractmethod
