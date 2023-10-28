@@ -114,7 +114,7 @@ class StartFedServer(Generic):
                 self.fed_count += 1
 
                 try:
-                    # send asynchronously here
+                    # asynchronously send
                     self.orchestrator.send(mess)
 
                     # fed_response = ???
@@ -376,11 +376,12 @@ class StartTrainingContainerEdge(Generic):
     #     ],
     #     "conf_path": "configuration path in docker container, optional"
     # }
-    def __init__(self, config=None):
+    def __init__(self, orchestrator, config=None):
         if config is not None:
             self.config = utils.load_config(config)
         else:
             self.config = None
+        self.orchestrator = orchestrator
 
     def generate_config(self, params):
         config = {}
@@ -406,8 +407,9 @@ class StartTrainingContainerEdge(Generic):
         # To do
         return []
     
-    def send_command(self, edge,edge_command):
-        pass
+    def send_command(self, edge_command):
+        # asynchronously send
+        self.orchestrator.send(edge_command)
     
     def exec(self, params):
         # prepare and run command to build docker
@@ -420,7 +422,7 @@ class StartTrainingContainerEdge(Generic):
             config = self.generate_config(params)
 
             edge_command = temp_conf.render(config)
-            self.send_command(edge,edge_command)
+            self.send_command(edge_command)
 
 
 

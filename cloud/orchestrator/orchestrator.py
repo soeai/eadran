@@ -52,17 +52,17 @@ def start_train(params, orchestrator=None):
     # }
     # ============== END OF MESSAGE
     logging.info("Request content: {}".format(params))
-    pipeline = Pipeline(task_list=[StartFedServer(),
+    pipeline = Pipeline(task_list=[StartFedServer(orchestrator),
                          BuildDocker(),
                          ResourceComputing(),
                          GenerateConfiguration(),
-                         StartTrainingContainerEdge()],
+                         StartTrainingContainerEdge(orchestrator)],
                         params=params)
     pipeline.exec()
 
     # send something to others if needed
-    if orchestrator is not None:
-        orchestrator.send("")
+    # if orchestrator is not None:
+    #     orchestrator.send("")
 
 
 def start_edge(params, orchestrator=None):
