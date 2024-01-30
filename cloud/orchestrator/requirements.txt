@@ -5,3 +5,4 @@ requests==2.25.1
 psutil
 paho-mqtt==1.6.1
 pandas
+qoa4ml
