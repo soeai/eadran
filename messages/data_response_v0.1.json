@@ -1,0 +1,33 @@
+{
+  "response_id": "uuid",
+  "timestamp": "2020-06-21 12:14:25",
+  "request_id": "reponse to which request",
+  "status": "enum[200 = OK, 400 = Empty, 500 = Error]",
+  "datasets": [
+    {
+      "dataset_id": "uuid of dataset",
+      "data_summary": {
+        "columns": 10,
+        "rows": 1247
+      },
+      "qod": {
+        "__schema": "http://fed.marketplace.com/qod/schema/v1",
+        "metric": {
+          "class_parity": 0.8,
+          "feature_correlation": 0.94,
+          "feature_relevance": 0.97,
+          "completeness": 1
+        }
+      },
+      "download_info": {
+        "method": "wget|s3|minio|local",
+        "url": "url for download (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
+        "data_name": "file name or object name",
+        "format": "enum[tuple, last] (tuple: features and label are separated as (features, label), last: label is the last column)",
+        "params": {
+          "__comment": "optional parameters for download, depend on methods"
+        }
+      }
+    }
+  ]
+}

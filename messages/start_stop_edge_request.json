@@ -1,0 +1,8 @@
+{
+    "edge_id": "specific resource id or *",
+    "command":"docker",
+    "params": "optional parameter to start/stop a docker image/container",
+    "image_or_container":"",
+    "config_url": "url to download config, instruction to get data also included in this config",
+    "conf_path": "configuration path in docker container, optional"
+}

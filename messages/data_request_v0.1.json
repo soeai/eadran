@@ -1,0 +1,67 @@
+{
+  "request_id":"uuid of the request to make sure that the dp does not handle duplicated request",
+  "encrypt_token": "this token will be decrypted by a private key",
+  "request_info": {
+    "__comment": "use to identify customer, request, related training transaction",
+    "requestor_name": "Name of the data request",
+    "market_consumer": "info about consumer",
+    "training_id": "id of related training transaction"
+  },
+  "datasets": [
+    {
+      "owner_id": "dp1",
+      "dataset_id": "uuid of dataset",
+      "__comment": "features required by the above-mentioned dataset for the above-mentioned provider",
+      "features": [
+        {
+          "__comment": "explain detailed the list of features",
+          "name": "trans_date_time",
+          "index": 1,
+          "dtype": "enum[DateTime, Float, Int, Object]"
+        },
+        {
+          "__comment": "explain detailed the list of features",
+          "name": "longitude",
+          "index": 2,
+          "dtype": "enum[DateTime, Float, Int, Object]"
+        }
+      ],
+      "label": {
+        "name": "column name getting as label (i.e, isFraud)",
+        "index": 10,
+        "dtype": "enum[numeric,categorical] (ask data service return a wanted type)"
+      },
+      "filters":
+      {
+        "operator": "enum[and, or]",
+        "constraints":
+        [
+          {
+            "feature_name": "trans_date_time",
+            "from": "2020-06-21 12:14:25",
+            "to": "*"
+          },
+          {
+            "feature_name": "longitude",
+            "from": "*",
+            "to": "*"
+          }
+        ]
+      },
+      "sample_limit": {
+        "number": 1000,
+        "method": "random"
+      },
+      "qod": {
+        "__comment": "some min requirements for qod?",
+        "__schema": "http://fed.marketplace.com/qod/schema/v1",
+        "constraints": [
+          {
+            "metric_name": "class_parity",
+            "min_value": 0.5
+          }
+        ]
+      }
+    }
+  ]
+}

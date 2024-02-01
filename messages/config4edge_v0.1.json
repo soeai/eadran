@@ -1,0 +1,113 @@
+{
+  "fedml_info": {
+    "server": "192.168.1.148:8080",
+    "model_id": "C001_M01_Fraud",
+    "run_th": 1,
+    "monitor_interval": 10,
+    "model_conf":{
+        "module_name": "code for training at edges",
+        "function_map":{
+            "train": "fit",
+            "evaluate": "evaluate",
+            "set_weights": "set_weights",
+            "get_weights": "get_weights"
+        },
+        "train_hyper_param":{
+            "epochs": 10,
+            "batch_size": 32
+        }
+    },
+    "pre_train_model": {
+      "url": "link to get pre-train model",
+      "name": "name of model on model management module/service",
+      "params": "optional params to download"
+    }
+  },
+  "data": {
+    "dataset_id": "",
+    "method": "wget|s3|minio",
+    "url": "url for download (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
+    "data_name": "file name or object name",
+    "format": "enum[tuple, last] (tuple: features and label are separated as (features, label), last: label is the last column)",
+    "params": {
+      "__comment":"optional parameters for download, depend on methods"}
+  },
+  "qoa4ml": {
+    "connector": {
+      "amqp_connector": {
+        "class": "amqp",
+        "conf": {
+          "end_point": "195.148.22.62",
+          "exchange_name": "fedmarketplace",
+          "exchange_type": "topic",
+          "out_routing_key": "fmml.client.report",
+          "queue_name": "frauddetection"}
+      }
+    },
+    "metric": {
+      "quality_of_model": {
+        "post_train_performance": {
+          "class": "Gauge",
+          "description": "evaluated metric (one of accuracy/precision/recall/F1) of training model",
+          "default": -1
+        },
+        "pre_train_performance": {
+          "class": "Gauge",
+          "description": "evaluated metric (one of accuracy/precision/recall/F1) of validating model",
+          "default": -1
+        },
+        "post_loss_value": {
+          "class": "Gauge",
+          "description": "model training loss",
+          "default": -1
+        },
+        "pre_loss_value": {
+          "class": "Gauge",
+          "description": "model training loss",
+          "default": -1
+        },
+        "post_test_performance": {
+          "class": "Gauge",
+          "description": "evaluated metric of test dataset if it is available",
+          "default": -1
+        },
+        "pre_test_performance": {
+          "class": "Gauge",
+          "description": "evaluated metric of test dataset if it is available",
+          "default": -1
+        },
+        "duration": {
+          "class": "Gauge",
+          "description": "Time of Training",
+          "default": 0}
+      },
+      "resource_monitor": {
+        "cpu": {
+          "class": "Gauge",
+          "description": "CPU usage",
+          "default": 0
+        },
+        "memory": {
+          "class": "Gauge",
+          "description": "Memory usage",
+          "default": 0
+        },
+        "gpu": {
+          "class": "Gauge",
+          "description": "GPU usage",
+          "default": -1
+        },
+        "network": {
+          "class": "Gauge",
+          "description": "network usage",
+          "default": -1
+        },
+        "storage": {
+          "class": "Gauge",
+          "description": "Data storage",
+          "default": -1
+        }
+      }
+    }
+  }
+}

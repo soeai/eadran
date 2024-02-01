@@ -1,0 +1,10 @@
+{
+  "edge_id": "id of computing resource",
+  "timestamp": 1341414,
+  "health": {
+    "mem": 12212,
+    "cpu": 3,
+    "gpu": 2
+  },
+  "docker_available": "docker version or not available on edge"
+}
