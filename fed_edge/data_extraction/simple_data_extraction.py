@@ -6,6 +6,7 @@ import json
 import os
 import random as rd
 
+
 class TabularHandle(ABCTabular):
     def extract(self, features, label, filters, sample_limit, qod, dest_path, method):
         if self.type == 'file':
@@ -27,7 +28,7 @@ class TabularHandle(ABCTabular):
                 row_limit = sample_limit['number']
                 select_method = sample_limit['method']
                 if select_method.lower() == 'random' and row_limit < row:
-                    idx = rd.choices(range(row), k= row_limit)
+                    idx = rd.choices(range(row), k=row_limit)
                     df = df.iloc[idx]
                     row = row_limit
                 else:
@@ -77,11 +78,11 @@ class TabularHandle(ABCTabular):
                 query += c['feature_name'] + ' >= ' + repr(c['from'])
             if c['to'] != "*" and c['to'] is not None:
                 query = '(' + query + ' and ' + c['feature_name'] + ' <= ' + repr(c['to']) + ')' if len(query) > 0 else \
-                c['feature_name'] + ' <= ' + repr(c['to'])
+                    c['feature_name'] + ' <= ' + repr(c['to'])
             exp.append(query)
         return op.join(exp) if len(exp) > 1 else exp[0]
 
-    def __build_response(self, filename_url, row, col, method ):
+    def __build_response(self, filename_url, row, col, method):
         # {
         #     "dataset_id": "uuid of dataset",
         #     "data_summary": {
@@ -108,30 +109,30 @@ class TabularHandle(ABCTabular):
         #     }
         # }
         res = {
-                  "dataset_id": self.dataset_id,
-                  "data_summary": {
-                    "columns": col,
-                    "rows": row
-                  },
-                  "qod": {
-                    "__schema": "http://fed.marketplace.com/qod/schema/v1",
-                    "metric": {
-                      "class_parity": -1,
-                      "feature_correlation": -1,
-                      "feature_relevance": -1,
-                      "completeness": -1
-                    }
-                  },
-                  "download_info": {
-                    "method": method,
-                    "url": filename_url,
-                    "data_name": "No specify",
-                    "format": "last",
-                    "params": {
-                      "__comment": "No optional parameters"
-                    }
-                  }
+            "dataset_id": self.dataset_id,
+            "data_summary": {
+                "columns": col,
+                "rows": row
+            },
+            "qod": {
+                "__schema": "http://fed.marketplace.com/qod/schema/v1",
+                "metric": {
+                    "class_parity": -1,
+                    "feature_correlation": -1,
+                    "feature_relevance": -1,
+                    "completeness": -1
                 }
+            },
+            "download_info": {
+                "method": method,
+                "url": filename_url,
+                "data_name": "No specify",
+                "format": "last",
+                "params": {
+                    "__comment": "No optional parameters"
+                }
+            }
+        }
         return res
 
 
@@ -152,13 +153,13 @@ if __name__ == '__main__':
                 filters = req['filters'] if 'filters' in req.keys() else None
                 qod = req['qod'] if 'qod' in req.keys() else None
                 sample = req['sample_limit'] if 'sample_limit' in req.keys() else None
-                response_json = TabularHandle(req['dataset_id'],access_info).extract(features,
-                                                                                     label,
-                                                                                     filters,
-                                                                                     sample,
-                                                                                     qod,
-                                                                                     dest_path=conf['dest_path'],
-                                                                                     method=conf['method'])
+                response_json = TabularHandle(req['dataset_id'], access_info).extract(features,
+                                                                                      label,
+                                                                                      filters,
+                                                                                      sample,
+                                                                                      qod,
+                                                                                      dest_path=conf['dest_path'],
+                                                                                      method=conf['method'])
                 print(response_json)
             else:
                 raise Exception('Opp! Request is not for me!!!!')
