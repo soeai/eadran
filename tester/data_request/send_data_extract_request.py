@@ -5,7 +5,6 @@ from qoa4ml.connector.amqp_connector import Amqp_Connector
 import qoa4ml.utils as utils
 from threading import Thread
 
-
 class DataService_Simulation(object):
     def __init__(self):
         self.config = utils.load_config('../fed_edge/conf/config.json')
