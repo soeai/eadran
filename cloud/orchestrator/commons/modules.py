@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-import qoa4ml.utils as utils
+import qoa4ml.qoaUtils as utils
 import subprocess, traceback, sys
 from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
-
 
 template_folder = utils.get_parent_dir(__file__,1)+"/template"
 config_folder = utils.get_parent_dir(__file__,1)+"/conf"
@@ -21,13 +20,13 @@ def docker_build(folder_path, image_repo):
     )
 
 
-def make_temp_dir(folder_name):
-    if not os.path.exists(temporary_folder):
-        os.makedirs(temporary_folder)
-    folder_path = temporary_folder+"/"+folder_name
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    return folder_path
+# def make_temp_dir(folder_name):
+#     if not os.path.exists(temporary_folder):
+#         os.makedirs(temporary_folder)
+#     folder_path = temporary_folder+"/"+folder_name
+#     if not os.path.exists(folder_path):
+#         os.makedirs(folder_path)
+#     return folder_path
 
 
 class Generic(ABC):

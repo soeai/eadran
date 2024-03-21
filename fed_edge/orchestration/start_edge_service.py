@@ -14,7 +14,7 @@ import uuid
 from threading import Thread
 import docker
 import psutil
-import qoa4ml.utils as utils
+import qoa4ml.qoaUtils as utils
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import logging
@@ -134,10 +134,11 @@ class EdgeOrchestrator(object):
         module_name = self.config['modules']['extract_data']['module_name']
         params = self.config['modules']['extract_data']['params']
         rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-        response = json.loads(rep_msg.stdout)
+        print(rep_msg.stdout)
+        # response = json.loads(rep_msg.stdout)
         # cleanup
         os.remove(fname)
-        return response
+        return ""
 
     def qod_eval(self, req_msg):
         if not os.path.isdir("temp"):

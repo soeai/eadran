@@ -4,7 +4,7 @@ import uuid
 
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
-import qoa4ml.utils as utils
+import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
 from commons.pipeline import Pipeline

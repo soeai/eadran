@@ -4,6 +4,7 @@ import os, time
 from flask_restful import Resource, Api
 from werkzeug.utils import secure_filename
 from cloud.commons.default import ServiceConfig
+from cloud.storage_service.storage import MinioStorage
 from helpers.custom_logger import CustomLogger
 from flask_restful import reqparse
 import json

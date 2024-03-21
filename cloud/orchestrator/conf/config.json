@@ -1,13 +1,13 @@
 {
   "amqp_in": {
-    "end_point":"195.148.22.62",
+    "end_point":"192.168.10.235",
     "exchange_name": "fedmarketplace",
     "exchange_type": "topic",
     "in_routing_key": "orchestrator.#",
     "in_queue": "orchestrator.queue.in"
   },
   "amqp_out": {
-    "end_point":"195.148.22.62",
+    "end_point":"192.168.10.235",
     "exchange_name": "fedmarketplace",
     "exchange_type": "topic",
     "out_routing_key": "edge",

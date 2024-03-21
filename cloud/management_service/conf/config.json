@@ -21,7 +21,7 @@
         "db_col": "user_management_collection"
     },
     "amqp_health_report": {
-        "end_point":"195.148.22.62",
+        "end_point":"192.168.10.235",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_routing_key": "healthreport.#",

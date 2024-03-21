@@ -14,6 +14,7 @@ from flask_restful import Resource, Api
 import pymongo
 import json, argparse
 from qoa4ml.collector.amqp_collector import Amqp_Collector
+from cloud.commons.default import ServiceConfig
 
 from helpers.custom_logger import CustomLogger
 import logging
@@ -496,5 +497,5 @@ if __name__ == '__main__':
     api.add_resource(MetadataMgt, '/metadata',resource_class_kwargs=config)
     api.add_resource(ModelMgt, '/model',resource_class_kwargs=config)
     api.add_resource(UserMgt, '/user',resource_class_kwargs=config)
-    api.add_resource(Configuration, '/config', resource_class_kwargs=config)
-    app.run(debug=True, port=5000)
+    # api.add_resource(Configuration, '/config', resource_class_kwargs=config)
+    app.run(debug=True, port=ServiceConfig.MGT_SERVICE_PORT)

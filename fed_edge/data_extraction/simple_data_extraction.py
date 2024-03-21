@@ -41,6 +41,7 @@ class TabularHandle(ABCTabular):
             if method == 'local':
                 file_name = str(uuid.uuid4()) + '.csv'
                 full_path = os.path.join(dest_path, file_name)
+                print(full_path)
                 df.to_csv(full_path, index=False)
             elif method == 's3':
                 pass
