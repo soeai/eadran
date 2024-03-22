@@ -124,6 +124,27 @@ class FedServerOrchestrator(object):
             traceback.print_exception(*sys.exc_info())
 
 
+    def health_report(self):
+        while True:
+            try:
+                docker_res = docker.from_env().version()
+            except:
+                docker_res = {}
+
+            # check how many container running
+            health_post = {
+                    "edge_id": self.edge_id,
+                    "routing_key": self.config['amqp_in']['in_routing_key'],
+                    "health": {
+                        "mem": psutil.virtual_memory()[1],
+                        "cpu": psutil.cpu_count(),
+                        "gpu": -1  # code to get GPU device here
+                    },
+                    "docker_available": docker_res  # code to check docker available or not
+                }
+            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
+            time.sleep(self.config['report_delay_time'])
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Federated Server Orchestrator Micro-Service...")
     parser.add_argument('--conf', help='config file', default="../conf/config.json")
