@@ -135,10 +135,10 @@ class EdgeOrchestrator(object):
         params = self.config['modules']['extract_data']['params']
         rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
         print(rep_msg.stdout)
-        # response = json.loads(rep_msg.stdout)
+        response = json.loads(rep_msg.stdout)
         # cleanup
         os.remove(fname)
-        return ""
+        return response
 
     def qod_eval(self, req_msg):
         if not os.path.isdir("temp"):

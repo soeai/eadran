@@ -12,7 +12,7 @@ import uuid
 from threading import Thread
 import docker
 import psutil
-import qoa4ml.utils as utils
+import qoa4ml.qoaUtils as utils
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import logging
@@ -30,7 +30,7 @@ class FedServerOrchestrator(object):
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
-        Thread(target=self.health_report).start()
+        # Thread(target=self.health_report).start()
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -123,47 +123,10 @@ class FedServerOrchestrator(object):
             print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
 
-    def extract_data(self, req_msg):
-        if not os.path.isdir("temp"):
-            os.mkdir('temp')
-        fname = "temp/request_{}.json".format(uuid.uuid4())
-        with open(fname, 'w') as f:
-            # save data request to file
-            json.dump(req_msg['data_request'], f)
-            # execute data extraction module
-        command = self.config['module']['command']
-        module_name = self.config['module']['module_name']
-        params = self.config['module']['params']
-        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-        response = json.loads(rep_msg.stdout)
-        # cleanup
-        os.remove(fname)
-        return response
-
-    def health_report(self):
-        while True:
-            try:
-                docker_res = docker.from_env().version()
-            except:
-                docker_res = {}
-
-            health_post = {
-                    "edge_id": self.edge_id,
-                    "routing_key": self.config['amqp_in']['in_routing_key'],
-                    "health": {
-                        "mem": psutil.virtual_memory()[1],
-                        "cpu": psutil.cpu_count(),
-                        "gpu": -1  # code to get GPU device here
-                    },
-                    "docker_available": docker_res  # code to check docker available or not
-                }
-            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
-            time.sleep(self.config['report_delay_time'])
-
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
-    parser.add_argument('--conf', help='config file', default="conf/config.json")
+    parser = argparse.ArgumentParser(description="Federated Server Orchestrator Micro-Service...")
+    parser.add_argument('--conf', help='config file', default="../conf/config.json")
     args = parser.parse_args()
 
     orchestrator = FedServerOrchestrator(args.conf)
