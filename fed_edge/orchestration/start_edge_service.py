@@ -26,9 +26,9 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 class EdgeOrchestrator(object):
     def __init__(self, config, ):
         self.config = utils.load_config(config)
-        self.docker_client = None
+        # self.docker_client = None
         self.edge_id = self.config['edge_id']
-        self.containers = {}
+        self.containers = []
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
@@ -42,30 +42,32 @@ class EdgeOrchestrator(object):
             logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
             response = None
             if req_msg['command'].lower() == 'docker':
-                # {
-                #     "edge_id": "specific resource id or *",
-                #     "command": "docker",
-                #     "params": "start",
-                #     "config":[
-                #         {
-                #             "image": "repo:docker_image_fedserver",
-                #             "container_name": "fedserver_container_01",
-                #             "detach": "True",
-                #             "binding_port":{
-                #                 "1111/tcp":"2222",
-                #                 "3333/tcp":"4444"}
-                #         }
-                #     ],
-                #     "conf_path": "configuration path in docker container, optional"
-                # }
-                self.docker_client = docker.from_env()
-                if req_msg['params'].lower() == 'start':
-                    for config in req_msg["config"]:
-                        self.start_container(config)
-                    response = {
-                        "edge_id": self.edge_id,
-                        "status": "success"
-                    }
+                if req_msg['command'].lower() == 'docker':
+                    # {
+                    #     "edge_id": "specific resource id or *",
+                    #     "command": "docker",
+                    #     "params": "start",
+                    #     "docker":[
+                    #         {
+                    #             "image": "repo:docker_image_rabbitmq",
+                    #             "options":{
+                    #                   "--name": "rabbit_container_01",
+                    #                   "-v":""
+                    #                   "-p": ["5672/tcp":"5672"],
+                    #                   "-mount":"
+                    #                       }
+                    #         }
+                    #     ]
+                    # }
+                    # self.docker_client = docker.from_env()
+                    if req_msg['params'].lower() == 'start':
+                        status = 1
+                        for config in req_msg["docker"]:
+                            status = self.start_container(config)
+                        response = {
+                            "edge_id": self.edge_id,
+                            "status": status
+                        }
                 # {
                 #     "edge_id": "specific resource id or *",
                 #     "command": "docker",
@@ -106,21 +108,62 @@ class EdgeOrchestrator(object):
 
     def start_container(self, config):
         try:
-            self.containers[config["container_name"]] = self.docker_client.containers.run(image=config["image"],
-                                                                                          detach=bool(config["detach"]),
-                                                                                          name=config["container_name"],
-                                                                                          ports=config["binding_port"])
+            # {
+            #             "image": "repo:docker_image_rabbitmq",
+            #             "options":{
+            #                   "--name": "rabbit_container_01",
+            #                   "-v":"",
+            #                   "-p": ["5672/tcp:5672"],
+            #                   "-mount":""
+            #                       }
+            #         }
+
+            # check container is runing with the same name, stop it
+            res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
+                                 capture_output=True)
+            if res.returncode == 0 and str(res.stdout).find(config["options"]["--name"]) >= 0:
+                subprocess.run(["docker", "stop", config["options"]["--name"]])
+                subprocess.run(["docker", "remove", config["options"]["--name"]])
+
+                command = ["docker", "run", "-d"]
+                for (k, v) in config["options"].items():
+                    if v is not None and len(v) > 0:
+                        if k == "-p":
+                            for port in v:
+                                command.extend(["-p", port])
+                        elif k != "-d":
+                            command.extend([k, v])
+                    else:
+                        command.append(k)
+                command.append(config["image"])
+                res = subprocess.run(command, capture_output=True)
+                self.containers.append(config["options"]["--name"])
+                return res.returncode
+            # self.containers[config["container_name"]] = self.docker_client.containers.run(image=config["image"],
+            #                                                                               detach=bool(config["detach"]),
+            #                                                                               name=config["container_name"],
+            #                                                                               ports=config["binding_port"])
         except Exception as e:
             print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
+        return 1
 
     def stop_container(self, container_name):
         try:
-            self.containers[container_name].stop()
-            self.connector.pop(container_name, None)
+            # if container_name in self.containers:
+            res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + container_name],
+                                 capture_output=True)
+            if res.returncode == 0 and str(res.stdout).find(container_name) >= 0:
+                subprocess.run(["docker", "stop", container_name])
+                subprocess.run(["docker", "remove", container_name])
+
+            # self.containers[container_name].stop()
+            self.containers.pop(container_name, None)
         except Exception as e:
             print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
+            return 1
+        return 0
 
     def extract_data(self, req_msg):
         if not os.path.isdir("temp"):

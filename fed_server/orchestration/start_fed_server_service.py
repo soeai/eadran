@@ -24,9 +24,9 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 class FedServerOrchestrator(object):
     def __init__(self, config, ):
         self.config = utils.load_config(config)
-        self.docker_client = None
+        # self.docker_client = None
         self.edge_id = self.config['edge_id']
-        self.containers = {}
+        self.containers = []
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
@@ -55,7 +55,7 @@ class FedServerOrchestrator(object):
                 #         }
                 #     ]
                 # }
-                self.docker_client = docker.from_env()
+                # self.docker_client = docker.from_env()
                 if req_msg['params'].lower() == 'start':
                     status = 1
                     for config in req_msg["docker"]:
@@ -126,6 +126,7 @@ class FedServerOrchestrator(object):
                         command.append(k)
                 command.append(config["image"])
                 res = subprocess.run(command, capture_output=True)
+                self.containers.append(config["options"]["--name"])
                 return res.returncode
             # self.containers[config["container_name"]] = self.docker_client.containers.run(image=config["image"],
             #                                                                               detach=bool(config["detach"]),
@@ -145,7 +146,7 @@ class FedServerOrchestrator(object):
                 subprocess.run(["docker", "remove", container_name])
 
             # self.containers[container_name].stop()
-            self.connector.pop(container_name, None)
+            self.containers.pop(container_name, None)
         except Exception as e:
             print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
