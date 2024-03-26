@@ -161,6 +161,29 @@ class ComputingResourceHealth(Resource):
         return jsonify({'status': response})
 
 
+class FedServerHealth(Resource):
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
+        self.conf = kwargs
+        self.mongo_url = kwargs['mongo_url']
+        self.mongo_client = pymongo.MongoClient(self.mongo_url)
+        self.db = self.mongo_client[kwargs["fedserver_health_log"]["db_name"]]
+        self.collection = self.db[kwargs["fedserver_health_log"]["db_col"]]
+
+    def get(self):
+        response = "false"
+        args = request.query_string.decode("utf-8").split("&")
+        if len(args) > 0:
+            # get param from args here
+            query = args[0].split("=")
+            if query[0] == 'id':
+                result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}}).sort([('timestamp', pymongo.DESCENDING)]).limit(1))
+                if len(result) > 0:
+                    response = result[0] #get ip from query result
+                    response.pop('_id', None)
+        return jsonify({'ip': response})
+
+
 class Configuration(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
@@ -493,7 +516,8 @@ if __name__ == '__main__':
 
     queue = EdgeHealthReport(config)
     api.add_resource(Configuration, '/resource', resource_class_kwargs=config)
-    api.add_resource(ComputingResourceHealth, '/health', resource_class_kwargs=config)
+    api.add_resource(ComputingResourceHealth, '/edgehealth', resource_class_kwargs=config)
+    api.add_resource(FedServerHealth, '/serverhealth', resource_class_kwargs=config)
     api.add_resource(MetadataMgt, '/metadata',resource_class_kwargs=config)
     api.add_resource(ModelMgt, '/model',resource_class_kwargs=config)
     api.add_resource(UserMgt, '/user',resource_class_kwargs=config)

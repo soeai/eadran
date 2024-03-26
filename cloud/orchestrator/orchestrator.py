@@ -79,7 +79,7 @@ def stop_edge(params, uuid):
 
 def request_data(params, request_id, orchestrator=None):
     if orchestrator is not None:
-        url_mgt_service = orchestrator.url_mgt_service +  "/health?id=" + params['edge_id']
+        url_mgt_service = orchestrator.url_mgt_service +  "/edgehealth?id=" + params['edge_id']
         edge_check = requests.get(url_mgt_service).json()
         # print(edge_check)
         if not edge_check['status'] == "false":
