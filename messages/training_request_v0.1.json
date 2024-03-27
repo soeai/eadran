@@ -1,10 +1,10 @@
 {
-  "consumer_id": "who request",
+  "consumer_id": "who request, i.e., the owner",
   "model_id": "",
   "datasets": [{
     "dataset_id": "uuid of dataset",
-    "resource_id": "specific computing infrastructure for this training",
-    "extract_response_id": "response id from data service (file data_response_v0.1.json)"
+    "edge_id": "specific computing infrastructure for this training",
+    "data_path": "the path of extracted dataset, storage in edge or local network of edge"
   }],
   "requirement_libs": [{
     "name": "tensorflow",
@@ -25,8 +25,6 @@
         }
     },
   "pre_train_model": {
-      "url": "link to get pre-train model from storage service",
-      "name": "name of model on model management module/service",
-      "params": "optional params to download"
+      "storage_ref_id": "link to get pre-train model from storage service"
     }
 }

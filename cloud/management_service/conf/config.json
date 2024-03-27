@@ -1,19 +1,23 @@
 {
     "mongo_url": "mongodb://195.148.22.62:27017/",
     "metadata":{
-        "db_name": "fed_metadata",
+        "db_name": "metadata",
         "db_col": "metadata_collection"
     },
-    "computing_resource":{
-        "db_name": "fed_computing_resource",
-        "db_col": "computing_resource_collection"
+    "edge_computing":{
+        "db_name": "edges",
+        "db_col": "edge_collection"
     },
-    "computing_health_log":{
-        "db_name": "fed_computing_health",
-        "db_col": "computing_health_collection"
+    "edge_health_log":{
+        "db_name": "edge_health_log",
+        "db_col": "edge_health_collection"
+    },
+    "server_health_log":{
+        "db_name": "server_health_log",
+        "db_col": "server_health_collection"
     },
     "model_management":{
-        "db_name": "fed_model_management",
+        "db_name": "model_management",
         "db_col": "model_management_collection"
     },
     "user_management":{

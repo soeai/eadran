@@ -1,6 +1,6 @@
 {
   "command": "start_fed_server",
-  "vm_id": "id of VM, in case we use many VMs",
+  "server_id": "id of VM, in case we use many VMs",
   "min_client": 2,
   "epochs": 5,
   "port": 8080

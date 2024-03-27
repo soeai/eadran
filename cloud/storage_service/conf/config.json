@@ -1,3 +1,12 @@
 {
-  "STORAGE_FOLDER": "temps"
+  "mongo_url": "mongodb://195.148.22.62:27017/",
+  "storage":{
+        "db_name": "storage_db_name",
+        "db_col": "storage_db_collection"
+    },
+  "minio_conf": {
+    "minio_server": "",
+    "minio_access": "",
+    "minio_secret": ""
+  }
 }
