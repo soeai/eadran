@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 
@@ -45,9 +46,11 @@ class StorageService(Resource):
             msg = {"filename": secure_filename(file.filename),
                    "mimetype":file.mimetype}
             # put info into database
-            storage_id = self.collection.insert_one(msg).inserted_id
+            storage_id = str(self.collection.insert_one(msg).inserted_id)
             # put file to storage
-            self.storage.put(storage_id, file)
+            # file_size = file.content_length
+            data = file.stream.read()
+            self.storage.put(storage_id, data)
 
             return jsonify({'storage_id': storage_id})
 
@@ -82,10 +85,12 @@ class StorageService(Resource):
 
 if __name__ == '__main__':
     # init_env_variables()
-    parser = reqparse.RequestParser()
+    req_parser = reqparse.RequestParser()
     # Look only in the POST body
     # parser.add_argument('data', type=list, location='json')
-    parser.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+    req_parser.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+
+    parser = argparse.ArgumentParser(description="Argument for Management Service")
     parser.add_argument('--conf', help='configuration file', default="./conf/config.json")
 
     args = parser.parse_args()
