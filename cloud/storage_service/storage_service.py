@@ -22,7 +22,9 @@ logger = CustomLogger().get_logger()
 class StorageService(Resource):
     def __init__(self, **kwargs) -> None:
         self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client[kwargs["storage"]["db_name"]]
+        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["storage"]["db_name"]]) \
+            if self.mongo_client[kwargs["storage"]["db_name"]] in self.mongo_client.list_database_names() \
+            else self.mongo_client[kwargs["storage"]["db_name"]]
         self.collection = self.db[kwargs["storage"]["db_col"]]
         # create a MinioStorage object here
         self.storage = MinioStorage(kwargs["minio_conf"])
@@ -83,7 +85,9 @@ class StorageService(Resource):
 class StorageInfo(Resource):
     def __init__(self, **kwargs) -> None:
         self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client[kwargs["storage"]["db_name"]]
+        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["storage"]["db_name"]]) \
+            if self.mongo_client[kwargs["storage"]["db_name"]] in self.mongo_client.list_database_names() \
+            else self.mongo_client[kwargs["storage"]["db_name"]]
         self.collection = self.db[kwargs["storage"]["db_col"]]
 
     def get(self):
@@ -119,7 +123,7 @@ if __name__ == '__main__':
     post_parser.add_argument('file', type=werkzeug.datastructures.FileStorage, required=True, location='files')
     post_parser.add_argument('user', type=str, required=True, location='form')
 
-    parser = argparse.ArgumentParser(description="Argument for Management Service")
+    parser = argparse.ArgumentParser(description="Argument for Storage Service")
     parser.add_argument('--conf', help='configuration file', default="./conf/config.json")
 
     args = parser.parse_args()
