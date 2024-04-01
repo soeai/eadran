@@ -12,6 +12,7 @@ import time
 from threading import Thread
 import pymongo
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_restful import Resource, Api
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 
@@ -22,6 +23,8 @@ app = Flask(__name__)
 api = Api(app)
 
 logger = CustomLogger().get_logger().setLevel(logging.INFO)
+
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # fedmarketplace_service = "management_service"
 # fedmarketplace_service_port= "8006"

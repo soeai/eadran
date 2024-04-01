@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import pymongo
 import werkzeug
+from flask_cors import CORS
 
 from flask import Flask, jsonify, request, Response
 from flask_restful import Resource, Api, reqparse
@@ -15,7 +16,7 @@ from helpers.custom_logger import CustomLogger
 
 app = Flask(__name__)
 api = Api(app)
-
+cors = CORS(app, resources={r"/storage/*": {"origins": "*"}})
 logger = CustomLogger().get_logger()
 
 
