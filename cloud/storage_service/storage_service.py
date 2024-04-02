@@ -112,7 +112,8 @@ class StorageInfo(Resource):
 
     # utility function
     def obj2string(obj):
-        obj['_id'] = str(obj["_id"])
+        obj['id'] = str(obj["_id"])
+        obj.pop("_id")
         return obj
 
 
