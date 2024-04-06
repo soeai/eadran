@@ -102,7 +102,9 @@ class EdgeMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "attributes": "sample"
+                    "edge_id": "12345",
+                    "edge_name": "Edge 1",
+                    "status": "active"
                 }
             }
             2 - insert many
@@ -111,30 +113,71 @@ class EdgeMgt(Resource):
                 "action": 2,
                 "data":[
                     {
-                        "attributes": "sample"
+                        "edge_id": "12345",
+                        "edge_name": "Edge 1",
+                        "status": "active"
                     },
                     {
-                        "attributes": "sample2"
+                        "edge_id": "12346",
+                        "edge_name": "Edge 2",
+                        "status": "active"
                     }
                 ]
             }
             """
             # response = "false"
-            if (args['action'] == 1):
-                response = {"insert_id":str(self.collection.insert_one(args['data']).inserted_id)}
-            elif (args['action'] == 2):
-                response = {"insert_ids":str(self.collection.insert_many(args['data']).inserted_ids)}
+            if args['action'] == 1:
+                data = args['data']
+                # Check if edge_id already exists in the database
+                if self.collection.find_one({"edge_id": data["edge_id"]}):
+                    response = {"error": "Edge ID already exists"}
+                else:
+                    response = {"insert_id": str(self.collection.insert_one(data).inserted_id)}
+            elif args['action'] == 2:
+                data_list = args['data']
+                # Check if any edge_id already exists in the database
+                existing_ids = [edge["edge_id"] for edge in self.collection.find({}, {"_id": 0, "edge_id": 1})]
+                duplicate_ids = [edge["edge_id"] for edge in data_list if edge["edge_id"] in existing_ids]
+                if duplicate_ids:
+                    response = {"error": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}
+                else:
+                    inserted_ids = [str(self.collection.insert_one(edge).inserted_id) for edge in data_list]
+                    response = {"insert_ids": inserted_ids}
             else:
-                # self.collection.drop()
-                response = "Action {} Not support Yet!".format(args['action'])
-        # get param from args here
-        return jsonify({'status': "success", "response":response})
+                response = {"error": f"Action {args['action']} is not supported"}
+        else:
+            response = {"error": "Request data must be in JSON format"}
+            # get param from args here
+        return jsonify({'status': "success", "response": response})
 
     def put(self):
         if request.is_json:
             args = request.get_json(force=True)
-        # get param from args here
-        return jsonify({'status': "Not support yet!"})
+            """
+            {
+                "edge_id": "12345",
+                "update_data": {
+                    "edge_name": "Updated Edge 1"
+                }
+            }
+            """
+            # Check if edge_id exists in the request
+            if 'edge_id' not in args:
+                return jsonify({"error": "Edge ID is missing in the request"}), 400
+
+            edge_id = args['edge_id']
+            update_data = args.get('update_data', {})
+
+            # Check if edge_id exists in the database
+            existing_edge = self.collection.find_one({"edge_id": edge_id})
+            if existing_edge:
+                # Update the edge with the provided data
+                self.collection.update_one({"edge_id": edge_id}, {"$set": update_data})
+                return jsonify({"message": f"Edge with ID {edge_id} updated successfully"}), 200
+            else:
+                return jsonify({"error": f"Edge with ID {edge_id} not found"}), 404
+        else:
+            return jsonify({"error": "Request data must be in JSON format"}), 400
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")
