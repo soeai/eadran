@@ -25,7 +25,7 @@ api = Api(app)
 logger = CustomLogger().get_logger().setLevel(logging.INFO)
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-
+mongo_client = None
 # fedmarketplace_service = "management_service"
 # fedmarketplace_service_port= "8006"
 # mongo_conn = None
@@ -70,10 +70,9 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 class EdgeMgt(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["edge_computing"]["db_name"]]) \
-            if self.mongo_client[kwargs["edge_computing"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["edge_computing"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["edge_computing"]["db_name"]) \
+            if kwargs["edge_computing"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["edge_computing"]["db_name"]]
         self.collection = self.db[kwargs["edge_computing"]["db_col"]]
 
     def get(self):
@@ -152,10 +151,9 @@ class EdgeMgt(Resource):
 class ComputingResourceHealth(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["edge_health_log"]["db_name"]]) \
-            if self.mongo_client[kwargs["edge_health_log"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["edge_health_log"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["edge_health_log"]["db_name"]) \
+            if kwargs["edge_health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["edge_health_log"]["db_name"]]
         self.collection = self.db[kwargs["edge_health_log"]["db_col"]]
 
     def get(self):
@@ -176,10 +174,9 @@ class ComputingResourceHealth(Resource):
 class FedServerHealth(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["fedserver_health_log"]["db_name"]]) \
-            if self.mongo_client[kwargs["fedserver_health_log"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["fedserver_health_log"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["fedserver_health_log"]["db_name"]) \
+            if kwargs["fedserver_health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["fedserver_health_log"]["db_name"]]
         self.collection = self.db[kwargs["fedserver_health_log"]["db_col"]]
 
     def get(self):
@@ -201,10 +198,9 @@ class EdgeHealthReport(object):
     def __init__(self, config):
         self.amqp_collector = Amqp_Collector(config['amqp_health_report'], self)
         Thread(target=self.start_amqp).start()
-        self.mongo_client = pymongo.MongoClient(config['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[config["edge_health_log"]["db_name"]]) \
-            if self.mongo_client[config["edge_health_log"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[config["edge_health_log"]["db_name"]]
+        self.db = mongo_client.get_database(config["edge_health_log"]["db_name"]) \
+            if config["edge_health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[config["edge_health_log"]["db_name"]]
         self.collection = self.db[config["edge_health_log"]["db_col"]]
 
     def message_processing(self, ch, method, props, body):
@@ -219,10 +215,9 @@ class EdgeHealthReport(object):
 class MetadataMgt(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(config['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["metadata"]["db_name"]]) \
-            if self.mongo_client[kwargs["metadata"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["metadata"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["metadata"]["db_name"]) \
+            if kwargs["metadata"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["metadata"]["db_name"]]
         self.collection = self.db[kwargs["metadata"]["db_col"]]
 
     def get(self):
@@ -305,10 +300,9 @@ class MetadataMgt(Resource):
 class ModelMgt(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["model_management"]["db_name"]]) \
-            if self.mongo_client[kwargs["model_management"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["model_management"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["model_management"]["db_name"]) \
+            if kwargs["model_management"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["model_management"]["db_name"]]
         self.collection = self.db[kwargs["model_management"]["db_col"]]
 
     def get(self):
@@ -391,10 +385,9 @@ class ModelMgt(Resource):
 class UserMgt(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["user_management"]["db_name"]]) \
-            if self.mongo_client[kwargs["user_management"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["user_management"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["user_management"]["db_name"]) \
+            if kwargs["user_management"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["user_management"]["db_name"]]
         self.collection = self.db[kwargs["user_management"]["db_col"]]
 
     def get(self):
@@ -479,6 +472,7 @@ if __name__ == '__main__':
     with open(args.conf) as f:
         config = json.loads(f.read())
 
+    mongo_client = pymongo.MongoClient(config['mongo_url'])
     # queue to get health info from edge and federated server
     queue = EdgeHealthReport(config)
 
