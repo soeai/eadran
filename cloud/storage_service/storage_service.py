@@ -46,7 +46,7 @@ class StorageService(Resource):
                                 mimetype=result[0]['mimetype'],
                                 headers={"Content-Disposition":
                                         "attachment;filename={}".format(result[0]['filename'])})
-        return jsonify({"message":"missing query: id=???"}), 404
+        return {"message":"missing query: id=???"}, 404
 
     def post(self):
         req_params = post_parser.parse_args()
@@ -64,7 +64,7 @@ class StorageService(Resource):
             data = file.stream.read()
             self.storage.put(storage_id, data)
 
-            return jsonify({'storage_id': storage_id})
+            return {'storage_id': storage_id}
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")

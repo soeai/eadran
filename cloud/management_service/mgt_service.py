@@ -29,6 +29,7 @@ logger = CustomLogger().get_logger().setLevel(logging.INFO)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 mongo_client = None
 auth_collection = None
+
 # fedmarketplace_service = "management_service"
 # fedmarketplace_service_port= "8006"
 # mongo_conn = None
@@ -205,9 +206,9 @@ class EdgeMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"edge_id": query[1]})
-                return jsonify({"message": "deleted \'{}\'".format(r.get("edge_id"))})
+                return {"message": "deleted \'{}\'".format(r.get("edge_id"))}
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class ComputingResourceHealth(Resource):
@@ -230,7 +231,7 @@ class ComputingResourceHealth(Resource):
                     response.pop('_id', None)
                     return jsonify({'result': response})
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class FedServerHealth(Resource):
@@ -251,9 +252,11 @@ class FedServerHealth(Resource):
                 if len(result) > 0:
                     response = result[0] #get ip from query result
                     response.pop('_id', None)
-                    return jsonify({'result': response})
+                    return {'result': response}
+                else:
+                    return {"message": "server does not exist."}, 404
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class EdgeHealthReport(object):
@@ -285,7 +288,7 @@ class MetadataMgt(Resource):
     def get(self):
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
@@ -298,19 +301,21 @@ class MetadataMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return jsonify({'result': response})
+                    return {'result': response}
+                else:
+                    return {"message":"your dataset does not exist."}, 404
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
     # add new dataset info
     def post(self):
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
         if request.is_json:
             req_args = request.get_json(force=True)
-            print(req_args)
+            # print(req_args)
             """
             Action table:
             1 - insert one 
@@ -421,7 +426,7 @@ class MetadataMgt(Resource):
         else:
             response = "Invalid JSON format"
         # get param from args here
-        return jsonify({'status': 0, "response":response})
+        return {'status': 0, "response":response}
 
     # update dataset info
     def put(self):
@@ -443,9 +448,9 @@ class MetadataMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"dataset_id": query[1]})
-                return jsonify({"message": "deleted \'{}\'".format(r.get("dataset_id"))})
+                return {"message": "deleted \'{}\'".format(r.get("dataset_id"))}
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class ModelMgt(Resource):
@@ -457,11 +462,12 @@ class ModelMgt(Resource):
         self.collection = self.db[kwargs["model_management"]["db_col"]]
 
     def get(self):
+        req_args = request.query_string.decode("utf-8").split("&")
+
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
-        req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
             # get param from args here
@@ -472,19 +478,21 @@ class ModelMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return jsonify({'result': response})
+                    return {'result': response}
+                else:
+                    return {"message": "your model does not exist!"}, 404
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
     # insert new model info
     def post(self):
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
         if request.is_json:
             req_args = request.get_json(force=True)
-            print(req_args)
+            # print(req_args)
             """
             Action table:
             1 - insert one 
@@ -584,13 +592,13 @@ class ModelMgt(Resource):
                 # self.collection.drop()
                 response = "Action {} Not support Yet!".format(req_args['action'])
         # get param from args here
-        return jsonify({'status': 0, "response":response})
+        return {'status': 0, "response":response}
 
     # update an existing model info
     def put(self):
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
         #pass
         # if request.is_json:
@@ -606,12 +614,12 @@ class ModelMgt(Resource):
                     return_document=True
                 )
                 if updated_model:
-                    return jsonify({'status': "success", "response": updated_model})
+                    return {'status': "success", "response": updated_model}
                 else:
-                    return jsonify({'status': "error", "response": "Model not found."}), 404
+                    return {'status': "error", "response": "Model not found."}, 404
             else:
-                return jsonify({'status': "error", "response": "Missing model_id in request."}), 400
-        return jsonify({'status': 1, "response": "Invalid JSON payload."})
+                return {'status': "error", "response": "Missing model_id in request."}, 400
+        return {'status': 1, "response": "Invalid JSON payload."}
 
     def delete(self):
         check_login = required_auth()
@@ -656,6 +664,9 @@ class UserMgt(Resource):
                     response = result[0]
                     response.pop('_id', None)
                     response.pop('password', None)
+                else:
+                    return {"message":"user does not exist."}, 404
+
         return jsonify({'result': response})
 
     def post(self):
@@ -727,24 +738,33 @@ class UserMgt(Resource):
 
 
 class Authentication(Resource):
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
+
+    def get(self):
+        pass
+
     def post(self):
         if request.is_json:
             args = request.get_json(force=True)
-            print(args)
-            session_id = jwt.encode("","KEY")
+            # ADD CODE TO CHECK USER:PASS CORRECT
+
+            session_id = jwt.encode(args,"KEYKEY")
+            auth_collection.insert_one({"session_id": session_id})
             return jsonify({"session_id":session_id})
-        return 401
+        return "Error", 401
 
 
 def required_auth():
     # verify correct user ==========
     token = request.headers.get('Authorization')
     if not token:
-        return jsonify({'status': "Required session id!"}), 401
+        return {'status': "Required session id!"}
 
-    jwt = token.split('Bearer ')[1]
-    if list(auth_collection.find({"session_id": jwt})).count() < 1:
-        return jsonify({'status': "Your session is expired. Please login again!"}), 401
+    secret_token = token.split('Bearer ')[1]
+
+    if len(list(auth_collection.find({"session_id": secret_token}))) < 1:
+        return {'status': "Your session is expired. Please login again!"}
 
     return None
 
