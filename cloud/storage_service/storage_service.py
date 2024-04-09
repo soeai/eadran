@@ -18,14 +18,14 @@ app = Flask(__name__)
 api = Api(app)
 cors = CORS(app, resources={r"/storage/*": {"origins": "*"}})
 logger = CustomLogger().get_logger()
+mongo_client = None
 
 
 class StorageService(Resource):
     def __init__(self, **kwargs) -> None:
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["storage"]["db_name"]]) \
-            if self.mongo_client[kwargs["storage"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["storage"]["db_name"]]
+        self.db = mongo_client.get_database(kwargs["storage"]["db_name"]) \
+            if kwargs["storage"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["storage"]["db_name"]]
         self.collection = self.db[kwargs["storage"]["db_col"]]
         # create a MinioStorage object here
         self.storage = MinioStorage(kwargs["minio_conf"])
@@ -85,10 +85,10 @@ class StorageService(Resource):
 
 class StorageInfo(Resource):
     def __init__(self, **kwargs) -> None:
-        self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
-        self.db = self.mongo_client.get_database(self.mongo_client[kwargs["storage"]["db_name"]]) \
-            if self.mongo_client[kwargs["storage"]["db_name"]] in self.mongo_client.list_database_names() \
-            else self.mongo_client[kwargs["storage"]["db_name"]]
+        # self.mongo_client = pymongo.MongoClient(kwargs['mongo_url'])
+        self.db = mongo_client.get_database(kwargs["storage"]["db_name"]) \
+            if kwargs["storage"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["storage"]["db_name"]]
         self.collection = self.db[kwargs["storage"]["db_col"]]
 
     def get(self):
@@ -132,6 +132,7 @@ if __name__ == '__main__':
     with open(args.conf) as f:
         config = json.loads(f.read())
 
+    mongo_client = pymongo.MongoClient(config['mongo_url'])
     api.add_resource(StorageService, '/storage/obj',resource_class_kwargs=config)
     api.add_resource(StorageInfo, '/storage/owner', resource_class_kwargs=config)
 
