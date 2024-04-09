@@ -82,7 +82,7 @@ class EdgeMgt(Resource):
     def get(self):
         check_login = required_auth()
         if check_login is not None:
-            return check_login
+            return check_login, 401
 
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
@@ -304,7 +304,15 @@ class MetadataMgt(Resource):
                     return {'result': response}
                 else:
                     return {"message":"your dataset does not exist."}, 404
-
+            if query[0] == 'owner':
+                result = list(self.collection.find({"owner": query[1]}).sort(
+                    [('timestamp', pymongo.DESCENDING)]))
+                if len(result) > 0:
+                    for r in result:
+                        r.pop('_id', None)
+                    return {'result': result}
+                else:
+                    return {"result": []}
         return {"message": "missing query: id=???"}, 404
 
     # add new dataset info
@@ -430,7 +438,25 @@ class MetadataMgt(Resource):
 
     # update dataset info
     def put(self):
-        pass
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login, 401
+
+        if request.is_json:
+            req_args = request.get_json(force=True)
+            if 'dataset_id' in req_args:
+                updated_dataset = self.collection.find_one_and_update(
+                    {"dataset_id": req_args['dataset_id']},
+                    {"$set": req_args['update_data']},
+                    return_document=True
+                )
+                if updated_dataset:
+                    return {'status': "success", "response": updated_dataset}
+                else:
+                    return {'status': "error", "response": "Data not found."}, 404
+            else:
+                return {'status': "error", "response": "Missing dataset_id in request."}, 400
+        return {'status': 1, "response": "Invalid JSON payload."}
         # if request.is_json:
         #     args = request.get_json(force=True)
         # # get param from args here
