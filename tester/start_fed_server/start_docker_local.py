@@ -1,10 +1,11 @@
 import json
 import subprocess
 import traceback
+import sys
 
 try:
     # Install required packages
-    # subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
     # Now import the required modules
 
