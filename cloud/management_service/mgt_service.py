@@ -655,6 +655,7 @@ class UserMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
+                    response.pop('password', None)
         return jsonify({'result': response})
 
     def post(self):
@@ -731,7 +732,8 @@ class Authentication(Resource):
             args = request.get_json(force=True)
             print(args)
             session_id = jwt.encode("","KEY")
-        return jsonify({"session_id":session_id})
+            return jsonify({"session_id":session_id})
+        return 401
 
 
 def required_auth():
