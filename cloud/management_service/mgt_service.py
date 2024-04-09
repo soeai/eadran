@@ -237,10 +237,10 @@ class ComputingResourceHealth(Resource):
 class FedServerHealth(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.db = mongo_client.get_database(kwargs["fedserver_health_log"]["db_name"]) \
-            if kwargs["fedserver_health_log"]["db_name"] in mongo_client.list_database_names() \
-            else mongo_client[kwargs["fedserver_health_log"]["db_name"]]
-        self.collection = self.db[kwargs["fedserver_health_log"]["db_col"]]
+        self.db = mongo_client.get_database(kwargs["server_health_log"]["db_name"]) \
+            if kwargs["server_health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["server_health_log"]["db_name"]]
+        self.collection = self.db[kwargs["server_health_log"]["db_col"]]
 
     def get(self):
         req_args = request.query_string.decode("utf-8").split("&")
