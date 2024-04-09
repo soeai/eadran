@@ -12,6 +12,7 @@ try:
                           }
             }
     command = ["docker", "run", "-d", config["image"]]
+
     res = subprocess.run(["docker", "run", "-d", "--name", "some-rabbit", "rabbitmq:3"], capture_output=True)
     if res.returncode == 0 and str(res.stdout).find(config["options"]["--name"]) >= 0:
         subprocess.run(["docker", "stop", config["options"]["--name"]])
