@@ -11,7 +11,8 @@ try:
                       "-p": ["5672:5672/tcp"],
                           }
             }
-    res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]], capture_output=True)
+    command = ["docker", "run", "-d", config["image"]]
+    res = subprocess.run(["docker", "run", "-d", "--name", "some-rabbit", "rabbitmq:3"], capture_output=True)
     if res.returncode == 0 and str(res.stdout).find(config["options"]["--name"]) >= 0:
         subprocess.run(["docker", "stop", config["options"]["--name"]])
         subprocess.run(["docker", "remove", config["options"]["--name"]])
