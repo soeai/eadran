@@ -10,6 +10,8 @@ import json
 import logging
 import time
 from threading import Thread
+
+import jwt
 import pymongo
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -26,6 +28,7 @@ logger = CustomLogger().get_logger().setLevel(logging.INFO)
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 mongo_client = None
+auth_collection = None
 # fedmarketplace_service = "management_service"
 # fedmarketplace_service_port= "8006"
 # mongo_conn = None
@@ -76,6 +79,10 @@ class EdgeMgt(Resource):
         self.collection = self.db[kwargs["edge_computing"]["db_col"]]
 
     def get(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -92,6 +99,10 @@ class EdgeMgt(Resource):
         return jsonify({"message": "missing query: id=???"}), 404
 
     def post(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         if request.is_json:
             args = request.get_json(force=True)
             """
@@ -150,6 +161,10 @@ class EdgeMgt(Resource):
         return jsonify({'status': 0, "response": response})
 
     def put(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         if request.is_json:
             args = request.get_json(force=True)
             """
@@ -179,6 +194,10 @@ class EdgeMgt(Resource):
             return jsonify({"error": "Request data must be in JSON format"}), 400
 
     def delete(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -264,6 +283,10 @@ class MetadataMgt(Resource):
         self.collection = self.db[kwargs["metadata"]["db_col"]]
 
     def get(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -281,6 +304,10 @@ class MetadataMgt(Resource):
 
     # add new dataset info
     def post(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         if request.is_json:
             req_args = request.get_json(force=True)
             print(req_args)
@@ -405,6 +432,10 @@ class MetadataMgt(Resource):
         # return jsonify({'status': True})
 
     def delete(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -426,6 +457,10 @@ class ModelMgt(Resource):
         self.collection = self.db[kwargs["model_management"]["db_col"]]
 
     def get(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -443,6 +478,10 @@ class ModelMgt(Resource):
 
     # insert new model info
     def post(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         if request.is_json:
             req_args = request.get_json(force=True)
             print(req_args)
@@ -549,6 +588,10 @@ class ModelMgt(Resource):
 
     # update an existing model info
     def put(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         #pass
         # if request.is_json:
         #     args = request.get_json(force=True)
@@ -571,6 +614,10 @@ class ModelMgt(Resource):
         return jsonify({'status': 1, "response": "Invalid JSON payload."})
 
     def delete(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -592,7 +639,12 @@ class UserMgt(Resource):
         self.collection = self.db[kwargs["user_management"]["db_col"]]
 
     def get(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
+
         # get param from args here
         if len(req_args) > 0:
             # get param from args here
@@ -606,6 +658,10 @@ class UserMgt(Resource):
         return jsonify({'result': response})
 
     def post(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         if request.is_json:
             args = request.get_json(force=True)
             print(args)
@@ -653,6 +709,10 @@ class UserMgt(Resource):
     #     return jsonify({'status': True})
     #
     def delete(self):
+        check_login = required_auth()
+        if check_login is not None:
+            return check_login
+
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
         if len(req_args) > 0:
@@ -665,6 +725,28 @@ class UserMgt(Resource):
         return jsonify({"message": "missing query: id=???"}), 404
 
 
+class Authentication(Resource):
+    def post(self):
+        if request.is_json:
+            args = request.get_json(force=True)
+            print(args)
+            session_id = jwt.encode("","KEY")
+        return jsonify({"session_id":session_id})
+
+
+def required_auth():
+    # verify correct user ==========
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'status': "Required session id!"}), 401
+
+    jwt = token.split('Bearer ')[1]
+    if list(auth_collection.find({"session_id": jwt})).count() < 1:
+        return jsonify({'status': "Your session is expired. Please login again!"}), 401
+
+    return None
+
+
 if __name__ == '__main__': 
     # init_env_variables()
     parser = argparse.ArgumentParser(description="Arguments for Management Service")
@@ -674,6 +756,11 @@ if __name__ == '__main__':
         config = json.loads(f.read())
 
     mongo_client = pymongo.MongoClient(config['mongo_url'])
+    db = mongo_client.get_database(config["authentication"]["db_name"]) \
+        if config["authentication"]["db_name"] in mongo_client.list_database_names() \
+        else mongo_client[config["authentication"]["db_name"]]
+    auth_collection = db[config["authentication"]["db_col"]]
+
     # queue to get health info from edge and federated server
     queue = EdgeHealthReport(config)
 
@@ -686,6 +773,7 @@ if __name__ == '__main__':
     api.add_resource(MetadataMgt, '/metadata',resource_class_kwargs=config)
     api.add_resource(ModelMgt, '/model',resource_class_kwargs=config)
     api.add_resource(UserMgt, '/user',resource_class_kwargs=config)
+    api.add_resource(Authentication, '/auth', resource_class_kwargs=config)
 
     # run service
     app.run(debug=True, port=ServiceConfig.MGT_SERVICE_PORT)

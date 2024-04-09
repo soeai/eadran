@@ -1,28 +1,32 @@
 {
     "mongo_url": "mongodb://195.148.22.62:27017/",
     "metadata":{
-        "db_name": "metadata",
-        "db_col": "metadata_collection"
+        "db_name": "db_metadata",
+        "db_col": "col_metadata"
     },
     "edge_computing":{
-        "db_name": "edges",
-        "db_col": "edge_collection"
+        "db_name": "db_edges",
+        "db_col": "col_edges"
     },
     "edge_health_log":{
-        "db_name": "edge_health_log",
-        "db_col": "edge_health_collection"
+        "db_name": "db_edge_health_log",
+        "db_col": "col_edge_health_log"
     },
     "server_health_log":{
-        "db_name": "server_health_log",
-        "db_col": "server_health_collection"
+        "db_name": "db_server_health_log",
+        "db_col": "col_server_health_log"
     },
     "model_management":{
-        "db_name": "model_management",
-        "db_col": "model_management_collection"
+        "db_name": "db_model_management",
+        "db_col": "col_model_management"
     },
     "user_management":{
-        "db_name": "fed_user_management",
-        "db_col": "user_management_collection"
+        "db_name": "db_user_management",
+        "db_col": "col_user_management"
+    },
+    "authentication":{
+        "db_name": "db_authentication",
+        "db_col": "col_authentication"
     },
     "amqp_health_report": {
         "end_point":"192.168.10.235",
