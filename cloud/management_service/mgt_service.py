@@ -481,6 +481,15 @@ class ModelMgt(Resource):
                     return {'result': response}
                 else:
                     return {"message": "your model does not exist!"}, 404
+            if query[0] == 'owner':
+                result = list(self.collection.find({"owner": query[1]}).sort(
+                    [('timestamp', pymongo.DESCENDING)]))
+                if len(result) > 0:
+                    for r in result:
+                        r.pop('_id', None)
+                    return {'result': result}
+                else:
+                    return {"result": []}
 
         return {"message": "missing query: id=???"}, 404
 
