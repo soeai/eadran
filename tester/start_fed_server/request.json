@@ -2,17 +2,12 @@
   "edge_id": "fedserver001",
   "command": "docker",
   "params": "start",
-  "config": [
-    {
-      "image": "rabbitmq:3",
-      "container_name": "fed_rabbit_container_01",
-      "detach": "True",
-      "binding_port": {
-        "5672/tcp": "5672",
-        "5671/tcp": "5671",
-        "25672/tcp": "25672",
-        "15672/tcp": "15672"
-      }
+  "config": {
+    "image": "rabbitmq:3",
+    "container_name": "fed_rabbit_container_01",
+    "detach": "True",
+    "binding_port": {
+      "5672/tcp": "5672"
     }
-  ]
+  }
 }
