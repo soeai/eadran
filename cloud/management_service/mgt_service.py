@@ -147,7 +147,7 @@ class EdgeMgt(Resource):
         else:
             response = {"error": "Request data must be in JSON format"}
             # get param from args here
-        return jsonify({'status': "success", "response": response})
+        return jsonify({'status': 0, "response": response})
 
     def put(self):
         if request.is_json:
@@ -172,7 +172,7 @@ class EdgeMgt(Resource):
             if existing_edge:
                 # Update the edge with the provided data
                 self.collection.update_one({"edge_id": edge_id}, {"$set": update_data})
-                return jsonify({"message": f"Edge with ID {edge_id} updated successfully"}), 200
+                return jsonify({"message": f"Edge with ID {edge_id} updated successfully"})
             else:
                 return jsonify({"error": f"Edge with ID {edge_id} not found"}), 404
         else:
@@ -384,9 +384,9 @@ class MetadataMgt(Resource):
             }
             """
             # response = "false"
-            if (req_args['action'] == 1):
+            if req_args['action'] == 1:
                 response = {"insert_id":str(self.collection.insert_one(req_args['data']).inserted_id)}
-            elif (req_args['action'] == 2):
+            elif req_args['action'] == 2:
                 response = {"insert_ids":str(self.collection.insert_many(req_args['data']).inserted_ids)}
             else:
                 # self.collection.drop()
@@ -394,7 +394,7 @@ class MetadataMgt(Resource):
         else:
             response = "Invalid JSON format"
         # get param from args here
-        return jsonify({'status': "success", "response":response})
+        return jsonify({'status': 0, "response":response})
 
     # update dataset info
     def put(self):
@@ -537,15 +537,15 @@ class ModelMgt(Resource):
         }
             """
             # response = "false"
-            if (req_args['action'] == 1):
+            if req_args['action'] == 1:
                 response = {"insert_id":str(self.collection.insert_one(req_args['data']).inserted_id)}
-            elif (req_args['action'] == 2):
+            elif req_args['action'] == 2:
                 response = {"insert_ids":str(self.collection.insert_many(req_args['data']).inserted_ids)}
             else:
                 # self.collection.drop()
                 response = "Action {} Not support Yet!".format(req_args['action'])
         # get param from args here
-        return jsonify({'status': "success", "response":response})
+        return jsonify({'status': 0, "response":response})
 
     # update an existing model info
     def put(self):
@@ -568,7 +568,7 @@ class ModelMgt(Resource):
                     return jsonify({'status': "error", "response": "Model not found."}), 404
             else:
                 return jsonify({'status': "error", "response": "Missing model_id in request."}), 400
-        return jsonify({'status': "error", "response": "Invalid JSON payload."})
+        return jsonify({'status': 1, "response": "Invalid JSON payload."})
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")
@@ -635,16 +635,16 @@ class UserMgt(Resource):
                 ]
             }
             """
-            response = "false"
-            if (args['action'] == 1):
+            # response = "false"
+            if args['action'] == 1:
                 response = {"insert_id":str(self.collection.insert_one(args['data']).inserted_id)}
-            elif (args['action'] == 2):
+            elif args['action'] == 2:
                 response = {"insert_ids":str(self.collection.insert_many(args['data']).inserted_ids)}
             else:
                 # self.collection.drop()
                 response = "Action {} Not support Yet!".format(args['action'])
         # get param from args here
-        return jsonify({'status': "success", "response":response})
+        return jsonify({'status': 0, "response":response})
 
     # def put(self):
     #     if request.is_json:
