@@ -1,13 +1,13 @@
 import subprocess
 import sys
 import traceback
+import docker
 
 try:
     # Install required packages
     # subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
     # Now import the required modules
-    import docker
 
     config = {
         "image": "rabbitmq:3",
