@@ -101,7 +101,9 @@ class EdgeMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "attributes": "sample"
+                    "edge_id": "12345",
+                    "edge_name": "Edge 1",
+                    "status": "active"
                 }
             }
             2 - insert many
@@ -110,30 +112,71 @@ class EdgeMgt(Resource):
                 "action": 2,
                 "data":[
                     {
-                        "attributes": "sample"
+                        "edge_id": "edge001",
+                        "edge_name": "Edge 1",
+                        "status": "active"
                     },
                     {
-                        "attributes": "sample2"
+                        "edge_id": "edge002",
+                        "edge_name": "Edge 2",
+                        "status": "active"
                     }
                 ]
             }
             """
             # response = "false"
-            if (args['action'] == 1):
-                response = {"insert_id":str(self.collection.insert_one(args['data']).inserted_id)}
-            elif (args['action'] == 2):
-                response = {"insert_ids":str(self.collection.insert_many(args['data']).inserted_ids)}
+            if args['action'] == 1:
+                data = args['data']
+                # Check if edge_id already exists in the database
+                if self.collection.find_one({"edge_id": data["edge_id"]}):
+                    response = {"error": "Edge ID already exists"}
+                else:
+                    response = {"insert_id": str(self.collection.insert_one(data).inserted_id)}
+            elif args['action'] == 2:
+                data_list = args['data']
+                # Check if any edge_id already exists in the database
+                existing_ids = [edge["edge_id"] for edge in self.collection.find({}, {"_id": 0, "edge_id": 1})]
+                duplicate_ids = [edge["edge_id"] for edge in data_list if edge["edge_id"] in existing_ids]
+                if duplicate_ids:
+                    response = {"error": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}
+                else:
+                    inserted_ids = [str(self.collection.insert_one(edge).inserted_id) for edge in data_list]
+                    response = {"insert_ids": inserted_ids}
             else:
-                # self.collection.drop()
-                response = "Action {} Not support Yet!".format(args['action'])
-        # get param from args here
-        return jsonify({'status': "success", "response":response})
+                response = {"error": f"Action {args['action']} is not supported"}
+        else:
+            response = {"error": "Request data must be in JSON format"}
+            # get param from args here
+        return jsonify({'status': "success", "response": response})
 
     def put(self):
         if request.is_json:
             args = request.get_json(force=True)
-        # get param from args here
-        return jsonify({'status': "Not support yet!"})
+            """
+            {
+                "edge_id": "edge001",
+                "update_data": {
+                    "edge_name": "Updated Edge 1"
+                }
+            }
+            """
+            # Check if edge_id exists in the request
+            if 'edge_id' not in args:
+                return jsonify({"error": "Edge ID is missing in the request"}), 400
+
+            edge_id = args['edge_id']
+            update_data = args.get('update_data', {})
+
+            # Check if edge_id exists in the database
+            existing_edge = self.collection.find_one({"edge_id": edge_id})
+            if existing_edge:
+                # Update the edge with the provided data
+                self.collection.update_one({"edge_id": edge_id}, {"$set": update_data})
+                return jsonify({"message": f"Edge with ID {edge_id} updated successfully"}), 200
+            else:
+                return jsonify({"error": f"Edge with ID {edge_id} not found"}), 404
+        else:
+            return jsonify({"error": "Request data must be in JSON format"}), 400
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")
@@ -248,19 +291,94 @@ class MetadataMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "attributes": "sample"
+                    "dataset_id": "ds001",
+                    "description": "fraud",
+                    "no_of_samples": 123,
+                    "qod_ref": {
+                        "_comment": "metric of quality of data",
+                        "ref": "http://...",
+                        "values": {}
+                    },
+                    "cxt_ref": {
+                        "_comment": "metric of data in context",
+                        "ref": "http://...",
+                        "values": {}
+                    },
+                    "qod_weight": {},
+                    "cxt_weight": {},
+                    "qod_unit_price": 1.0,
+                    "cxt_unit_price": 1.0,
+                    "cost_formula": "formula to evaluate the cost",
+                    "features": [],
+                    "edge_computings": [],
+                    "data_access": {
+                        "type": "file (database|cloud)",
+                        "location": "user@ip:/home/data.csv",
+                        "key": ""
+                    },
+                    "owner": "dp123"
                 }
             }
             2 - insert many
             Example:
             {
                 "action": 2,
-                "data":[
+                "data": [
                     {
-                        "attributes": "sample"
+                        "dataset_id": "ds001",
+                        "description": "fraud",
+                        "no_of_samples": 123,
+                        "qod_ref": {
+                            "_comment": "metric of quality of data",
+                            "ref": "http://...",
+                            "values": {}
+                        },
+                        "cxt_ref": {
+                            "_comment": "metric of data in context",
+                            "ref": "http://...",
+                            "values": {}
+                        },
+                        "qod_weight": {},
+                        "cxt_weight": {},
+                        "qod_unit_price": 1.0,
+                        "cxt_unit_price": 1.0,
+                        "cost_formula": "formula to evaluate the cost",
+                        "features": [],
+                        "edge_computings": [],
+                        "data_access": {
+                            "type": "file (database|cloud)",
+                            "location": "user@ip:/home/data.csv",
+                            "key": ""
+                        },
+                        "owner": "dp123"
                     },
                     {
-                        "attributes": "sample2"
+                        "dataset_id": "ds002",
+                        "description": "another dataset",
+                        "no_of_samples": 200,
+                        "qod_ref": {
+                            "_comment": "metric of quality of data",
+                            "ref": "http://...",
+                            "values": {}
+                        },
+                        "cxt_ref": {
+                            "_comment": "metric of data in context",
+                            "ref": "http://...",
+                            "values": {}
+                        },
+                        "qod_weight": {},
+                        "cxt_weight": {},
+                        "qod_unit_price": 1.0,
+                        "cxt_unit_price": 1.0,
+                        "cost_formula": "formula to evaluate the cost",
+                        "features": [],
+                        "edge_computings": [],
+                        "data_access": {
+                            "type": "file (database|cloud)",
+                            "location": "user@ip:/home/data2.csv",
+                            "key": ""
+                        },
+                        "owner": "dp456"
                     }
                 ]
             }
@@ -273,6 +391,8 @@ class MetadataMgt(Resource):
             else:
                 # self.collection.drop()
                 response = "Action {} Not support Yet!".format(req_args['action'])
+        else:
+            response = "Invalid JSON format"
         # get param from args here
         return jsonify({'status': "success", "response":response})
 
@@ -333,7 +453,29 @@ class ModelMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "attributes": "sample"
+                    "model_id": "model001",
+                    "name": "Detection Model",
+                    "description": "detection",
+                    "owner": "user123",
+                    "created_at": "2024-03-26 11:30:00",
+                    "training_code": {
+                        "module_name": "code for training at edges",
+                        "function_map": {
+                            "train": "fit",
+                            "evaluate": "evaluate",
+                            "set_weights": "set_weights",
+                            "get_weights": "get_weights"
+                        },
+                        "train_hyper_param": {
+                            "epochs": 10,
+                            "batch_size": 32
+                        }
+                    },
+                    "pre_train_model": {
+                        "url": "link to get pre-train model",
+                        "name": "pre-trained model name",
+                        "params": "optional params to download"
+                    }
                 }
             }
             2 - insert many
@@ -342,13 +484,57 @@ class ModelMgt(Resource):
                 "action": 2,
                 "data":[
                     {
-                        "attributes": "sample"
+                    "model_id": "model001",
+                    "name": "Detection Model",
+                    "description": "detection",
+                    "owner": "user123",
+                    "created_at": "2024-03-26 11:30:00",
+                    "training_code": {
+                        "module_name": "code for training at edges",
+                        "function_map": {
+                            "train": "fit",
+                            "evaluate": "evaluate",
+                            "set_weights": "set_weights",
+                            "get_weights": "get_weights"
+                        },
+                        "train_hyper_param": {
+                            "epochs": 10,
+                            "batch_size": 32
+                        }
                     },
-                    {
-                        "attributes": "sample2"
+                    "pre_train_model": {
+                        "url": "link to get pre-train model",
+                        "name": "pre-trained model name",
+                        "params": "optional params to download"
                     }
-                ]
-            }
+                },
+                {
+                    "model_id": "model002",
+                    "name": "Another Model",
+                    "description": "Another description",
+                    "owner": "user456",
+                    "created_at": "2024-03-27 13:45:00",
+                    "training_code": {
+                        "module_name": "code for training at edges",
+                        "function_map": {
+                            "train": "fit",
+                            "evaluate": "evaluate",
+                            "set_weights": "set_weights",
+                            "get_weights": "get_weights"
+                        },
+                        "train_hyper_param": {
+                            "epochs": 15,
+                            "batch_size": 64
+                        }
+                    },
+                    "pre_train_model": {
+                        "url": "link to get pre-train model",
+                        "name": "pre-trained model name",
+                        "params": "optional params to download"
+                    }
+                }
+            ]
+        }
             """
             # response = "false"
             if (req_args['action'] == 1):
@@ -363,11 +549,26 @@ class ModelMgt(Resource):
 
     # update an existing model info
     def put(self):
-        pass
+        #pass
         # if request.is_json:
         #     args = request.get_json(force=True)
         # # get param from args here
         # return jsonify({'status': True})
+        if request.is_json:
+            req_args = request.get_json(force=True)
+            if 'model_id' in req_args:
+                updated_model = self.collection.find_one_and_update(
+                    {"model_id": req_args['model_id']},
+                    {"$set": req_args['update_data']},
+                    return_document=True
+                )
+                if updated_model:
+                    return jsonify({'status': "success", "response": updated_model})
+                else:
+                    return jsonify({'status': "error", "response": "Model not found."}), 404
+            else:
+                return jsonify({'status': "error", "response": "Missing model_id in request."}), 400
+        return jsonify({'status': "error", "response": "Invalid JSON payload."})
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")
