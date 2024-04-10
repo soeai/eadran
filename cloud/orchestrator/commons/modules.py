@@ -153,7 +153,7 @@ class BuildDocker(Generic):
         req_text = ""
         for req in reqs:
             req_text = req_text + req["name"] + "==" + req["version"] + "\n"
-        with open(folder_path + "/requirement.txt", "w") as f:
+        with open(folder_path + "/requirements.txt", "w") as f:
             f.write(req_text)
 
     def generate_dockerfile(self, docker_config, folder_path):
@@ -174,19 +174,23 @@ class BuildDocker(Generic):
     def fetch_source_code(self, config, folder_path):
         # fetch source code from git/url/object storage to folder_path
         # return True/False
+        # download code/module from config['storage_ref_id']
+        # rename module to config['module_name'] if it is not the same name
         pass
 
     def exec(self, params):
         # prepare and run command to build docker
-        # subprocess.run()
-
         # report all necessary info for next step
-        folder_path = make_temp_dir(params["consumer_id"] + "_folder")
-        self.generate_requirements(params["requirement_libs"], folder_path)
-        self.generate_dockerfile(params["docker_config"], folder_path)
-        image_repo = "<generate image repo here>"
-        if self.fetch_source_code(params["pre_train_model"], folder_path):
-            sub_thread = threading.Thread(target=docker_build, args=(folder_path, image_repo))
+        temp_folder = make_temp_dir(params["consumer_id"] + "_folder")
+        self.generate_requirements(params["requirement_libs"], temp_folder)
+
+        # THERE IS NO DOCKER_CONFIG IN PARAMS
+        self.generate_dockerfile(params["docker_config"], temp_folder)
+
+        image_repo = params["consumer_id"] + "_" + params['model_id']
+
+        if self.fetch_source_code(params["model_conf"], temp_folder):
+            sub_thread = threading.Thread(target=docker_build, args=(temp_folder, image_repo))
             sub_thread.start()
 
         response = params
