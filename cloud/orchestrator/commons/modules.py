@@ -1,32 +1,32 @@
 from abc import ABC, abstractmethod
 import qoa4ml.qoaUtils as utils
-import subprocess, traceback, sys
+import traceback, sys
 from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
 
-template_folder = utils.get_parent_dir(__file__,1)+"/template"
-config_folder = utils.get_parent_dir(__file__,1)+"/conf"
-temporary_folder = utils.get_parent_dir(__file__,1)+"/temp"
+template_folder = utils.get_parent_dir(__file__, 1) + "/template"
+config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
+temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
 jinja_env = Environment(loader=FileSystemLoader(template_folder))
 
 
 def docker_build(folder_path, image_repo):
     client = docker.from_env()
     client.images.build(
-        path = folder_path,
-        dockerfile = folder_path+'/Dockerfile',
-        tag=image_repo, 
+        path=folder_path,
+        dockerfile=folder_path + '/Dockerfile',
+        tag=image_repo,
     )
 
 
-# def make_temp_dir(folder_name):
-#     if not os.path.exists(temporary_folder):
-#         os.makedirs(temporary_folder)
-#     folder_path = temporary_folder+"/"+folder_name
-#     if not os.path.exists(folder_path):
-#         os.makedirs(folder_path)
-#     return folder_path
+def make_temp_dir(folder_name):
+    if not os.path.exists(temporary_folder):
+        os.makedirs(temporary_folder)
+    folder_path = os.path.join(temporary_folder, folder_name)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    return folder_path
 
 
 class Generic(ABC):
@@ -36,106 +36,102 @@ class Generic(ABC):
 
 
 class StartFedServer(Generic):
-    def __init__(self, orchestrator, config=None):
-        if config is None:
-            config = config_folder+"/fed_server.json"
-        self.config = utils.load_config(config)
+    def __init__(self, orchestrator):
         self.orchestrator = orchestrator
-        # self.rmq_port = self.config["RMQ_port"]
-        # self.ports_pool = self.config["port_pool"]
-        # self.fed_server_ulr = config["fed_server_url"] # Federated Orchestration Server: REST
-        self.fed_count = 0
-        
-    # orchestrator send message to micro-service via queue
-    # def send_start_fed_command(self,json_mess):
-    #     # headers = {
-    #     #     'Content-Type': 'application/json'
-    #     # }
-    #     # # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
-    #     # return requests.request("POST", self.fed_server_ulr, headers=headers, data=json.dumps(json_mess)) # assume that fed_server is a rest server
-    #     pass
+        self.server_id = orchestrator.config['server_id']
+        self.counter = 0
+        self.fed_server_image_port = orchestrator.config['fed_server_image_port']
+        self.fed_server_image_name = orchestrator.config['fed_server_image_name']
+        self.rabbit_image_name = orchestrator.config['rabbitmq_image_name']
+        self.rabbit_image_port = orchestrator.config['rabbitmq_image_port']
 
     def exec(self, params):
         try:
-        # send message to orchestration_at_federated service to start 2 docker: RMQ & Federated Server
-        # get queue routine, IP, port
-        # optional store in database - configuration service
+            # send message to orchestration_at_federated service to start 2 docker: RMQ & Federated Server
+            # get queue routine, IP, port
+            # optional store in database - configuration service
 
-        # prepare and run command to build docker
-        # subprocess.run()
-            fed_response = {}
+            # prepare and run command to build docker
+            # subprocess.run()
+            # report all necessary info for next step
             response = params
-        # report all necessary info for next step
-            if params is not None: # check Param
+            if params is not None:  # check Param
+                # check service to make sure server is running well
+                url_mgt_service = self.orchestrator.url_mgt_service + "/edgehealth?id=" + self.server_id
+                server_check = requests.get(url_mgt_service).json()
+                # print(edge_check)
+                if not server_check['status'] == 1:
+                    # Message to start RMQ and Federate Server
+                    # {
+                    #     "server_id": "specific resource id or *",
+                    #     "command": "docker",
+                    #     "params": "start",
+                    #     "docker":[
+                    #         {
+                    #             "image": "repo:docker_image_rabbitmq",
+                    #             "options":{
+                    #                   "--name": "rabbit_container_01",
+                    #                   "-v":""
+                    #                   "-p": ["5672/tcp":"5672"],
+                    #                   "-mount":"
+                    #                       }
+                    #         }
+                    #     ]
+                    # }
 
-                # Message to start RMQ and Federate Server
-                mess = {}
-                mess["command"] = "docker"
-                mess["params"] = "start"
-                mess["config"] = []
-                jinja_var = {}
+                    command = {
+                        "server_id": self.server_id,
+                        "command": "docker",
+                        "params": "start",
+                        "docker": [
+                            {
+                                "image": self.fed_server_image_name,
+                                "options": {
+                                    "--name": f"fed_server_container_{params['consumer_id']}",
+                                    "-v": "",
+                                    "-p": [f"{self.fed_server_image_port}/tcp:{self.fed_server_image_port}"],
+                                    "-mount": ""
+                                }
+                            },
+                            {
+                                "image": self.rabbit_image_name,
+                                "options": {
+                                    "--name": f"rabbit_container_{params['consumer_id']}",
+                                    "-v": "",
+                                    "-p": [f"{self.rabbit_image_port}/tcp:{self.rabbit_image_port}"],
+                                    "-mount": ""
+                                }
+                            },
+                        ]
+                    }
+                    try:
+                        # asynchronously send
+                        self.orchestrator.send(command)
 
-                # init config for RMQ
-                tem_conf = jinja_env.get_template("rabbit_broker.json")
-                jinja_var["container_name"] = "rabbit_broker_"+str(self.count)
-                jinja_var["command_port"] = self.rmq_port["command_port"] + self.count
-                jinja_var["mess_port"] = self.rmq_port["mess_port"] + self.count
-                rabbit_config = tem_conf.render(jinja_var)
-                mess["config"].append(rabbit_config)
-                # init config for Fed Server
-                tem_conf = jinja_env.get_template("fed_server.json")
-                jinja_var["container_name"] = "fed_server"+str(self.count)
+                        # fed_response = ???
+                        # fed_response["IP"] = response.json()
 
-                ############################################################
-                # Uncommented this block when ports are defined in params
-                # example params["ports"]: [{"port": 1234, "protocol":"tcp"}]
-                # port_mapping = []
-                # for port in params["ports"]:
-                #     port_map ={"con_port": port["port"],"port_protocol": port["protocol"],"phy_port": self.ports_pool}
-                #     self.ports_pool += 1
-                #     port_mapping.append(port_map)
-                ################## Example port mapping ####################
-                # Comment this block when ports are defined in params
-                port_mapping = [{
-                    "con_port": 4002,
-                    "phy_port": 4002,
-                    "port_protocol": "tcp"
-                },{
-                    "con_port": 4003,
-                    "phy_port": 4003,
-                    "port_protocol": "tcp"
-                }]
-                ############################################################
-                jinja_var["port_mapping"] = port_mapping
-                jinja_var["image_repo"] = params["fed_image_repo"] # params must have fed_server image repo
-                rabbit_config = tem_conf.render(jinja_var)
-                mess["config"].append(rabbit_config)
-                self.fed_count += 1
+                        # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
+                        fed_server_ip = server_check['result']['ip']
+                    except Exception as e:
+                        print("[ERROR] - Error {} while send start fed command: {}".format(type(e), e.__traceback__))
+                        traceback.print_exception(*sys.exc_info())
+                        # response must be dictionary including IP of fed server
+                    response["start_fed_resp"] = {
+                                                "ip": fed_server_ip,
+                                                "fed_server_port": self.fed_server_image_port,
+                                                "rabbit_port": self.rabbit_image_port
+                                            }
 
-                try:
-                    # asynchronously send
-                    self.orchestrator.send(mess)
-
-                    # fed_response = ???
-                    # fed_response["IP"] = response.json()
-
-                    # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
-
-                except Exception as e:
-                    print("[ERROR] - Error {} while send start fed command: {}".format(type(e),e.__traceback__))
-                    traceback.print_exception(*sys.exc_info())
-                    # response must be dictionary including IP of fed server
-                fed_response["config"] = mess["config"] # this including ports of fed server and message broker 
         except Exception as e:
-            print("[ERROR] - Error {} while start FedServer: {}".format(type(e),e.__traceback__))
+            print("[ERROR] - Error {} while start FedServer: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
 
         # need to return more info here to build docker
-        response["fed_response"] = fed_response
         return response
 
 
-# SHOULD DISTRIBUTED THIS CLASS TO HANDLE MULTIPLE REQUESTS
+# SHOULD DISTRIBUTE THIS CLASS TO HANDLE MULTIPLE REQUESTS
 class BuildDocker(Generic):
     #   "requirement_libs": [{
     #     "name": "tensorflow",
@@ -147,20 +143,20 @@ class BuildDocker(Generic):
     # build docker from user config source code + library (from storage service - MinIO)
     # push docker
     # return docker name:tag:version
-    def __init__(self, config=None):
+    def __init__(self, orchestrator, config=None):
         if config is not None:
             self.config = utils.load_config(config)
         else:
             self.config = None
 
-    def generate_requirements(self, reqs,folder_path):
+    def generate_requirements(self, reqs, folder_path):
         req_text = ""
         for req in reqs:
-            req_text = req_text + req["name"]+"=="+req["version"]+"\n"
-        with open(folder_path+"/requirement.txt", "w") as f:
+            req_text = req_text + req["name"] + "==" + req["version"] + "\n"
+        with open(folder_path + "/requirement.txt", "w") as f:
             f.write(req_text)
 
-    def generate_dockerfile(self, docker_config ,folder_path):
+    def generate_dockerfile(self, docker_config, folder_path):
         # Example:
         # docker_config = {
         #     "base_image": "python@latest",
@@ -172,7 +168,7 @@ class BuildDocker(Generic):
         # init config for RMQ
         tem_doc = jinja_env.get_template("Dockerfile")
         docker_file = tem_doc.render(docker_config)
-        with open(folder_path+"/Dockerfile", "w") as f:
+        with open(folder_path + "/Dockerfile", "w") as f:
             f.write(docker_file)
 
     def fetch_source_code(self, config, folder_path):
@@ -185,14 +181,14 @@ class BuildDocker(Generic):
         # subprocess.run()
 
         # report all necessary info for next step
-        folder_path = make_temp_dir(params["consumer_id"]+"_folder")
+        folder_path = make_temp_dir(params["consumer_id"] + "_folder")
         self.generate_requirements(params["requirement_libs"], folder_path)
-        self.generate_dockerfile(params["docker_config"],folder_path)
+        self.generate_dockerfile(params["docker_config"], folder_path)
         image_repo = "<generate image repo here>"
         if self.fetch_source_code(params["pre_train_model"], folder_path):
             sub_thread = threading.Thread(target=docker_build, args=(folder_path, image_repo))
             sub_thread.start()
-        
+
         response = params
         docker_response = {}
         docker_response["image_repo"] = image_repo
@@ -211,40 +207,41 @@ class ResourceComputing(Generic):
     # return validation: True/False
     def __init__(self, config=None):
         if config is None:
-            config = config_folder+"/resourceComputing.json"
+            config = config_folder + "/resourceComputing.json"
         self.config = utils.load_config(config)
-        self.resource_manager_url = config["resource_manager_url"] # ComputingResourceMgt url: REST
-        self.data_service_url = config["data_service_url"] # Dataset url: REST
+        self.resource_manager_url = config["resource_manager_url"]  # ComputingResourceMgt url: REST
+        self.data_service_url = config["data_service_url"]  # Dataset url: REST
         self.data_flag = False
         self.resource_flag = False
 
-    def isDataReady(self,dataset_id):
+    def isDataReady(self, dataset_id):
         try:
             headers = {
                 'Content-Type': 'application/json'
             }
-            json_mess ={"dataset_id":dataset_id}
+            json_mess = {"dataset_id": dataset_id}
             # Example response = {"result":"True/False"}
-            response = requests.request("POST", self.data_service_url, headers=headers, data=json.dumps(json_mess)) # assume that data service is a rest server 
+            response = requests.request("POST", self.data_service_url, headers=headers,
+                                        data=json.dumps(json_mess))  # assume that data service is a rest server
             return bool(response["result"])
         except Exception as e:
-            print("[ERROR] - Error {} while check dataset status: {}".format(type(e),e.__traceback__))
+            print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
             return False
-        
 
-    def isResourceReady(self,resource_id, resource_config):
+    def isResourceReady(self, resource_id, resource_config):
         try:
             headers = {
                 'Content-Type': 'application/json'
             }
-            json_mess ={"dataset_id":resource_id}
+            json_mess = {"dataset_id": resource_id}
             json_mess["config"] = resource_config
             # Example response = {"result":"True/False"}
-            response = requests.request("POST", self.resource_manager_url, headers=headers, data=json.dumps(json_mess)) # assume that resource management service is a rest server 
+            response = requests.request("POST", self.resource_manager_url, headers=headers, data=json.dumps(
+                json_mess))  # assume that resource management service is a rest server
             return bool(response["result"])
         except Exception as e:
-            print("[ERROR] - Error {} while check dataset status: {}".format(type(e),e.__traceback__))
+            print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
             return False
 
@@ -253,7 +250,9 @@ class ResourceComputing(Generic):
         # subprocess.run()
 
         # report all necessary info for next step
-        if self.isResourceReady(params["resource"]["resource_id"],params["resource"]["resource_config"]) and self.isDataReady(params["datasets"]["datasets_id"]): # structure of params need to add resource config
+        if self.isResourceReady(params["resource"]["resource_id"],
+                                params["resource"]["resource_config"]) and self.isDataReady(
+                params["datasets"]["datasets_id"]):  # structure of params need to add resource config
             resource_response = True
         else:
             resource_response = False
@@ -284,7 +283,7 @@ class GenerateConfiguration(Generic):
             self.config = utils.load_config(config)
         else:
             self.config = None
-    
+
     def get_fed_server_url(self, params):
         # To do
         pass
@@ -292,7 +291,7 @@ class GenerateConfiguration(Generic):
     def generate_model_id(self, params):
         # To do
         pass
-    
+
     def get_run_th(self, params):
         # To do
         pass
@@ -316,15 +315,14 @@ class GenerateConfiguration(Generic):
         # To do
         pass
 
-
     def exec(self, params):
         # prepare and run command to build docker
         # subprocess.run()
 
         # report all necessary info for next step
-        if params["resource_response"]: # if dataset and resource ready
+        if params["resource_response"]:  # if dataset and resource ready
             dataset = params["datasets"]
-            for data in dataset:    
+            for data in dataset:
                 jinja_var = {}
                 # init config for RMQ
                 tem_conf = jinja_env.get_template("config4edge_v0.1.json")
@@ -347,9 +345,10 @@ class GenerateConfiguration(Generic):
                 configuration["data"] = self.generate_data_configuration(params)
                 temp_f_name = "edge_configurations"
                 make_temp_dir(temp_f_name)
-                folder_path = temporary_folder+"/"+temp_f_name
+                folder_path = temporary_folder + "/" + temp_f_name
 
-                with open(folder_path+"/configuration"+data["dataset_id"]+".json", "w") as f: # data must have feature name
+                with open(folder_path + "/configuration" + data["dataset_id"] + ".json",
+                          "w") as f:  # data must have feature name
                     f.write(configuration)
 
         response = {}
@@ -401,15 +400,15 @@ class StartTrainingContainerEdge(Generic):
         #     "conf_path": ""
         # }
         return config
-    
+
     def get_edge_resource(self, params):
         # To do
         return []
-    
+
     def send_command(self, edge_command):
         # asynchronously send
         self.orchestrator.send(edge_command)
-    
+
     def exec(self, params):
         # prepare and run command to build docker
         # subprocess.run()
@@ -422,9 +421,6 @@ class StartTrainingContainerEdge(Generic):
 
             edge_command = temp_conf.render(config)
             self.send_command(edge_command)
-
-
-
 
         response = {}
         return response

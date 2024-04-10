@@ -227,30 +227,30 @@ class ComputingResourceHealth(Resource):
         return {"status": 1, "message": "missing query: id=???"}, 404
 
 
-class FedServerHealth(Resource):
-    def __init__(self, **kwargs) -> None:
-        super().__init__()
-        self.db = mongo_client.get_database(kwargs["server_health_log"]["db_name"]) \
-            if kwargs["server_health_log"]["db_name"] in mongo_client.list_database_names() \
-            else mongo_client[kwargs["server_health_log"]["db_name"]]
-        self.collection = self.db[kwargs["server_health_log"]["db_col"]]
-
-    def get(self):
-        req_args = request.query_string.decode("utf-8").split("&")
-        if len(req_args) > 0:
-            # get param from args here
-            query = req_args[0].split("=")
-            if query[0] == 'id':
-                result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}})
-                              .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
-                if len(result) > 0:
-                    response = result[0] #get ip from query result
-                    response.pop('_id', None)
-                    return {'result': response}
-                else:
-                    return {"status": 1, "message": "server does not exist."}, 404
-
-        return {"status": 1, "message": "missing query: id=???"}, 404
+# class FedServerHealth(Resource):
+#     def __init__(self, **kwargs) -> None:
+#         super().__init__()
+#         self.db = mongo_client.get_database(kwargs["server_health_log"]["db_name"]) \
+#             if kwargs["server_health_log"]["db_name"] in mongo_client.list_database_names() \
+#             else mongo_client[kwargs["server_health_log"]["db_name"]]
+#         self.collection = self.db[kwargs["server_health_log"]["db_col"]]
+#
+#     def get(self):
+#         req_args = request.query_string.decode("utf-8").split("&")
+#         if len(req_args) > 0:
+#             # get param from args here
+#             query = req_args[0].split("=")
+#             if query[0] == 'id':
+#                 result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}})
+#                               .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
+#                 if len(result) > 0:
+#                     response = result[0] #get ip from query result
+#                     response.pop('_id', None)
+#                     return {'result': response}
+#                 else:
+#                     return {"status": 1, "message": "server does not exist."}, 404
+#
+#         return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class EdgeHealthReport(object):
@@ -658,7 +658,7 @@ if __name__ == '__main__':
 
     # service to check health of edge and federated server
     api.add_resource(ComputingResourceHealth, '/edgehealth', resource_class_kwargs=config)
-    api.add_resource(FedServerHealth, '/serverhealth', resource_class_kwargs=config)
+    # api.add_resource(FedServerHealth, '/serverhealth', resource_class_kwargs=config)
 
     # management service
     api.add_resource(EdgeMgt, '/edge', resource_class_kwargs=config)

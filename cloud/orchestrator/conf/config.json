@@ -14,5 +14,10 @@
     "out_queue": "orchestrator.queue.out"
   },
   "url_mgt_service": "http://",
-  "url_storage_service": "http://"
+  "url_storage_service": "http://",
+  "server_id": "fedserver001",
+  "fed_server_image_name": "",
+  "fed_server_image_port": 8080,
+  "rabbitmq_image_name": "",
+  "rabbitmq_image_port": 5672
 }

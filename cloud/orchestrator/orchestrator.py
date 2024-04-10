@@ -8,7 +8,8 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
 from commons.pipeline import Pipeline
-from commons.modules import BuildDocker, ResourceComputing, GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
+from commons.modules import BuildDocker, ResourceComputing, GenerateConfiguration, StartFedServer, \
+    StartTrainingContainerEdge
 import logging
 import requests
 
@@ -16,7 +17,7 @@ logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
-def start_train(params, orchestrator=None):
+def start_train(params, _orchestrator=None):
     # ======================= MESSAGE RECEIVE FROM CLIENT
     # {
     #   "consumer_id": "who request",
@@ -52,11 +53,11 @@ def start_train(params, orchestrator=None):
     # }
     # ============== END OF MESSAGE
     logging.info("Request content: {}".format(params))
-    pipeline = Pipeline(task_list=[StartFedServer(orchestrator),
-                         BuildDocker(),
-                         ResourceComputing(),
-                         GenerateConfiguration(),
-                         StartTrainingContainerEdge(orchestrator)],
+    pipeline = Pipeline(task_list=[StartFedServer(_orchestrator),
+                                   BuildDocker(),
+                                   ResourceComputing(),
+                                   GenerateConfiguration(),
+                                   StartTrainingContainerEdge(_orchestrator)],
                         params=params)
     pipeline.exec()
 
@@ -65,28 +66,28 @@ def start_train(params, orchestrator=None):
     #     orchestrator.send("")
 
 
-def start_edge(params, orchestrator=None):
+def start_edge(params, _orchestrator=None):
     pipeline = Pipeline([ResourceComputing(), GenerateConfiguration()], params)
     pipeline.exec()
     # send something to others if needed
-    if orchestrator is not None:
-        orchestrator.send("")
+    if _orchestrator is not None:
+        _orchestrator.send("")
 
 
-def stop_edge(params, uuid):
+def stop_edge(params):
     pass
 
 
-def request_data(params, request_id, orchestrator=None):
-    if orchestrator is not None:
-        url_mgt_service = orchestrator.url_mgt_service +  "/edgehealth?id=" + params['edge_id']
+def request_data(params, request_id, orchestrator_obj=None):
+    if orchestrator_obj is not None:
+        url_mgt_service = orchestrator_obj.url_mgt_service + "/edgehealth?id=" + params['edge_id']
         edge_check = requests.get(url_mgt_service).json()
         # print(edge_check)
-        if not edge_check['status'] == "false":
+        if not edge_check['status'] == 1:
             routing = edge_check['status']['routing_key']
             params['request_id'] = request_id
             logging.info("Sending a request [{}] to [{}]".format(request_id, params['edge_id']))
-            orchestrator.send(params,routing_key=routing)
+            orchestrator_obj.send(params, routing_key=routing)
 
 
 class Orchestrator(object):
@@ -98,7 +99,7 @@ class Orchestrator(object):
         self.url_mgt_service = self.config['url_mgt_service'] + ServiceConfig.MGT_SERVICE_HOST + ":" \
                                + str(ServiceConfig.MGT_SERVICE_PORT)
         self.url_storage_service = self.config['url_storage_service'] + ServiceConfig.STORAGE_SERVICE_HOST \
-                            + ":" + str(ServiceConfig.STORAGE_SERVICE_PORT)
+                                   + ":" + str(ServiceConfig.STORAGE_SERVICE_PORT)
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -117,9 +118,10 @@ class Orchestrator(object):
                 request_data(req_msg['content'], request_id, self)
 
         elif msg_type == 'response':
-            logging.info("Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
+            logging.info(
+                "Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
 
-    def send(self, msg, routing_key = None):
+    def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)
 
     def start_receive(self):
