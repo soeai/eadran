@@ -34,5 +34,6 @@
         "exchange_type": "topic",
         "in_routing_key": "healthreport.#",
         "in_queue": "queue_healthreport"
-    }
+    },
+    "secret_key": "PRIVATE-KEY-ENCRYPT-EADRAN-2024"
 }

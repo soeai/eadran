@@ -17,6 +17,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
 from qoa4ml.collector.amqp_collector import Amqp_Collector
+import hashlib
 
 from cloud.commons.default import ServiceConfig
 from helpers.custom_logger import CustomLogger
@@ -29,11 +30,6 @@ logger = CustomLogger().get_logger().setLevel(logging.INFO)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 mongo_client = None
 auth_collection = None
-
-# fedmarketplace_service = "management_service"
-# fedmarketplace_service_port= "8006"
-# mongo_conn = None
-
 
 # def get_node_name():
 #     node_name = os.environ.get('NODE_NAME')
@@ -95,9 +91,9 @@ class EdgeMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return jsonify({'result': response})
+                    return {'result': response}
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
     def post(self):
         check_login = required_auth()
@@ -105,7 +101,7 @@ class EdgeMgt(Resource):
             return check_login
 
         if request.is_json:
-            args = request.get_json(force=True)
+            req_args = request.get_json(force=True)
             """
             Action table:
             1 - insert one 
@@ -136,30 +132,26 @@ class EdgeMgt(Resource):
                 ]
             }
             """
-            # response = "false"
-            if args['action'] == 1:
-                data = args['data']
+            if req_args['action'] == 1:
+                data = req_args['data']
                 # Check if edge_id already exists in the database
                 if self.collection.find_one({"edge_id": data["edge_id"]}):
-                    response = {"error": "Edge ID already exists"}
+                    return {"message": "Edge ID already exists"}, 400
                 else:
-                    response = {"insert_id": str(self.collection.insert_one(data).inserted_id)}
-            elif args['action'] == 2:
-                data_list = args['data']
+                    return {"insert_id": str(self.collection.insert_one(data).inserted_id)}
+            elif req_args['action'] == 2:
+                data_list = req_args['data']
                 # Check if any edge_id already exists in the database
                 existing_ids = [edge["edge_id"] for edge in self.collection.find({}, {"_id": 0, "edge_id": 1})]
                 duplicate_ids = [edge["edge_id"] for edge in data_list if edge["edge_id"] in existing_ids]
                 if duplicate_ids:
-                    response = {"error": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}
+                    return {"status": 1, "message": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}, 201
                 else:
                     inserted_ids = [str(self.collection.insert_one(edge).inserted_id) for edge in data_list]
-                    response = {"insert_ids": inserted_ids}
+                    return {"insert_ids": inserted_ids}
             else:
-                response = {"error": f"Action {args['action']} is not supported"}
-        else:
-            response = {"error": "Request data must be in JSON format"}
-            # get param from args here
-        return jsonify({'status': 0, "response": response})
+                return {"status": 1, "message": f"Action {req_args['action']} is not supported"}, 400
+        return {"status": 1, "message": "Request data must be in JSON format"}, 400
 
     def put(self):
         check_login = required_auth()
@@ -167,7 +159,7 @@ class EdgeMgt(Resource):
             return check_login
 
         if request.is_json:
-            args = request.get_json(force=True)
+            req_args = request.get_json(force=True)
             """
             {
                 "edge_id": "edge001",
@@ -177,22 +169,22 @@ class EdgeMgt(Resource):
             }
             """
             # Check if edge_id exists in the request
-            if 'edge_id' not in args:
-                return jsonify({"error": "Edge ID is missing in the request"}), 400
+            if 'edge_id' not in req_args:
+                return {"status": 1, "message": "Edge ID is missing in the request"}, 400
 
-            edge_id = args['edge_id']
-            update_data = args.get('update_data', {})
+            edge_id = req_args['edge_id']
+            update_data = req_args.get('update_data', {})
 
             # Check if edge_id exists in the database
             existing_edge = self.collection.find_one({"edge_id": edge_id})
             if existing_edge:
                 # Update the edge with the provided data
                 self.collection.update_one({"edge_id": edge_id}, {"$set": update_data})
-                return jsonify({"message": f"Edge with ID {edge_id} updated successfully"})
+                return {"message": f"Edge with ID {edge_id} updated successfully"}
             else:
-                return jsonify({"error": f"Edge with ID {edge_id} not found"}), 404
-        else:
-            return jsonify({"error": "Request data must be in JSON format"}), 400
+                return {"status": 1, "message": f"Edge with ID {edge_id} not found"}, 404
+
+        return {"status": 1, "message": "Request data must be in JSON format"}, 400
 
     def delete(self):
         check_login = required_auth()
@@ -208,7 +200,7 @@ class EdgeMgt(Resource):
                 r = self.collection.find_one_and_delete({"edge_id": query[1]})
                 return {"message": "deleted \'{}\'".format(r.get("edge_id"))}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class ComputingResourceHealth(Resource):
@@ -225,13 +217,14 @@ class ComputingResourceHealth(Resource):
             # get param from args here
             query = req_args[0].split("=")
             if query[0] == 'id':
-                result = list(self.collection.find({"edge_id":query[1],"timestamp": {"$gt": time.time() - 600}}).sort([('timestamp', pymongo.DESCENDING)]).limit(1))
+                result = list(self.collection.find({"edge_id":query[1],"timestamp": {"$gt": time.time() - 600}})
+                              .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return jsonify({'result': response})
+                    return {'result': response}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class FedServerHealth(Resource):
@@ -248,15 +241,16 @@ class FedServerHealth(Resource):
             # get param from args here
             query = req_args[0].split("=")
             if query[0] == 'id':
-                result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}}).sort([('timestamp', pymongo.DESCENDING)]).limit(1))
+                result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}})
+                              .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
                 if len(result) > 0:
                     response = result[0] #get ip from query result
                     response.pop('_id', None)
                     return {'result': response}
                 else:
-                    return {"message": "server does not exist."}, 404
+                    return {"status": 1, "message": "server does not exist."}, 404
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class EdgeHealthReport(object):
@@ -331,32 +325,7 @@ class MetadataMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "dataset_id": "ds001",
-                    "description": "fraud",
-                    "no_of_samples": 123,
-                    "qod_ref": {
-                        "_comment": "metric of quality of data",
-                        "ref": "http://...",
-                        "values": {}
-                    },
-                    "cxt_ref": {
-                        "_comment": "metric of data in context",
-                        "ref": "http://...",
-                        "values": {}
-                    },
-                    "qod_weight": {},
-                    "cxt_weight": {},
-                    "qod_unit_price": 1.0,
-                    "cxt_unit_price": 1.0,
-                    "cost_formula": "formula to evaluate the cost",
-                    "features": [],
-                    "edge_computings": [],
-                    "data_access": {
-                        "type": "file (database|cloud)",
-                        "location": "user@ip:/home/data.csv",
-                        "key": ""
-                    },
-                    "owner": "dp123"
+                    data object
                 }
             }
             2 - insert many
@@ -365,60 +334,10 @@ class MetadataMgt(Resource):
                 "action": 2,
                 "data": [
                     {
-                        "dataset_id": "ds001",
-                        "description": "fraud",
-                        "no_of_samples": 123,
-                        "qod_ref": {
-                            "_comment": "metric of quality of data",
-                            "ref": "http://...",
-                            "values": {}
-                        },
-                        "cxt_ref": {
-                            "_comment": "metric of data in context",
-                            "ref": "http://...",
-                            "values": {}
-                        },
-                        "qod_weight": {},
-                        "cxt_weight": {},
-                        "qod_unit_price": 1.0,
-                        "cxt_unit_price": 1.0,
-                        "cost_formula": "formula to evaluate the cost",
-                        "features": [],
-                        "edge_computings": [],
-                        "data_access": {
-                            "type": "file (database|cloud)",
-                            "location": "user@ip:/home/data.csv",
-                            "key": ""
-                        },
-                        "owner": "dp123"
+                        data object
                     },
                     {
-                        "dataset_id": "ds002",
-                        "description": "another dataset",
-                        "no_of_samples": 200,
-                        "qod_ref": {
-                            "_comment": "metric of quality of data",
-                            "ref": "http://...",
-                            "values": {}
-                        },
-                        "cxt_ref": {
-                            "_comment": "metric of data in context",
-                            "ref": "http://...",
-                            "values": {}
-                        },
-                        "qod_weight": {},
-                        "cxt_weight": {},
-                        "qod_unit_price": 1.0,
-                        "cxt_unit_price": 1.0,
-                        "cost_formula": "formula to evaluate the cost",
-                        "features": [],
-                        "edge_computings": [],
-                        "data_access": {
-                            "type": "file (database|cloud)",
-                            "location": "user@ip:/home/data2.csv",
-                            "key": ""
-                        },
-                        "owner": "dp456"
+                        data object
                     }
                 ]
             }
@@ -434,7 +353,7 @@ class MetadataMgt(Resource):
         else:
             response = "Invalid JSON format"
         # get param from args here
-        return {'status': 0, "response":response}
+        return {'status': 0, "message": response}
 
     # update dataset info
     def put(self):
@@ -451,16 +370,12 @@ class MetadataMgt(Resource):
                     return_document=True
                 )
                 if updated_dataset:
-                    return {'status': "success", "response": updated_dataset}
+                    return {'status': 0, "message": updated_dataset}
                 else:
-                    return {'status': "error", "response": "Data not found."}, 404
+                    return {'status': 1, "message": "Data not found."}, 404
             else:
-                return {'status': "error", "response": "Missing dataset_id in request."}, 400
-        return {'status': 1, "response": "Invalid JSON payload."}
-        # if request.is_json:
-        #     args = request.get_json(force=True)
-        # # get param from args here
-        # return jsonify({'status': True})
+                return {'status': 1, "message": "Missing dataset_id in request."}, 400
+        return {'status': 1, "message": "Invalid JSON payload."}
 
     def delete(self):
         check_login = required_auth()
@@ -527,7 +442,6 @@ class ModelMgt(Resource):
 
         if request.is_json:
             req_args = request.get_json(force=True)
-            # print(req_args)
             """
             Action table:
             1 - insert one 
@@ -535,29 +449,7 @@ class ModelMgt(Resource):
             {
                 "action": 1,
                 "data":{
-                    "model_id": "model001",
-                    "name": "Detection Model",
-                    "description": "detection",
-                    "owner": "user123",
-                    "created_at": "2024-03-26 11:30:00",
-                    "training_code": {
-                        "module_name": "code for training at edges",
-                        "function_map": {
-                            "train": "fit",
-                            "evaluate": "evaluate",
-                            "set_weights": "set_weights",
-                            "get_weights": "get_weights"
-                        },
-                        "train_hyper_param": {
-                            "epochs": 10,
-                            "batch_size": 32
-                        }
-                    },
-                    "pre_train_model": {
-                        "url": "link to get pre-train model",
-                        "name": "pre-trained model name",
-                        "params": "optional params to download"
-                    }
+                    data object
                 }
             }
             2 - insert many
@@ -566,68 +458,22 @@ class ModelMgt(Resource):
                 "action": 2,
                 "data":[
                     {
-                    "model_id": "model001",
-                    "name": "Detection Model",
-                    "description": "detection",
-                    "owner": "user123",
-                    "created_at": "2024-03-26 11:30:00",
-                    "training_code": {
-                        "module_name": "code for training at edges",
-                        "function_map": {
-                            "train": "fit",
-                            "evaluate": "evaluate",
-                            "set_weights": "set_weights",
-                            "get_weights": "get_weights"
-                        },
-                        "train_hyper_param": {
-                            "epochs": 10,
-                            "batch_size": 32
-                        }
-                    },
-                    "pre_train_model": {
-                        "url": "link to get pre-train model",
-                        "name": "pre-trained model name",
-                        "params": "optional params to download"
-                    }
+                    data object
                 },
                 {
-                    "model_id": "model002",
-                    "name": "Another Model",
-                    "description": "Another description",
-                    "owner": "user456",
-                    "created_at": "2024-03-27 13:45:00",
-                    "training_code": {
-                        "module_name": "code for training at edges",
-                        "function_map": {
-                            "train": "fit",
-                            "evaluate": "evaluate",
-                            "set_weights": "set_weights",
-                            "get_weights": "get_weights"
-                        },
-                        "train_hyper_param": {
-                            "epochs": 15,
-                            "batch_size": 64
-                        }
-                    },
-                    "pre_train_model": {
-                        "url": "link to get pre-train model",
-                        "name": "pre-trained model name",
-                        "params": "optional params to download"
-                    }
+                    data object
                 }
             ]
         }
             """
-            # response = "false"
             if req_args['action'] == 1:
                 response = {"insert_id":str(self.collection.insert_one(req_args['data']).inserted_id)}
             elif req_args['action'] == 2:
                 response = {"insert_ids":str(self.collection.insert_many(req_args['data']).inserted_ids)}
             else:
-                # self.collection.drop()
                 response = "Action {} Not support Yet!".format(req_args['action'])
-        # get param from args here
-        return {'status': 0, "response":response}
+
+        return {'status': 0, "response": response}
 
     # update an existing model info
     def put(self):
@@ -635,11 +481,6 @@ class ModelMgt(Resource):
         if check_login is not None:
             return check_login, 401
 
-        #pass
-        # if request.is_json:
-        #     args = request.get_json(force=True)
-        # # get param from args here
-        # return jsonify({'status': True})
         if request.is_json:
             req_args = request.get_json(force=True)
             if 'model_id' in req_args:
@@ -649,12 +490,12 @@ class ModelMgt(Resource):
                     return_document=True
                 )
                 if updated_model:
-                    return {'status': "success", "response": updated_model}
+                    return {'status': 0, "message": updated_model}
                 else:
-                    return {'status': "error", "response": "Model not found."}, 404
+                    return {'status': 1, "message": "Model not found."}, 404
             else:
-                return {'status': "error", "response": "Missing model_id in request."}, 400
-        return {'status': 1, "response": "Invalid JSON payload."}
+                return {'status': 0, "message": "Missing model_id in request."}, 400
+        return {'status': 1, "message": "Invalid JSON payload."}
 
     def delete(self):
         check_login = required_auth()
@@ -668,9 +509,9 @@ class ModelMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"model_id": query[1]})
-                return jsonify({"message": "deleted \'{}\'".format(r.get("model_id"))})
+                return {"message": "deleted \'{}\'".format(r.get("model_id"))}
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class UserMgt(Resource):
@@ -693,7 +534,7 @@ class UserMgt(Resource):
             # get param from args here
             query = req_args[0].split("=")
             if query[0] == 'id':
-                result = list(self.collection.find({"user_id": query[1]}).sort(
+                result = list(self.collection.find({"username": query[1]}).sort(
                     [('timestamp', pymongo.DESCENDING)]).limit(1))
                 if len(result) > 0:
                     response = result[0]
@@ -702,7 +543,7 @@ class UserMgt(Resource):
                 else:
                     return {"message":"user does not exist."}, 404
 
-        return jsonify({'result': response})
+        return {'result': response}
 
     def post(self):
         check_login = required_auth()
@@ -710,44 +551,23 @@ class UserMgt(Resource):
             return check_login
 
         if request.is_json:
-            args = request.get_json(force=True)
-            print(args)
+            req_args = request.get_json(force=True)
             """
-            Action table:
-            0 - drop all collection
-            # no data require
-            1 - insert one 
             Example:
             {
-                "action": 1,
-                "data":{
-                    "attributes": "sample"
-                }
-            }
-            2 - insert many
-            Example:
-            {
-                "action": 2,
-                "data":[
-                    {
-                        "attributes": "sample"
-                    },
-                    {
-                        "attributes": "sample2"
-                    }
-                ]
+                "username": "",
+                "email": "",
+                "fullname": "",
+                "password": "",
+                "role": ""
             }
             """
-            # response = "false"
-            if args['action'] == 1:
-                response = {"insert_id":str(self.collection.insert_one(args['data']).inserted_id)}
-            elif args['action'] == 2:
-                response = {"insert_ids":str(self.collection.insert_many(args['data']).inserted_ids)}
-            else:
-                # self.collection.drop()
-                response = "Action {} Not support Yet!".format(args['action'])
-        # get param from args here
-        return jsonify({'status': 0, "response":response})
+            # encrypt password
+            req_args['password'] = hashlib.md5(str(req_args['password']).encode()).hexdigest()
+
+            response = {"insert_id": str(self.collection.insert_one(req_args).inserted_id)}
+
+        return jsonify({'status': 0, "message": response})
 
     # def put(self):
     #     if request.is_json:
@@ -766,28 +586,43 @@ class UserMgt(Resource):
             # get param from args here
             query = req_args[0].split("=")
             if query[0] == 'id':
-                r = self.collection.find_one_and_delete({"user_id": query[1]})
-                return jsonify({"message": "deleted \'{}\'".format(r.get("user_id"))})
+                r = self.collection.find_one_and_delete({"username": query[1]})
+                return {"message": "deleted \'{}\'".format(r.get("username"))}
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return {"message": "missing query: id=???"}, 404
 
 
 class Authentication(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-
-    def get(self):
-        pass
+        self.config = kwargs
+        self.db = mongo_client.get_database(kwargs["user_management"]["db_name"]) \
+            if kwargs["user_management"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["user_management"]["db_name"]]
+        self.collection = self.db[kwargs["user_management"]["db_col"]]
 
     def post(self):
         if request.is_json:
-            args = request.get_json(force=True)
+            """
+            {
+                "username": "",
+                "password": ""
+            }
+            """
+            req_args = request.get_json(force=True)
             # ADD CODE TO CHECK USER:PASS CORRECT
-
-            session_id = jwt.encode(args,"KEYKEY")
-            auth_collection.insert_one({"session_id": session_id})
-            return jsonify({"session_id":session_id})
-        return "Error", 401
+            if "username" in req_args.keys() and 'password' in req_args.keys():
+                result = list(self.collection.find({"username": req_args['username']}))
+                if len(result) > 0:
+                    # encrypt password
+                    pwd = hashlib.md5(str(req_args['password']).encode()).hexdigest()
+                    if result[0]['password'] == pwd:
+                        session_id = jwt.encode(req_args, self.config['secret_key'])
+                        auth_collection.insert_one({"session_id": session_id})
+                        return {"session_id": session_id}
+                else:
+                    return {'message': 'username or password is not correct'}, 401
+        return {"message": "request body must be in JSON format. {username: xxx, password: yyy}"}, 401
 
 
 def required_auth():
