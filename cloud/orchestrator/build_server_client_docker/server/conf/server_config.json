@@ -1,0 +1,5 @@
+{
+  "min_client": 2,
+  "epochs": 5,
+  "port": 8080
+}

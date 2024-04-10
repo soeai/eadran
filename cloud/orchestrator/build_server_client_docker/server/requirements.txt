@@ -1,1 +1,2 @@
-flwr
+flwr==1.8
+pandas

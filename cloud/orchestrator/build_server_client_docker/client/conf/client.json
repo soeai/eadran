@@ -1,0 +1,17 @@
+{ 
+    "data_source_id": "ds000",
+    "model_id": "C001_M01_Fraud",
+    "machine_profile_ref": "http://...",
+    "monitor_interval": 10,
+    "fed_server": "[::]:8080",
+    "model_conf":{
+        "module_name": "ml_model",
+        "model_var": "model",
+        "function_map":{
+            "train": "fit",
+            "evaluate": "evaluate",
+            "set_weights": "set_weights",
+            "get_weights": "get_weights"
+        }
+    }
+}
