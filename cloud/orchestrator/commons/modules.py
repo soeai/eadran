@@ -132,6 +132,22 @@ class StartFedServer(Generic):
 
 
 # SHOULD DISTRIBUTE THIS CLASS TO HANDLE MULTIPLE REQUESTS
+def generate_requirements(reqs, folder_path):
+    req_text = ""
+    for req in reqs:
+        req_text = req_text + req["name"] + "==" + req["version"] + "\n"
+    with open(folder_path + "/requirements.txt", "w") as f:
+        f.write(req_text)
+
+
+def fetch_source_code(config, folder_path):
+    # fetch source code from git/url/object storage to folder_path
+    # return True/False
+    # download code/module from config['storage_ref_id']
+    # rename module to config['module_name'] if its name is not correct
+    pass
+
+
 class BuildDocker(Generic):
     #   "requirement_libs": [{
     #     "name": "tensorflow",
@@ -143,20 +159,13 @@ class BuildDocker(Generic):
     # build docker from user config source code + library (from storage service - MinIO)
     # push docker
     # return docker name:tag:version
-    def __init__(self, orchestrator, config=None):
+    def __init__(self, config=None):
         if config is not None:
             self.config = utils.load_config(config)
         else:
             self.config = None
 
-    def generate_requirements(self, reqs, folder_path):
-        req_text = ""
-        for req in reqs:
-            req_text = req_text + req["name"] + "==" + req["version"] + "\n"
-        with open(folder_path + "/requirements.txt", "w") as f:
-            f.write(req_text)
-
-    def generate_dockerfile(self, docker_config, folder_path):
+    def generate_dockerfile(self, folder_path):
         # Example:
         # docker_config = {
         #     "base_image": "python@latest",
@@ -167,29 +176,22 @@ class BuildDocker(Generic):
         # }
         # init config for RMQ
         tem_doc = jinja_env.get_template("Dockerfile")
-        docker_file = tem_doc.render(docker_config)
+        docker_file = tem_doc.render(self.config['docker_config'])
         with open(folder_path + "/Dockerfile", "w") as f:
             f.write(docker_file)
-
-    def fetch_source_code(self, config, folder_path):
-        # fetch source code from git/url/object storage to folder_path
-        # return True/False
-        # download code/module from config['storage_ref_id']
-        # rename module to config['module_name'] if it is not the same name
-        pass
 
     def exec(self, params):
         # prepare and run command to build docker
         # report all necessary info for next step
         temp_folder = make_temp_dir(params["consumer_id"] + "_folder")
-        self.generate_requirements(params["requirement_libs"], temp_folder)
+        generate_requirements(params["requirement_libs"], temp_folder)
 
         # THERE IS NO DOCKER_CONFIG IN PARAMS
         self.generate_dockerfile(params["docker_config"], temp_folder)
 
         image_repo = params["consumer_id"] + "_" + params['model_id']
 
-        if self.fetch_source_code(params["model_conf"], temp_folder):
+        if fetch_source_code(params["model_conf"], temp_folder):
             sub_thread = threading.Thread(target=docker_build, args=(temp_folder, image_repo))
             sub_thread.start()
 
