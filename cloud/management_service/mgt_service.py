@@ -606,7 +606,8 @@ class Authentication(Resource):
             """
             {
                 "username": "",
-                "password": ""
+                "password": "",
+                "role": ""
             }
             """
             req_args = request.get_json(force=True)
