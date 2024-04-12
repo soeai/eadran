@@ -2,7 +2,7 @@
   "fedml_info": {
     "server": "192.168.1.148:8080",
     "model_id": "C001_M01_Fraud",
-    "run_th": 1,
+    "version": 1,
     "monitor_interval": 10,
     "model_conf":{
         "module_name": "code for training at edges",
