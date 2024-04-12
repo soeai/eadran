@@ -4,6 +4,7 @@ note that other tasks have been done to prepare such a data for the training tas
 '''
 import argparse
 import time
+from urllib.request import urlretrieve
 import flwr as fl
 import qoa4ml.qoaUtils as qoa_utils
 # from qoa4ml import QoaClient
@@ -116,6 +117,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     client_conf = qoa_utils.load_config(args.client)
+
+    # download code of DPs to read data
+    urlretrieve(client_conf['data_conf']['url'], client_conf['data_conf']['module_name']+".py")
 
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])

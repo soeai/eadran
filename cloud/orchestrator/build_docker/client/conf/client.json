@@ -16,6 +16,7 @@
         }
     },
     "data_conf": {
+        "url": "",
         "module_name": "data_reader",
         "function_map": "read_data"
     }
