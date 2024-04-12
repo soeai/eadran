@@ -91,9 +91,9 @@ class EdgeMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return {'result': response}
+                    return {"status": 0, 'result': response}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
     def post(self):
         check_login = required_auth()
@@ -136,19 +136,19 @@ class EdgeMgt(Resource):
                 data = req_args['data']
                 # Check if edge_id already exists in the database
                 if self.collection.find_one({"edge_id": data["edge_id"]}):
-                    return {"message": "Edge ID already exists"}, 400
+                    return {"status": 1, "message": "Edge ID already exists"}, 400
                 else:
-                    return {"insert_id": str(self.collection.insert_one(data).inserted_id)}
+                    return {"status": 0, "message": str(self.collection.insert_one(data).inserted_id)}
             elif req_args['action'] == 2:
                 data_list = req_args['data']
                 # Check if any edge_id already exists in the database
                 existing_ids = [edge["edge_id"] for edge in self.collection.find({}, {"_id": 0, "edge_id": 1})]
                 duplicate_ids = [edge["edge_id"] for edge in data_list if edge["edge_id"] in existing_ids]
                 if duplicate_ids:
-                    return {"status": 1, "message": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}, 201
+                    return {"status": 1, "message": f"Duplicated edge IDs: {', '.join(duplicate_ids)}"}, 400
                 else:
                     inserted_ids = [str(self.collection.insert_one(edge).inserted_id) for edge in data_list]
-                    return {"insert_ids": inserted_ids}
+                    return {"status": 0, "message": inserted_ids}
             else:
                 return {"status": 1, "message": f"Action {req_args['action']} is not supported"}, 400
         return {"status": 1, "message": "Request data must be in JSON format"}, 400
@@ -180,7 +180,7 @@ class EdgeMgt(Resource):
             if existing_edge:
                 # Update the edge with the provided data
                 self.collection.update_one({"edge_id": edge_id}, {"$set": update_data})
-                return {"message": f"Edge with ID {edge_id} updated successfully"}
+                return {"status": 0, "message": f"Edge with ID {edge_id} updated successfully"}
             else:
                 return {"status": 1, "message": f"Edge with ID {edge_id} not found"}, 404
 
@@ -198,7 +198,7 @@ class EdgeMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"edge_id": query[1]})
-                return {"message": "deleted \'{}\'".format(r.get("edge_id"))}
+                return {"status": 0, "message": "deleted \'{}\'".format(r.get("edge_id"))}
 
         return {"status": 1, "message": "missing query: id=???"}, 404
 
@@ -222,7 +222,7 @@ class ComputingResourceHealth(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return {'result': response}
+                    return {"status": 0, 'result': response}
 
         return {"status": 1, "message": "missing query: id=???"}, 404
 
@@ -253,14 +253,14 @@ class ComputingResourceHealth(Resource):
 #         return {"status": 1, "message": "missing query: id=???"}, 404
 
 
-class EdgeHealthReport(object):
-    def __init__(self, config):
-        self.amqp_collector = Amqp_Collector(config['amqp_health_report'], self)
+class ResourceHealthReport(object):
+    def __init__(self, _config):
+        self.amqp_collector = Amqp_Collector(_config['amqp_health_report'], self)
         Thread(target=self.start_amqp).start()
-        self.db = mongo_client.get_database(config["edge_health_log"]["db_name"]) \
-            if config["edge_health_log"]["db_name"] in mongo_client.list_database_names() \
-            else mongo_client[config["edge_health_log"]["db_name"]]
-        self.collection = self.db[config["edge_health_log"]["db_col"]]
+        self.db = mongo_client.get_database(_config["health_log"]["db_name"]) \
+            if _config["health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[_config["health_log"]["db_name"]]
+        self.collection = self.db[_config["health_log"]["db_col"]]
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -295,19 +295,19 @@ class MetadataMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return {'result': response}
+                    return {"status": 0, 'result': response}
                 else:
-                    return {"message":"your dataset does not exist."}, 404
+                    return {"status": 1, "message": "your dataset does not exist."}, 404
             if query[0] == 'owner':
                 result = list(self.collection.find({"owner": query[1]}).sort(
                     [('timestamp', pymongo.DESCENDING)]))
                 if len(result) > 0:
                     for r in result:
                         r.pop('_id', None)
-                    return {'result': result}
+                    return {"status": 0, 'result': result}
                 else:
-                    return {"result": []}
-        return {"message": "missing query: id=???"}, 404
+                    return {"status": 0, "result": []}
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
     # add new dataset info
     def post(self):
@@ -344,9 +344,9 @@ class MetadataMgt(Resource):
             """
             # response = "false"
             if req_args['action'] == 1:
-                response = {"insert_id":str(self.collection.insert_one(req_args['data']).inserted_id)}
+                response = str(self.collection.insert_one(req_args['data']).inserted_id)
             elif req_args['action'] == 2:
-                response = {"insert_ids":str(self.collection.insert_many(req_args['data']).inserted_ids)}
+                response = str(self.collection.insert_many(req_args['data']).inserted_ids)
             else:
                 # self.collection.drop()
                 response = "Action {} Not support Yet!".format(req_args['action'])
@@ -389,9 +389,9 @@ class MetadataMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"dataset_id": query[1]})
-                return {"message": "deleted \'{}\'".format(r.get("dataset_id"))}
+                return {"status": 0, "message": "deleted \'{}\'".format(r.get("dataset_id"))}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class ModelMgt(Resource):
@@ -419,20 +419,20 @@ class ModelMgt(Resource):
                 if len(result) > 0:
                     response = result[0]
                     response.pop('_id', None)
-                    return {'result': response}
+                    return {"status": 0, 'result': response}
                 else:
-                    return {"message": "your model does not exist!"}, 404
+                    return {"status": 1, "message": "your model does not exist!"}, 404
             if query[0] == 'owner':
                 result = list(self.collection.find({"owner": query[1]}).sort(
                     [('timestamp', pymongo.DESCENDING)]))
                 if len(result) > 0:
                     for r in result:
                         r.pop('_id', None)
-                    return {'result': result}
+                    return {"status": 0, 'result': result}
                 else:
-                    return {"result": []}
+                    return {"status": 0, "result": []}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
     # insert new model info
     def post(self):
@@ -467,9 +467,9 @@ class ModelMgt(Resource):
         }
             """
             if req_args['action'] == 1:
-                response = {"insert_id":str(self.collection.insert_one(req_args['data']).inserted_id)}
+                response = str(self.collection.insert_one(req_args['data']).inserted_id)
             elif req_args['action'] == 2:
-                response = {"insert_ids":str(self.collection.insert_many(req_args['data']).inserted_ids)}
+                response = str(self.collection.insert_many(req_args['data']).inserted_ids)
             else:
                 response = "Action {} Not support Yet!".format(req_args['action'])
 
@@ -509,9 +509,9 @@ class ModelMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"model_id": query[1]})
-                return {"message": "deleted \'{}\'".format(r.get("model_id"))}
+                return {"status": 0, "message": "deleted \'{}\'".format(r.get("model_id"))}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class UserMgt(Resource):
@@ -541,9 +541,9 @@ class UserMgt(Resource):
                     response.pop('_id', None)
                     response.pop('password', None)
                 else:
-                    return {"message":"user does not exist."}, 404
+                    return { "status": 1, "message":"user does not exist."}, 404
 
-        return {'result': response}
+        return {"status": 0, 'result': response}
 
     def post(self):
         check_login = required_auth()
@@ -565,9 +565,9 @@ class UserMgt(Resource):
             # encrypt password
             req_args['password'] = hashlib.md5(str(req_args['password']).encode()).hexdigest()
 
-            response = {"insert_id": str(self.collection.insert_one(req_args).inserted_id)}
+            response = str(self.collection.insert_one(req_args).inserted_id)
 
-        return jsonify({'status': 0, "message": response})
+        return {'status': 0, "message": response}
 
     # def put(self):
     #     if request.is_json:
@@ -587,9 +587,9 @@ class UserMgt(Resource):
             query = req_args[0].split("=")
             if query[0] == 'id':
                 r = self.collection.find_one_and_delete({"username": query[1]})
-                return {"message": "deleted \'{}\'".format(r.get("username"))}
+                return {"status": 0, "message": "deleted \'{}\'".format(r.get("username"))}
 
-        return {"message": "missing query: id=???"}, 404
+        return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class Authentication(Resource):
@@ -620,10 +620,10 @@ class Authentication(Resource):
                     if result[0]['password'] == pwd:
                         session_id = jwt.encode(req_args, self.config['secret_key'])
                         auth_collection.insert_one({"session_id": session_id})
-                        return {"session_id": session_id}
+                        return {"status": 0, "session_id": session_id}
                 else:
-                    return {'message': 'username or password is not correct'}, 401
-        return {"message": "request body must be in JSON format. {username: xxx, password: yyy}"}, 401
+                    return {"status": 1, 'message': 'username or password is not correct'}, 401
+        return {"status": 1, "message": "request body must be in JSON format. {username: xxx, password: yyy}"}, 401
 
 
 def required_auth():
@@ -655,17 +655,17 @@ if __name__ == '__main__':
     auth_collection = db[config["authentication"]["db_col"]]
 
     # queue to get health info from edge and federated server
-    queue = EdgeHealthReport(config)
+    queue = ResourceHealthReport(config)
 
     # service to check health of edge and federated server
-    api.add_resource(ComputingResourceHealth, '/edgehealth', resource_class_kwargs=config)
+    api.add_resource(ComputingResourceHealth, '/health', resource_class_kwargs=config)
     # api.add_resource(FedServerHealth, '/serverhealth', resource_class_kwargs=config)
 
     # management service
     api.add_resource(EdgeMgt, '/edge', resource_class_kwargs=config)
-    api.add_resource(MetadataMgt, '/metadata',resource_class_kwargs=config)
-    api.add_resource(ModelMgt, '/model',resource_class_kwargs=config)
-    api.add_resource(UserMgt, '/user',resource_class_kwargs=config)
+    api.add_resource(MetadataMgt, '/metadata', resource_class_kwargs=config)
+    api.add_resource(ModelMgt, '/model', resource_class_kwargs=config)
+    api.add_resource(UserMgt, '/user', resource_class_kwargs=config)
     api.add_resource(Authentication, '/auth', resource_class_kwargs=config)
 
     # run service

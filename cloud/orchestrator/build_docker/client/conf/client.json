@@ -1,7 +1,8 @@
 { 
-    "data_source_id": "ds000",
+    "consumer_id": "",
+    "dataset_id": "ds000",
     "model_id": "C001_M01_Fraud",
-    "machine_profile_ref": "http://...",
+    "edge_id": "http://...",
     "monitor_interval": 10,
     "fed_server": "[::]:8080",
     "model_conf":{
@@ -13,5 +14,9 @@
             "set_weights": "set_weights",
             "get_weights": "get_weights"
         }
+    },
+    "data_conf": {
+        "module_name": "data_reader",
+        "function_map": "read_data"
     }
 }

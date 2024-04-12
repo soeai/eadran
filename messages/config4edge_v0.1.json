@@ -81,7 +81,7 @@
           "description": "Time of Training",
           "default": 0}
       },
-      "resource_monitor": {
+      "edge_monitor": {
         "cpu": {
           "class": "Gauge",
           "description": "CPU usage",

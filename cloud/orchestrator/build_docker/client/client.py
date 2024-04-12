@@ -117,28 +117,28 @@ if __name__ == '__main__':
     args = parser.parse_args()
     client_conf = qoa_utils.load_config(args.client)
 
-    # import custom code of user
-    user_custom_module = __import__(client_conf['model_conf']['module_name'])
+    # import custom code of market consumer
+    mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
 
     # import code of data provider to read data
-    reader = getattr(__import__("data_reader"), "read_data")
+    dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
+                                   client_conf['data_conf']["function_map"])
 
-    X, y = reader(args.data)
+    X, y = dps_read_data_module(args.data)
 
     # Create monitor
-    # qoa_client = QoaClient(client_conf={"model_id":client_conf['model_id'],
+    # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
+    #                                      "model_id":client_conf['model_id'],
     #                                      "run_id": run_th,
-    #                                      "data_source_id": data_source_id,
-    #                                      "machine_profile_ref": client_conf['machine_profile_ref'],
+    #                                      "dataset_id": data_source_id,
+    #                                      "edge_id": client_conf['edge_id'],
     #                                      "train_round": 1},
-    #                         connector_conf=connector_conf)
+    #                                      connector_conf=connector_conf)
     # qoa_client.add_metric(metric_conf['quality_of_model'], category='quality_of_model')
-    # qoa_client.add_metric(metric_conf['resource_monitor'], category='resource_monitor')
-
-
+    # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
 
     # temporary does not monitor and report to assessment service
-    fed_client = FedMarkClient(custom_module = user_custom_module,
+    fed_client = FedMarkClient(custom_module = mcs_custom_module,
                                client_profile=client_conf,
                                x_train=X,
                                y_train=y)

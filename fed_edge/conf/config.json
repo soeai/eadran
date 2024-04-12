@@ -17,7 +17,12 @@
     "owner_id": "dc001",
     "dataset_id": "fraud001",
     "dest_path": "../../data_samples",
-    "method": "local"
+    "method": "local",
+    "reader_conf": {
+        "id": "storage id of module",
+        "module_name": "data_reader",
+        "function_map": "read_data"
+    }
   },
   "modules": {
     "extract_data": {

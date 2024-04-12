@@ -1,9 +1,0 @@
-{
-    "image": "{{ image_repo }}",
-    "options":{
-            "--name": "{{ container_name }}",
-            "-v":"{{ volume }}",
-            "-p": ["5672/tcp:5672"],
-            "-mount":"{{ mount_folder }}"
-            }
-}

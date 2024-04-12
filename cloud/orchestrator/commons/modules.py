@@ -57,10 +57,9 @@ class StartFedServer(Generic):
             response = params
             if params is not None:  # check Param
                 # check service to make sure server is running well
-                url_mgt_service = self.orchestrator.url_mgt_service + "/edgehealth?id=" + self.server_id
+                url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                 server_check = requests.get(url_mgt_service).json()
-                # print(edge_check)
-                if not server_check['status'] == 1:
+                if server_check['status'] == 0:
                     # Message to start RMQ and Federate Server
                     # {
                     #     "server_id": "specific resource id or *",
@@ -107,12 +106,8 @@ class StartFedServer(Generic):
                     try:
                         # asynchronously send
                         self.orchestrator.send(command)
-
-                        # fed_response = ???
-                        # fed_response["IP"] = response.json()
-
-                        # Example response = {"fed_ip":"127.0.0.1", "rmq_ip":"127.0.0.1"}
                         fed_server_ip = server_check['result']['ip']
+
                     except Exception as e:
                         print("[ERROR] - Error {} while send start fed command: {}".format(type(e), e.__traceback__))
                         traceback.print_exception(*sys.exc_info())
@@ -196,99 +191,39 @@ class BuildDocker(Generic):
             sub_thread.start()
 
         response = params
-        docker_response = {}
-        docker_response["image_repo"] = image_repo
         # Add more info here
-
-        response["build_docker"] = docker_response
+        response["build_docker"] = {"image": image_repo}
         return response
 
 
 class ResourceComputing(Generic):
-    # check resource availabe
-    #  "datasets": [{
-    #     "resource_id": "specific computing infrastructure for this training",
-    #   }],
-    # use resource_id -> ComputingResourceMgt (query with parameter ?eid) & ComputingResourceHealth (query with parameter ?eid)
-    # return validation: True/False
-    def __init__(self, config=None):
-        if config is None:
-            config = config_folder + "/resourceComputing.json"
-        self.config = utils.load_config(config)
-        self.resource_manager_url = config["resource_manager_url"]  # ComputingResourceMgt url: REST
-        self.data_service_url = config["data_service_url"]  # Dataset url: REST
-        self.data_flag = False
-        self.resource_flag = False
+    def __init__(self, orchestrator):
+        self.orchestrator = orchestrator
 
-    def isDataReady(self, dataset_id):
+    def is_edge_ready(self, edge_id):
         try:
-            headers = {
-                'Content-Type': 'application/json'
-            }
-            json_mess = {"dataset_id": dataset_id}
-            # Example response = {"result":"True/False"}
-            response = requests.request("POST", self.data_service_url, headers=headers,
-                                        data=json.dumps(json_mess))  # assume that data service is a rest server
-            return bool(response["result"])
-        except Exception as e:
-            print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
-            traceback.print_exception(*sys.exc_info())
-            return False
-
-    def isResourceReady(self, resource_id, resource_config):
-        try:
-            headers = {
-                'Content-Type': 'application/json'
-            }
-            json_mess = {"dataset_id": resource_id}
-            json_mess["config"] = resource_config
-            # Example response = {"result":"True/False"}
-            response = requests.request("POST", self.resource_manager_url, headers=headers, data=json.dumps(
-                json_mess))  # assume that resource management service is a rest server
-            return bool(response["result"])
+            url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + edge_id
+            edge_check = requests.get(url_mgt_service).json()
+            return bool(edge_check['status'])
         except Exception as e:
             print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
             return False
 
     def exec(self, params):
-        # prepare and run command to build docker
-        # subprocess.run()
-
         # report all necessary info for next step
-        if self.isResourceReady(params["resource"]["resource_id"],
-                                params["resource"]["resource_config"]) and self.isDataReady(
-                params["datasets"]["datasets_id"]):  # structure of params need to add resource config
-            resource_response = True
-        else:
-            resource_response = False
+        edge_available = {}
+        for edge_id in params['datasets']:
+            edge_available[edge_id] = self.is_edge_ready(edge_id)
+
         response = params
-        response["resource_response"] = resource_response
+        response["edge_available"] = edge_available
         return response
 
 
 class GenerateConfiguration(Generic):
-    # Generate json file : /messageschemas/config4edge_v0.1.json (multiple files <-> edges/dataset)
-    # "model_id" - fedml_info.model_id
-    # fedml_info.server - StartFedServer result
-    # run_th - missing
-    # monitor_interval - get from ManagementService/configuration service
-    # model_conf - model_conf
-    # pre_train_model - pre_train_model
-    #
-    # data.dataset_id - datasets
-    #  use data.extract_response_id to get information of dataset from Dataservice
-    # /messageschema/data_response_v0.1.json - datasets.download_info -> data
-    #
-    # qoa4ml from StartFederated 
-    # metric from Configuration Service
-    #
-    # Upload configuration files to Storage Service -> return link/path
-    def __init__(self, config=None):
-        if config is not None:
-            self.config = utils.load_config(config)
-        else:
-            self.config = None
+    def __init__(self, orchestrator):
+        self.orchestrator = orchestrator
 
     def get_fed_server_url(self, params):
         # To do
@@ -322,27 +257,18 @@ class GenerateConfiguration(Generic):
         pass
 
     def exec(self, params):
-        # prepare and run command to build docker
-        # subprocess.run()
-
         # report all necessary info for next step
         if params["resource_response"]:  # if dataset and resource ready
             dataset = params["datasets"]
             for data in dataset:
                 jinja_var = {}
                 # init config for RMQ
-                tem_conf = jinja_env.get_template("config4edge_v0.1.json")
+                tem_conf = jinja_env.get_template("config4edge.json")
                 jinja_var["fed_server_url"] = self.get_fed_server_url(params)
                 jinja_var["model_id"] = self.generate_model_id(params)
                 jinja_var["run_th"] = self.get_run_th(params)
                 jinja_var["monitor_interval"] = self.get_monitor_interval(params)
 
-                # rmq_conf = {
-                #     "url": "",
-                #     "exchange_name": "",
-                #     "our_routing": "",
-                #     "queue_name": "" 
-                # }
                 jinja_var["rmq_conf"] = self.get_rmq_config(params)
 
                 configuration = tem_conf.render(jinja_var)

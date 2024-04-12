@@ -8,13 +8,9 @@
         "db_name": "db_edges",
         "db_col": "col_edges"
     },
-    "edge_health_log":{
-        "db_name": "db_edge_health_log",
-        "db_col": "col_edge_health_log"
-    },
-    "server_health_log":{
-        "db_name": "db_server_health_log",
-        "db_col": "col_server_health_log"
+    "health_log":{
+        "db_name": "db_health_log",
+        "db_col": "col_health_log"
     },
     "model_management":{
         "db_name": "db_model_management",

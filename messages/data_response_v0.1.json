@@ -19,14 +19,16 @@
           "completeness": 1
         }
       },
-      "download_info": {
-        "method": "wget|s3|minio|local",
-        "url": "url for download (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
-        "data_name": "file name or object name",
-        "format": "enum[tuple, last] (tuple: features and label are separated as (features, label), last: label is the last column)",
-        "params": {
-          "__comment": "optional parameters for download, depend on methods"
-        }
+      "data": {
+          "method": "wget|s3|minio|file",
+          "url": "url for download data (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
+          "format": "enum[tuple, last] (tuple: features and label are separated as (features, label), last: label is the last column)",
+          "params": "optional object parameters for download, depend on methods",
+          "module_conf": {
+            "url": "url to download module",
+            "module_name": "module to read data",
+            "function_map": "function that is called by marketplace"
+          }
       }
     }
   ]

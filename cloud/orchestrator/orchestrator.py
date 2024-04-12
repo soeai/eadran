@@ -24,7 +24,7 @@ def start_train(params, _orchestrator=None):
     #   "model_id": "",
     #   "datasets": [{
     #     "dataset_id": "uuid of dataset",
-    #     "resource_id": "specific computing infrastructure for this training",
+    #     "edge_id": "specific computing infrastructure for this training",
     #     "extract_response_id": "response id from data service (file data_response_v0.1.json)"
     #   }],
     #   "requirement_libs": [{
@@ -80,7 +80,7 @@ def stop_edge(params):
 
 def request_data(params, request_id, orchestrator_obj=None):
     if orchestrator_obj is not None:
-        url_mgt_service = orchestrator_obj.url_mgt_service + "/edgehealth?id=" + params['edge_id']
+        url_mgt_service = orchestrator_obj.url_mgt_service + "/health?id=" + params['edge_id']
         edge_check = requests.get(url_mgt_service).json()
         # print(edge_check)
         if not edge_check['status'] == 1:

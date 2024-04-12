@@ -2,7 +2,7 @@
   "fedml_info": {
     "server": "{{ fed_server_url}}",
     "model_id": "{{ model_id }}",
-    "run_th": {{ run_th }},
+    "run_th": 1,
     "monitor_interval": 10,
     "model_conf":{
         "module_name": "code for training at edges",
@@ -19,18 +19,19 @@
     },
     "pre_train_model": {
       "url": "link to get pre-train model",
-      "name": "name of model on model management module/service",
       "params": "optional params to download"
     }
   },
   "data": {
-    "dataset_id": "",
-    "method": "wget|s3|minio",
+    "method": "wget|s3|minio|local",
     "url": "url for download (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
-    "data_name": "file name or object name",
     "format": "enum[tuple, last] (tuple: features and label are separated as (features, label), last: label is the last column)",
-    "params": {
-      "__comment":"optional parameters for download, depend on methods"}
+    "params": "optional object parameters for download, depend on methods",
+    "module_conf": {
+      "url": "url to download from storage service",
+      "module_name": "module to read data",
+      "function_map": "function that is called by marketplace"
+    }
   },
   "qoa4ml": {
     "connector": {
@@ -81,7 +82,7 @@
           "description": "Time of Training",
           "default": 0}
       },
-      "resource_monitor": {
+      "edge_monitor": {
         "cpu": {
           "class": "Gauge",
           "description": "CPU usage",
