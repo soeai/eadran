@@ -1,23 +1,15 @@
 #!/bin/bash
-echo "Starting Federated Client with: port=$1 --- epochs=$2"
+echo "Starting Federated Client with: --storage=$1 --requirements=$2 --conf=$3"
 
-#if [ ! -f "$2" ]; then
-#  wget https://github.com/dungcao/fedmarketplace.data/raw/main/fraud_detection/$2 .
-#fi
-#if [ ! -f "$3" ]; then
-#  wget https://github.com/dungcao/fedmarketplace.data/raw/main/fraud_detection/$3 .
-#fi
+#get requirements file from storage
+if [ ! -f "$2" ]; then
+  wget $1/$2
+  pip install -r $2
+fi
 
-wget http://$1/storage/requirements.txt
+#get config file from storage
+if [ ! -f "$3" ]; then
+  wget $1/$3
+fi
 
-pip install -r requirements.txt
-
-wget http://training-code
-
-wget http://read_data_code
-
-wget http://config_file
-
-wget http://pre-train_model
-
-python3 client.py --conf=$1
+python3 client.py --conf=$3

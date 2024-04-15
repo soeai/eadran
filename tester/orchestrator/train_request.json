@@ -4,7 +4,12 @@
   "datasets": [{
     "dataset_id": "ds001",
     "edge_id": "edge001",
-    "data_path": ""
+    "data_path": "",
+    "data_conf": {
+        "storage_ref_id": "",
+        "module_name": "data_reader",
+        "function_map": "read_data"
+    }
   },
     {
     "dataset_id": "ds002",

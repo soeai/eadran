@@ -1,11 +1,13 @@
 { 
-    "consumer_id": "",
-    "dataset_id": "ds000",
+    "consumer_id": "mcs_tester_001",
+    "dataset_id": "ds_001",
     "model_id": "C001_M01_Fraud",
-    "edge_id": "http://...",
+    "edge_id": "edge_001",
     "monitor_interval": 10,
     "fed_server": "[::]:8080",
+    "run_id": 1,
     "model_conf":{
+        "storage_ref_id":"661cce5ed3341cbe6ff0fb3b",
         "module_name": "ml_model",
         "model_var": "model",
         "function_map":{
@@ -16,8 +18,12 @@
         }
     },
     "data_conf": {
-        "url": "",
+        "storage_ref_id": "",
         "module_name": "data_reader",
-        "function_map": "read_data"
+        "function_map": "read_data",
+        "data_path": ""
+    },
+    "pre_train_model": {
+      "storage_ref_id": "link to get pre-train model from storage service"
     }
 }

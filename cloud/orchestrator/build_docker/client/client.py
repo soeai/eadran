@@ -108,18 +108,19 @@ class FedMarkClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
-    parser.add_argument('--server', help='IP:Port of Federated Server', default='127.0.0.1:8080')
-    parser.add_argument('--run', help='n^th of model', default="1")
-    parser.add_argument('--data', help='Data File')
-    parser.add_argument('--client', help='Client config file', default="./conf/client.json")
+    # parser.add_argument('--server', help='IP:Port of Federated Server', default='127.0.0.1:8080')
+    # parser.add_argument('--run', help='n^th of model', default="1")
+    # parser.add_argument('--data', help='Data File')
+    parser.add_argument('--conf', help='Client config file', default="./conf/client_template.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
     args = parser.parse_args()
-    client_conf = qoa_utils.load_config(args.client)
+    client_conf = qoa_utils.load_config(args.conf)
 
     # download code of DPs to read data
-    urlretrieve(client_conf['data_conf']['url'], client_conf['data_conf']['module_name']+".py")
+    urlretrieve(client_conf['data_conf']['storage_ref_id'], client_conf['data_conf']['module_name']+".py")
+    urlretrieve(client_conf['model_conf']['storage_ref_id'], client_conf['data_conf']['module_name'] + ".py")
 
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
@@ -128,13 +129,13 @@ if __name__ == '__main__':
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
                                    client_conf['data_conf']["function_map"])
 
-    X, y = dps_read_data_module(args.data)
+    X, y = dps_read_data_module(client_conf['data_conf']['data_path'])
 
     # Create monitor
     # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
     #                                      "model_id":client_conf['model_id'],
-    #                                      "run_id": run_th,
-    #                                      "dataset_id": data_source_id,
+    #                                      "run_id": client_conf['run_id'],
+    #                                      "dataset_id": client_conf['dataset_id'],
     #                                      "edge_id": client_conf['edge_id'],
     #                                      "train_round": 1},
     #                                      connector_conf=connector_conf)
@@ -142,12 +143,12 @@ if __name__ == '__main__':
     # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
 
     # temporary does not monitor and report to assessment service
-    fed_client = FedMarkClient(custom_module = mcs_custom_module,
+    fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
                                x_train=X,
                                y_train=y)
                                # ,
                                # qoa_monitor=qoa_client,
-                               # monitor_interval=int(interval))
+                               # monitor_interval=int(client_conf['monitor_interval']))
 
     fl.client.start_numpy_client(server_address=args.server, client=fed_client)
