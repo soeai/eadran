@@ -13,7 +13,7 @@ from threading import Thread
 
 import jwt
 import pymongo
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
 from qoa4ml.collector.amqp_collector import Amqp_Collector
@@ -523,9 +523,9 @@ class UserMgt(Resource):
         self.collection = self.db[kwargs["user_management"]["db_col"]]
 
     def get(self):
-        check_login = required_auth()
-        if check_login is not None:
-            return check_login
+        # check_login = required_auth()
+        # if check_login is not None:
+        #     return check_login
 
         req_args = request.query_string.decode("utf-8").split("&")
 
@@ -546,9 +546,9 @@ class UserMgt(Resource):
         return {"status": 0, 'result': response}
 
     def post(self):
-        check_login = required_auth()
-        if check_login is not None:
-            return check_login
+        # check_login = required_auth()
+        # if check_login is not None:
+        #     return check_login
 
         if request.is_json:
             req_args = request.get_json(force=True)
@@ -576,9 +576,9 @@ class UserMgt(Resource):
     #     return jsonify({'status': True})
     #
     def delete(self):
-        check_login = required_auth()
-        if check_login is not None:
-            return check_login
+        # check_login = required_auth()
+        # if check_login is not None:
+        #     return check_login
 
         req_args = request.query_string.decode("utf-8").split("&")
         # get param from args here
@@ -669,4 +669,4 @@ if __name__ == '__main__':
     api.add_resource(Authentication, '/auth', resource_class_kwargs=config)
 
     # run service
-    app.run(debug=True, port=ServiceConfig.MGT_SERVICE_PORT)
+    app.run(host='0.0.0.0', debug=True, port=ServiceConfig.MGT_SERVICE_PORT)
