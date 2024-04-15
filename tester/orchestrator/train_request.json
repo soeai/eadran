@@ -1,6 +1,6 @@
 {
-  "consumer_id": "who request, i.e., the owner",
-  "model_id": "",
+  "consumer_id": "mcs_tester_001",
+  "model_id": "fraud_001",
   "datasets": [{
     "dataset_id": "ds001",
     "edge_id": "edge001",
@@ -22,7 +22,7 @@
   }
   ],
   "model_conf":{
-        "storage_ref_id":"id of code that manages in storage service",
+        "storage_ref_id":"661cce5ed3341cbe6ff0fb3b",
         "module_name": "model_tf",
         "function_map":{
             "train": "fit",
