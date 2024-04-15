@@ -5,7 +5,7 @@ import sys
 
 try:
     # Install required packages
-    subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    # subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
     # Now import the required modules
 
@@ -22,7 +22,7 @@ try:
         subprocess.run(["docker", "rm", container_name])
 
     # Assemble the docker run command
-    docker_run_command = ["docker", "run", "-d", "--name", container_name]
+    docker_run_command = ["sudo", "docker", "run", "-d", "--name", container_name]
     docker_run_command += ["-p"] + binding_ports
     docker_run_command += [image_name]
 

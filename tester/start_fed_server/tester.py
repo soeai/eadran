@@ -48,3 +48,13 @@ with open('request.json') as f:
     req["request_id"] = request_id = str(uuid.uuid4())
     client.send(req)
     print(req)
+
+
+
+
+
+
+
+
+
+    # session_id: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImxvbmciLCJwYXNzd29yZCI6InNkYWRhIiwicm9sZSI6IjEifQ.g0qUNqUVtaQTGgMxokH1rCPl4PnxsH4mHo7M0H8w_7E
