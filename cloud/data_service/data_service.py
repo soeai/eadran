@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, request
+from flask_cors import CORS
 from flask_restful import Resource, Api
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 from cloud.commons.default import ServiceConfig
@@ -11,6 +12,8 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 app = Flask(__name__)
 api = Api(app)
+
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 # mongo_client = None
 # orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
@@ -50,7 +53,7 @@ class DataService(Resource):
         self.queue = queue
 
     def get(self):
-        return jsonify({'status': True})
+        return {'status': 0}
 
     def post(self):
         if request.is_json:
@@ -62,8 +65,8 @@ class DataService(Resource):
                 "command": "request_data",
                 "content": json_msg}
             self.queue.send(orchestrator_command)
-            return jsonify({'status': "starting"})
-        return jsonify({'status': 'request must enclose a json object'}), 400
+            return {'status': 0, "message":"starting"}
+        return {'status': 1, "message": 'request must enclose a json object'}, 400
 
 
 class Queue(object):
@@ -79,9 +82,9 @@ with open("conf/config.json") as f:
 
 queue = Queue(orchestrator_config)
 
-api.add_resource(DataService, '/dataservice',resource_class_args=(queue,))
+api.add_resource(DataService, '/data',resource_class_args=(queue,))
 
 if __name__ == '__main__':
     # init_env_variables()
 
-    app.run(debug=True, port=ServiceConfig.DATA_SERVICE_PORT)
+    app.run(host='0.0.0.0', debug=True, port=ServiceConfig.DATA_SERVICE_PORT)
