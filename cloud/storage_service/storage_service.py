@@ -136,4 +136,4 @@ if __name__ == '__main__':
     api.add_resource(StorageService, '/storage/obj',resource_class_kwargs=config)
     api.add_resource(StorageInfo, '/storage/owner', resource_class_kwargs=config)
 
-    app.run(debug=True, port=ServiceConfig.STORAGE_SERVICE_PORT)
+    app.run(host='0.0.0.0', debug=True, port=ServiceConfig.STORAGE_SERVICE_PORT)
