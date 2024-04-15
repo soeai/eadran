@@ -90,7 +90,8 @@ class StartFedServer(Generic):
                                     "-v": "",
                                     "-p": [f"{self.fed_server_image_port}/tcp:{self.fed_server_image_port}"],
                                     "-mount": ""
-                                }
+                                },
+                                "epochs": params['model_conf']['train_hyper_param']['epochs']
                             },
                             {
                                 "image": self.rabbit_image_name,

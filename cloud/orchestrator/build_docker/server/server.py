@@ -32,14 +32,14 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 # Legacy mode
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Server Federated Learning")
-    parser.add_argument('--config', help='Federated Server ip:port and default data filename if needed',
-                        default="./conf/server_config.json")
+    parser.add_argument('--port', help='federated server port',default="8080")
+    parser.add_argument('--epochs', help='training epochs', default=5)
 
-    args = parser.parse_args()
+    params = parser.parse_args()
 
     # test_file = args.data
-    with open(args.config) as f:
-        params = json.load(f)
+    # with open(args.config) as f:
+    #     params = json.load(f)
 
     # Define strategy
     strategy = fl.server.strategy.FedAvg(

@@ -1,0 +1,41 @@
+{
+  "consumer_id": "who request, i.e., the owner",
+  "model_id": "",
+  "datasets": [{
+    "dataset_id": "ds001",
+    "edge_id": "edge001",
+    "data_path": ""
+  },
+    {
+    "dataset_id": "ds002",
+    "edge_id": "edge002",
+    "data_path": ""
+  }
+  ],
+  "requirement_libs": [{
+    "name": "tensorflow",
+    "version": "2.10"
+  },
+    {
+    "name": "flwr",
+    "version": "1.8"
+  }
+  ],
+  "model_conf":{
+        "storage_ref_id":"id of code that manages in storage service",
+        "module_name": "model_tf",
+        "function_map":{
+            "train": "fit",
+            "evaluate": "evaluate",
+            "set_weights": "set_weights",
+            "get_weights": "get_weights"
+        },
+        "train_hyper_param":{
+            "epochs": 10,
+            "batch_size": 32
+        }
+    },
+  "pre_train_model": {
+      "storage_ref_id": "link to get pre-train model from storage service"
+    }
+}

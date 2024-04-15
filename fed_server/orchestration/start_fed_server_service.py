@@ -116,16 +116,22 @@ class FedServerOrchestrator(object):
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
                 command = ["docker", "run", "-d"]
+                fed_port = None
                 for (k, v) in config["options"].items():
                     if v is not None and len(v) > 0:
                         if k == "-p":
                             for port in v:
                                 command.extend(["-p", port])
+                            fed_port = v[0]
                         elif k != "-d":
                             command.extend([k, v])
                     else:
                         command.append(k)
                 command.append(config["image"])
+                if fed_port is not None:
+                    command.append(fed_port)
+                if 'epochs' in config.keys():
+                    command.append(config['epochs'])
                 res = subprocess.run(command, capture_output=True)
                 self.containers.append(config["options"]["--name"])
                 return res.returncode
