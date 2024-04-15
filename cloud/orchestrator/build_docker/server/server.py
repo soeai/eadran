@@ -32,7 +32,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 # Legacy mode
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Server Federated Learning")
-    parser.add_argument('--port', help='federated server port',default="8080")
+    parser.add_argument('--port', help='federated server port', default="8080")
     parser.add_argument('--epochs', help='training epochs', default=5)
 
     params = parser.parse_args()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     # Start Flower server
     fl.server.start_server(
-        server_address="0.0.0.0:" + str(params['port']),
-        config=fl.server.ServerConfig(num_rounds=params['epochs']),
+        server_address = "0.0.0.0:" + str(params.port),
+        config = fl.server.ServerConfig(num_rounds=params.epochs),
         strategy=strategy
     )
