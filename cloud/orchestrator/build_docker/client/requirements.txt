@@ -3,4 +3,3 @@ psutil
 paho-mqtt==1.6.1
 qoa4ml==0.1.21
 pandas
-tensorflow

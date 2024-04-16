@@ -12,4 +12,4 @@ if [ ! -f "$2" ]; then
   wget $1?id=$2
 fi
 
-python3 client.py
+python client.py
