@@ -116,11 +116,16 @@ if __name__ == '__main__':
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
     args = parser.parse_args()
+
+    print(args.conf)
+
     client_conf = qoa_utils.load_config(args.conf)
 
+    print(client_conf)
+
     # download code of DPs to read data
-    urlretrieve(client_conf['data_conf']['storage_ref_id'], client_conf['data_conf']['module_name']+".py")
-    urlretrieve(client_conf['model_conf']['storage_ref_id'], client_conf['data_conf']['module_name'] + ".py")
+    urlretrieve("http://192.168.10.234:8081/storage/obj?id" + client_conf['data_conf']['storage_ref_id'], client_conf['data_conf']['module_name']+".py")
+    urlretrieve("http://192.168.10.234:8081/storage/obj?id" + client_conf['model_conf']['storage_ref_id'], client_conf['model_conf']['module_name'] + ".py")
 
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
