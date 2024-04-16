@@ -7,7 +7,7 @@
     "fed_server": "[::]:8080",
     "run_id": 1,
     "model_conf":{
-        "storage_ref_id":"661e9271d3341cbe6ff0fb40",
+        "storage_ref_id":"661eb3e6871c7abc5338d707",
         "module_name": "ml_model",
         "model_var": "model",
         "function_map":{
@@ -18,7 +18,7 @@
         }
     },
     "data_conf": {
-        "storage_ref_id": "661e9291d3341cbe6ff0fb41",
+        "storage_ref_id": "661eb394871c7abc5338d706",
         "module_name": "data_reader",
         "function_map": "read_data",
         "data_path": ""
