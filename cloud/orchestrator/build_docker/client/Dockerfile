@@ -4,9 +4,9 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/go/dockerfile-reference/
 
-ARG PYTHON_VERSION=3.10
-FROM python:${PYTHON_VERSION}-slim as base
-
+#ARG PYTHON_VERSION=3.10
+#FROM python:${PYTHON_VERSION}-slim as base
+FROM tensorflow/tensorflow
 # Prevents Python from writing pyc files.
 #ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -37,7 +37,7 @@ COPY . .
 RUN apt update
 RUN apt install -y git wget make build-essential manpages-dev python3-pip
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip setuptools wheel hp5y
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
