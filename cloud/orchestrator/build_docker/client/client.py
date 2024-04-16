@@ -108,28 +108,29 @@ class FedMarkClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
-    # parser.add_argument('--server', help='IP:Port of Federated Server', default='127.0.0.1:8080')
-    # parser.add_argument('--run', help='n^th of model', default="1")
-    # parser.add_argument('--data', help='Data File')
-    parser.add_argument('--conf', help='Client config file', default="./conf/client_template.json")
+    parser.add_argument('--service', help='ip:port of storage service', default='http://127.0.0.1:8081')
+    parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
     args = parser.parse_args()
 
-    print(args.conf)
-
+    # print(args.conf)
+    url_service = args.service + "/storage/obj?id="
     client_conf = qoa_utils.load_config(args.conf)
 
-    print(client_conf)
+    # print(client_conf)
 
     # download code of DPs to read data
-    urlretrieve("http://192.168.10.234:8081/storage/obj?id=" + client_conf['data_conf']['storage_ref_id'], client_conf['data_conf']['module_name']+".py")
-    urlretrieve("http://192.168.10.234:8081/storage/obj?id=" + client_conf['model_conf']['storage_ref_id'], client_conf['model_conf']['module_name'] + ".py")
+    urlretrieve(url_service + client_conf['data_conf']['storage_ref_id'],
+                client_conf['data_conf']['module_name']+".py")
+    urlretrieve(url_service + client_conf['model_conf']['storage_ref_id'],
+                client_conf['model_conf']['module_name'] + ".py")
 
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
 
+    # print("OK-->: " + str(mcs_custom_module))
     # import code of data provider to read data
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
                                    client_conf['data_conf']["function_map"])

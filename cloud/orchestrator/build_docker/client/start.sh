@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Federated Client with: --storage=$1 --requirements=$2 --conf="
+echo "Starting Federated Client with: --service=$1 --conf=$2"
 
 #get requirements file from storage
 #if [ ! -f "$2" ]; then
@@ -9,7 +9,7 @@ echo "Starting Federated Client with: --storage=$1 --requirements=$2 --conf="
 
 #get config file from storage
 if [ ! -f "$2" ]; then
-  wget $1?id=$2
+  wget http://$1/storage/obj?id=$2 -P ./conf/client.json
 fi
 
-python client.py
+python3 client.py --service=$1
