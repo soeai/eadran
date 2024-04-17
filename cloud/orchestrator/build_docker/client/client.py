@@ -108,18 +108,18 @@ class FedMarkClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
-    parser.add_argument('--service', help='ip:port of storage service', default='http://127.0.0.1:8081')
+    parser.add_argument('--service', help='ip:port of storage service', default='127.0.0.1:8081')
     parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
     args = parser.parse_args()
-
+    # print(args.)
     # print(args.conf)
-    url_service = args.service + "/storage/obj?id="
+    url_service = "http://" + args.service + "/storage/obj?id="
     client_conf = qoa_utils.load_config(args.conf)
 
-    # print(client_conf)
+    print(client_conf)
 
     # download code of DPs to read data
     urlretrieve(url_service + client_conf['data_conf']['storage_ref_id'],
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
 
-    # print("OK-->: " + str(mcs_custom_module))
+    print("OK-->: " + str(mcs_custom_module))
     # import code of data provider to read data
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
                                    client_conf['data_conf']["function_map"])
@@ -157,4 +157,4 @@ if __name__ == '__main__':
                                # qoa_monitor=qoa_client,
                                # monitor_interval=int(client_conf['monitor_interval']))
 
-    fl.client.start_numpy_client(server_address=args.server, client=fed_client)
+    fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)

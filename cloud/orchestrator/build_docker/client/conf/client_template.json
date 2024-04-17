@@ -4,10 +4,10 @@
     "model_id": "C001_M01_Fraud",
     "edge_id": "edge_001",
     "monitor_interval": 10,
-    "fed_server": "[::]:8080",
+    "fed_server": "192.168.80.87:8080",
     "run_id": 1,
     "model_conf":{
-        "storage_ref_id":"661eb3e6871c7abc5338d707",
+        "storage_ref_id":"661f9262871c7abc5338d709",
         "module_name": "ml_model",
         "model_var": "model",
         "function_map":{
@@ -21,7 +21,7 @@
         "storage_ref_id": "661eb394871c7abc5338d706",
         "module_name": "data_reader",
         "function_map": "read_data",
-        "data_path": ""
+        "data_path": "/data/fraudTrain_processed_SMOTE_1.csv"
     },
     "pre_train_model": {
       "storage_ref_id": "link to get pre-train model from storage service"

@@ -3,9 +3,9 @@ import tensorflow as tf
 model = None
 
 
-def init(in_shape = 10):
+def init(in_shape=10):
     global model
-    inputs = tf.keras.Input(shape=in_shape)
+    inputs = tf.keras.Input(shape=(in_shape, ))
     x = tf.keras.layers.Dense(128, activation=tf.nn.relu)(inputs)
     x = tf.keras.layers.Dense(256, activation=tf.nn.relu)(x)
     x = tf.keras.layers.Dense(64, activation=tf.nn.relu)(x)

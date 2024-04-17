@@ -1,5 +1,4 @@
 import argparse
-import json
 from typing import List, Tuple, Dict
 import flwr as fl
 from flwr.common import Metrics
@@ -10,7 +9,7 @@ def fit_config(rnd: int) -> Dict:
     return {"fit_round": rnd}
 
 
-def evaluate_config(rnd: int)-> Dict:
+def evaluate_config(rnd: int) -> Dict:
     """Return evaluation configuration dict for each round.
     Perform five local evaluation steps on each client (i.e., use five
     batches) during rounds one to three, then increase to ten local
@@ -49,7 +48,7 @@ if __name__ == "__main__":
 
     # Start Flower server
     fl.server.start_server(
-        server_address = "0.0.0.0:" + str(params.port),
-        config = fl.server.ServerConfig(num_rounds=params.epochs),
+        server_address="0.0.0.0:" + str(params.port),
+        config=fl.server.ServerConfig(num_rounds=params.epochs),
         strategy=strategy
     )

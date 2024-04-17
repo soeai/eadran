@@ -7,8 +7,9 @@
 #ARG PYTHON_VERSION=3.10
 #FROM python:${PYTHON_VERSION}-slim as base
 #FROM tensorflow/serving:latest-devel as build_image
-FROM tensorflow/tensorflow-cpu:latest
+#FROM tensorflow/tensorflow-cpu:latest      image doesnot exist
 #FROM ubuntu:20.04
+FROM tensorflow/tensorflow
 # Prevents Python from writing pyc files.
 #ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -19,6 +20,7 @@ FROM tensorflow/tensorflow-cpu:latest
 #ENV BOOTLOADER_CC=musl-gcc
 
 RUN mkdir -p /app
+RUN mkdir -p /data
 
 WORKDIR /app
 
@@ -35,5 +37,7 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 RUN chmod 755 ./start.sh
 
 # Run the application.
+#ENTRYPOINT ["./start.sh", "http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
 ENTRYPOINT ["./start.sh"]
+
 CMD ["http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
