@@ -36,9 +36,10 @@ class FedMarkClient(fl.client.NumPyClient):
         self.client_profile = client_profile
         self.x_train = x_train
         self.y_train = y_train
+        self.qoa_monitor = qoa_monitor
+
 
         if qoa_monitor is not None:
-            self.qoa_monitor = qoa_monitor
             self.train_performance = 0
             self.train_loss = 0
             self.test_performance = 0
