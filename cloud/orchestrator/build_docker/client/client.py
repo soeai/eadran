@@ -10,6 +10,7 @@ import qoa4ml.qoaUtils as qoa_utils
 # from qoa4ml import QoaClient
 import numpy as np
 
+
 # quality_of_model_conf = {}
 # resource_monitor_conf = {}
 
@@ -37,15 +38,14 @@ class FedMarkClient(fl.client.NumPyClient):
         self.x_train = x_train
         self.y_train = y_train
         self.qoa_monitor = qoa_monitor
-
+        self.train_performance = 0
+        self.train_loss = 0
+        self.test_performance = 0
+        self.test_loss = 0
+        self.monitor_interval = monitor_interval
+        self.total_time = 0
 
         if qoa_monitor is not None:
-            self.train_performance = 0
-            self.train_loss = 0
-            self.test_performance = 0
-            self.test_loss = 0
-            self.monitor_interval = monitor_interval
-            self.total_time = 0
             self.metrics = self.qoa_monitor.get_metric()
 
     def get_parameters(self, config):
@@ -67,7 +67,7 @@ class FedMarkClient(fl.client.NumPyClient):
     def fit(self, parameters, config):  # type: ignore
         if self.qoa_monitor is not None:
             # System monitoring
-            self.qoa_monitor.get()['train_round']=config['fit_round']
+            self.qoa_monitor.get()['train_round'] = config['fit_round']
             qoa_utils.procMonitorFlag = True
             qoa_utils.docker_monitor(self.qoa_monitor, self.monitor_interval, self.metrics)
 
@@ -83,7 +83,6 @@ class FedMarkClient(fl.client.NumPyClient):
         end_time = time.time()
 
         if self.qoa_monitor is not None:
-
             self.total_time += end_time - start_time
 
             # Report metric via QoA4ML
@@ -98,7 +97,7 @@ class FedMarkClient(fl.client.NumPyClient):
 
         return weight, len(self.x_train), {"performance": self.train_performance}
 
-    def evaluate(self, parameters, config): # type: ignore
+    def evaluate(self, parameters, config):  # type: ignore
         start_time = time.time()
         self.model_set_weights(parameters)
         self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
@@ -124,7 +123,7 @@ if __name__ == '__main__':
 
     # download code of DPs to read data
     urlretrieve(url_service + client_conf['data_conf']['storage_ref_id'],
-                client_conf['data_conf']['module_name']+".py")
+                client_conf['data_conf']['module_name'] + ".py")
     urlretrieve(url_service + client_conf['model_conf']['storage_ref_id'],
                 client_conf['model_conf']['module_name'] + ".py")
 
@@ -154,8 +153,8 @@ if __name__ == '__main__':
                                client_profile=client_conf,
                                x_train=X,
                                y_train=y)
-                               # ,
-                               # qoa_monitor=qoa_client,
-                               # monitor_interval=int(client_conf['monitor_interval']))
+    # ,
+    # qoa_monitor=qoa_client,
+    # monitor_interval=int(client_conf['monitor_interval']))
 
     fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
