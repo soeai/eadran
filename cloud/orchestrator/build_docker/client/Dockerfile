@@ -37,7 +37,6 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 RUN chmod 755 ./start.sh
 
 # Run the application.
-#ENTRYPOINT ["./start.sh", "http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
 ENTRYPOINT ["./start.sh"]
 
 CMD ["http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]

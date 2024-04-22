@@ -4,22 +4,24 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/go/dockerfile-reference/
 
-ARG PYTHON_VERSION=3.10
-FROM python:${PYTHON_VERSION}-slim as base
+#ARG PYTHON_VERSION=3.10
+#FROM python:${PYTHON_VERSION}-slim as base
+#
+## Prevents Python from writing pyc files.
+#ENV PYTHONDONTWRITEBYTECODE=1
+#
+## Keeps Python from buffering stdout and stderr to avoid situations where
+## the application crashes without emitting any logs due to buffering.
+#ENV PYTHONUNBUFFERED=1
 
-# Prevents Python from writing pyc files.
-ENV PYTHONDONTWRITEBYTECODE=1
+FROM ubuntu:20.04
 
-# Keeps Python from buffering stdout and stderr to avoid situations where
-# the application crashes without emitting any logs due to buffering.
-ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
+#WORKDIR /app
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN #adduser \
+#ARG UID=10001
+#RUN #adduser \
 #    --disabled-password \
 #    --gecos "" \
 #    --home "/nonexistent" \
@@ -32,18 +34,40 @@ RUN #adduser \
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into
 # into this layer.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,source=requirements.txt,target=requirements.txt \
-    python -m pip install -r requirements.txt
+#RUN #--mount=type=cache,target=/root/.cache/pip \
+#    --mount=type=bind,source=requirements.txt,target=requirements.txt \
+
+RUN mkdir -p /app
+#RUN #mkdir -p /data
+
+WORKDIR /app
+
+# Copy the source code into the container.
+COPY . .
+
+RUN apt update
+
+
+RUN apt install -y git wget make build-essential manpages-dev python3-pip
+
+RUN pip3 install --upgrade pip setuptools wheel
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+RUN chmod 755 ./start.sh
 
 # Switch to the non-privileged user to run the application.
 #USER appuser
 
 # Copy the source code into the container.
-COPY . .
+#COPY . .
 
 # Expose the port that the application listens on.
 #EXPOSE 8080
 
+
 # Run the application.
-CMD ['start.sh']
+ENTRYPOINT ["./start.sh"]
+
+CMD ["8081", "5"]
+
