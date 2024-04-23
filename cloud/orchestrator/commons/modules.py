@@ -60,24 +60,6 @@ class StartFedServer(Generic):
                 url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                 server_check = requests.get(url_mgt_service).json()
                 if server_check['status'] == 0:
-                    # Message to start RMQ and Federate Server
-                    # {
-                    #     "server_id": "specific resource id or *",
-                    #     "command": "docker",
-                    #     "params": "start",
-                    #     "docker":[
-                    #         {
-                    #             "image": "repo:docker_image_rabbitmq",
-                    #             "options":{
-                    #                   "--name": "rabbit_container_01",
-                    #                   "-v":""
-                    #                   "-p": ["5672/tcp":"5672"],
-                    #                   "-mount":"
-                    #                       }
-                    #         }
-                    #     ]
-                    # }
-
                     command = {
                         "server_id": self.server_id,
                         "command": "docker",

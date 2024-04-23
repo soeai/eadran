@@ -1,0 +1,40 @@
+{
+      " consumer_id ": "",
+      " model_id ": "",
+      " datasets ": [ {
+            " dataset_id ": "",
+            " edge_id ": " the tranining edge ",
+            " read_info ": {
+                  " method ": " wget |s3| minio | local ",
+                  " location ": " location of data ",
+                  " format ": " format of file or folder ",
+                  " params ": " optional params to access ",
+                  " module_conf ": {
+                        " storage_ref_id ": " id to download module ",
+                        " module_name ": " source code to read data ",
+                        " function_map ": " data reader function "
+                  }
+            }
+      } ],
+      " requirement_libs ": [ {
+            " name ": " tensorflow ",
+            " version ": "2.10"
+      } ],
+      " model_conf ": {
+            " storage_ref_id ":" id to download ",
+            " module_name ": " source code for training ",
+            " function_map ": {
+                  " train ": " fit ",
+                  " evaluate ": " evaluate ",
+                  " set_weights ": " set_weights ",
+                  " get_weights ": " get_weights "
+            } ,
+            " train_hyper_param ": {
+                  " epochs ": 10,
+                  " batch_size ": 32
+            }
+      } ,
+      " pre_train_model ": {
+            " storage_ref_id ": " id to download pre - train model "
+      }
+}
