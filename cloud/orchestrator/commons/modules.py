@@ -89,41 +89,28 @@ class GenerateConfiguration(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
-    def is_edge_ready(self, edge_id):
-        try:
-            url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + edge_id
-            edge_check = requests.get(url_mgt_service).json()
-            return bool(edge_check['status'])
-        except Exception as e:
-            print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
-            traceback.print_exception(*sys.exc_info())
-            return False
-
     def upload_config(self, config):
         # post to mongo to get id
         pass
 
     def exec(self, params):
-        # report all necessary info for next step
-        edge_available = {}
         for dataset in params['datasets']:
-            edge_id = dataset['edge_id']
             generated_config = {}
-            if self.is_edge_ready(edge_id):
-                generated_config['consumer_id'] = params['consumer_id']
-                generated_config['model_id'] = params['model_id']
-                generated_config['dataset_id'] = dataset['dataset_id']
-                generated_config['edge_id'] = edge_id
-                # generated_config['monitor_interval'] = 10
-                # generated_config['run_id'] = StartFedServer().counter
-                generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-                                                     + str(params['start_fed_resp']['port']))
-                generated_config['read_info'] = dataset['read_info']
-                generated_config['model_config'] = params['model_config']
-                generated_config['requirement_libs'] = params['requirement_libs']
-                generated_config['pre_train_model'] = params['pre_train_model']
-                # UPLOAD GENERATE CONFIG TO STORAGE
-                self.upload_config(generated_config)
+            edge_id = dataset['edge_id']
+            generated_config['consumer_id'] = params['consumer_id']
+            generated_config['model_id'] = params['model_id']
+            generated_config['dataset_id'] = dataset['dataset_id']
+            generated_config['edge_id'] = edge_id
+            # generated_config['monitor_interval'] = 10
+            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+            #                                      + str(params['start_fed_resp']['port']))
+            generated_config['read_info'] = dataset['read_info']
+            generated_config['model_conf'] = params['model_conf']
+            generated_config['requirement_libs'] = params['requirement_libs']
+            generated_config['pre_train_model'] = params['pre_train_model']
+            # UPLOAD GENERATE CONFIG TO STORAGE
+            print(generated_config)
+            # self.upload_config(generated_config)
 
 
 class StartTrainingContainerEdge(Generic):
@@ -133,6 +120,16 @@ class StartTrainingContainerEdge(Generic):
         else:
             self.config = None
         self.orchestrator = orchestrator
+
+    def is_edge_ready(self, edge_id):
+        try:
+            url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + edge_id
+            edge_check = requests.get(url_mgt_service).json()
+            return bool(edge_check['status'])
+        except Exception as e:
+            print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
+            traceback.print_exception(*sys.exc_info())
+            return False
 
     def send_command(self, edge_command):
         self.orchestrator.send(edge_command)

@@ -1,34 +1,74 @@
+
 {
-  "consumer_id": "mcs_tester_001",
-  "model_id": "fraud_001",
-  "datasets": [{
-    "dataset_id": "ds001",
-    "edge_id": "edge001",
-    "data_path": "",
-    "data_conf": {
-        "storage_ref_id": "",
-        "module_name": "data_reader",
-        "function_map": "read_data"
-    }
-  },
-    {
-    "dataset_id": "ds002",
-    "edge_id": "edge002",
-    "data_path": ""
-  }
-  ],
+  "consumer_id": "dongdong",
+  "model_id": "fraud_model",
+  "datasets": [ {
+            "dataset_id": "data01",
+            "edge_id": " the tranining edge ",
+            "read_info": {
+                  "method": " wget |s3| minio | local ",
+                  "location": " location of data ",
+                  "format": " format of file or folder ",
+                  "params": " optional params to access ",
+                  "module_conf": {
+                        "storage_ref_id": " id to download module ",
+                        "module_name": " source code to read data ",
+                        "function_map": " data reader function "
+                  }
+            }
+      },
+  {
+            "dataset_id": "data01",
+            "edge_id": " the tranining edge ",
+            "read_info": {
+                  "method": " wget |s3| minio | local ",
+                  "location": " location of data ",
+                  "format": " format of file or folder ",
+                  "params": " optional params to access ",
+                  "module_conf": {
+                        "storage_ref_id": " id to download module ",
+                        "module_name": " source code to read data ",
+                        "function_map": " data reader function "
+                  }
+            }
+      },
+  {
+            "dataset_id": "data01",
+            "edge_id": " the tranining edge ",
+            "read_info": {
+                  "method": " wget |s3| minio | local ",
+                  "location": " location of data ",
+                  "format": " format of file or folder ",
+                  "params": " optional params to access ",
+                  "module_conf": {
+                        "storage_ref_id": " id to download module ",
+                        "module_name": " source code to read data ",
+                        "function_map": " data reader function "
+                  }
+            }
+      },
+  {
+            "dataset_id": "data01",
+            "edge_id": " the tranining edge ",
+            "read_info": {
+                  "method": " wget |s3| minio | local ",
+                  "location": " location of data ",
+                  "format": " format of file or folder ",
+                  "params": " optional params to access ",
+                  "module_conf": {
+                        "storage_ref_id": " id to download module ",
+                        "module_name": " source code to read data ",
+                        "function_map": " data reader function "
+                  }
+            }
+      }],
   "requirement_libs": [{
-    "name": "tensorflow",
-    "version": "2.10"
-  },
-    {
-    "name": "flwr",
-    "version": "1.8"
-  }
-  ],
+      "name": "tensorflow",
+      "version": "2.10"
+  }],
   "model_conf":{
-        "storage_ref_id":"661cce5ed3341cbe6ff0fb3b",
-        "module_name": "model_tf",
+        "storage_ref_id":"id of code that manages in storage service",
+        "module_name": "code for training at edges, must be attached",
         "function_map":{
             "train": "fit",
             "evaluate": "evaluate",

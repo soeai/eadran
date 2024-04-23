@@ -7,8 +7,8 @@ from qoa4ml.connector.amqp_connector import Amqp_Connector
 import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
-from commons.pipeline import Pipeline
-from commons.modules import GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
+from cloud.orchestrator.commons.pipeline import Pipeline
+from cloud.orchestrator.commons.modules import GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
 import logging
 import requests
 
@@ -101,3 +101,4 @@ if __name__ == '__main__':
 
     orchestrator = Orchestrator(args.conf)
     orchestrator.start()
+
