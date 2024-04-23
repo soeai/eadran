@@ -96,7 +96,7 @@ class GenerateConfiguration(Generic):
         pass
 
     def exec(self, params):
-        storage_id = {}
+        template_id = []
         for dataset in params['datasets']:
             generated_config = {}
             edge_id = dataset['edge_id']
@@ -104,16 +104,21 @@ class GenerateConfiguration(Generic):
             generated_config['model_id'] = params['model_id']
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = edge_id
-            # generated_config['monitor_interval'] = 10
-            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-            #                                      + str(params['start_fed_resp']['port']))
+            generated_config['monitor_interval'] = 10
+            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+                                                 + str(params['start_fed_resp']['port']))
             generated_config['read_info'] = dataset['read_info']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
             # UPLOAD GENERATE CONFIG TO STORAGE
-            print(generated_config)
-            # id_when_sent_config = self.upload_config(generated_config)
+            # print(generated_config)
+            temp_id = self.upload_config(generated_config)
+            template_id.append(template_id)
+        response = params
+        response['template_id'] = template_id
+
+        return response
 
 
 class StartTrainingContainerEdge(Generic):
