@@ -115,7 +115,7 @@ class GenerateConfiguration(Generic):
                 generated_config['dataset_id'] = dataset['dataset_id']
                 generated_config['edge_id'] = edge_id
                 # generated_config['monitor_interval'] = 10
-                # generated_config['run_id'] = StartFedServer.counter
+                # generated_config['run_id'] = StartFedServer().counter
                 generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
                                                      + str(params['start_fed_resp']['port']))
                 generated_config['read_info'] = dataset['read_info']
