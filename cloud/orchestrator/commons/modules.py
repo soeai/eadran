@@ -5,28 +5,10 @@ from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
 
-template_folder = utils.get_parent_dir(__file__, 1) + "/template"
-config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
-temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
-jinja_env = Environment(loader=FileSystemLoader(template_folder))
-
-
-def docker_build(folder_path, image_repo):
-    client = docker.from_env()
-    client.images.build(
-        path=folder_path,
-        dockerfile=folder_path + '/Dockerfile',
-        tag=image_repo,
-    )
-
-
-def make_temp_dir(folder_name):
-    if not os.path.exists(temporary_folder):
-        os.makedirs(temporary_folder)
-    folder_path = os.path.join(temporary_folder, folder_name)
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    return folder_path
+# template_folder = utils.get_parent_dir(__file__, 1) + "/template"
+# config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
+# temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
+# jinja_env = Environment(loader=FileSystemLoader(template_folder))
 
 
 class Generic(ABC):
@@ -47,13 +29,6 @@ class StartFedServer(Generic):
 
     def exec(self, params):
         try:
-            # send message to orchestration_at_federated service to start 2 docker: RMQ & Federated Server
-            # get queue routine, IP, port
-            # optional store in database - configuration service
-
-            # prepare and run command to build docker
-            # subprocess.run()
-            # report all necessary info for next step
             response = params
             if params is not None:  # check Param
                 # check service to make sure server is running well
@@ -109,24 +84,7 @@ class StartFedServer(Generic):
         return response
 
 
-# SHOULD DISTRIBUTE THIS CLASS TO HANDLE MULTIPLE REQUESTS
-def generate_requirements(reqs, folder_path):
-    req_text = ""
-    for req in reqs:
-        req_text = req_text + req["name"] + "==" + req["version"] + "\n"
-    with open(folder_path + "/requirements.txt", "w") as f:
-        f.write(req_text)
-
-
-def fetch_source_code(config, folder_path):
-    # fetch source code from git/url/object storage to folder_path
-    # return True/False
-    # download code/module from config['storage_ref_id']
-    # rename module to config['module_name'] if its name is not correct
-    pass
-
-
-class ResourceComputingGenerateConfiguration(Generic):
+class GenerateConfiguration(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
@@ -163,4 +121,4 @@ class StartTrainingContainerEdge(Generic):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        return pass
+        pass
