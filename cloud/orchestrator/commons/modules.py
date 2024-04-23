@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-
+import requests
+import json
+import os
 import qoa4ml.qoaUtils as utils
 import traceback, sys
 from jinja2 import Environment, FileSystemLoader
@@ -91,14 +93,26 @@ class GenerateConfiguration(Generic):
         self.orchestrator = orchestrator
 
     def upload_config(self, config):
-        # post to mongo to get id
-        uri = self.orchestrator.url_storage_service + '/storage' + '/obj'
-        newHeader = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        json_object = json.dumps(config)
-        response = requests.post(uri,
-                                 data=json_object,
-                                 headers=newHeader)
+
+        # Specify the file path
+        json_file_path = "config.json"
+
+        # Write the config dictionary to the JSON file
+        with open(json_file_path, 'w') as json_file:
+            json.dump(config, json_file)
+
+        uri = "http://192.168.10.234:8081/storage/obj"
+        # It will be set automatically to 'multipart/form-data'
+        files = {'file': (json_file_path, open(json_file_path, 'rb'), 'application/json')}  # Specify the file to upload
+        data = {'user': 'dongdong'}  # Include the user parameter in the request body
+
+        response = requests.post(uri, files=files, data=data)
+
+        # Print the response
         print(response.text)
+
+        # Optionally, you may want to remove the JSON file after uploading
+        os.remove(json_file_path)
 
     def exec(self, params):
         template_id = []
