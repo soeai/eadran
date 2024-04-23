@@ -8,8 +8,7 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
 from commons.pipeline import Pipeline
-from commons.modules import (ResourceComputing, GenerateConfiguration,
-                             StartFedServer, StartTrainingContainerEdge)
+from commons.modules import GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
 import logging
 import requests
 
@@ -20,8 +19,7 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 def start_train(params, _orchestrator=None):
     logging.info("Request content: {}".format(params))
     pipeline = Pipeline(task_list=[StartFedServer(_orchestrator),
-                                   ResourceComputing(),
-                                   GenerateConfiguration(),
+                                   GenerateConfiguration(_orchestrator),
                                    StartTrainingContainerEdge(_orchestrator)],
                         params=params)
     pipeline.exec()
@@ -32,7 +30,7 @@ def start_train(params, _orchestrator=None):
 
 
 def start_edge(params, _orchestrator=None):
-    pipeline = Pipeline([ResourceComputing(), GenerateConfiguration()], params)
+    pipeline = Pipeline([GenerateConfiguration(_orchestrator)], params)
     pipeline.exec()
     # send something to others if needed
     if _orchestrator is not None:

@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
 
+
 # template_folder = utils.get_parent_dir(__file__, 1) + "/template"
 # config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
 # temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
@@ -98,15 +99,31 @@ class GenerateConfiguration(Generic):
             traceback.print_exception(*sys.exc_info())
             return False
 
+    def upload_config(self, config):
+        # post to mongo to get id
+        pass
+
     def exec(self, params):
         # report all necessary info for next step
         edge_available = {}
-        for edge_id in params['datasets']:
-            edge_available[edge_id] = self.is_edge_ready(edge_id)
-
-        response = params
-        response["edge_available"] = edge_available
-        return response
+        for dataset in params['datasets']:
+            edge_id = dataset['edge_id']
+            generated_config = {}
+            if self.is_edge_ready(edge_id):
+                generated_config['consumer_id'] = params['consumer_id']
+                generated_config['model_id'] = params['model_id']
+                generated_config['dataset_id'] = dataset['dataset_id']
+                generated_config['edge_id'] = edge_id
+                # generated_config['monitor_interval'] = 10
+                # generated_config['run_id'] = StartFedServer.counter
+                generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+                                                     + str(params['start_fed_resp']['port']))
+                generated_config['read_info'] = dataset['read_info']
+                generated_config['model_config'] = params['model_config']
+                generated_config['requirement_libs'] = params['requirement_libs']
+                generated_config['pre_train_model'] = params['pre_train_model']
+                # UPLOAD GENERATE CONFIG TO STORAGE
+                self.upload_config(generated_config)
 
 
 class StartTrainingContainerEdge(Generic):
