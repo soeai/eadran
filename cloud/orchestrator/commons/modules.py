@@ -91,9 +91,12 @@ class GenerateConfiguration(Generic):
 
     def upload_config(self, config):
         # post to mongo to get id
+        storage_url = self.orchestrator.url_storage_service
+
         pass
 
     def exec(self, params):
+        storage_id = {}
         for dataset in params['datasets']:
             generated_config = {}
             edge_id = dataset['edge_id']
@@ -109,7 +112,7 @@ class GenerateConfiguration(Generic):
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
             # UPLOAD GENERATE CONFIG TO STORAGE
-            print(generated_config)
+            # print(generated_config)
             # self.upload_config(generated_config)
 
 
