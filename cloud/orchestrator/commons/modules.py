@@ -112,8 +112,8 @@ class GenerateConfiguration(Generic):
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
             # UPLOAD GENERATE CONFIG TO STORAGE
-            # print(generated_config)
-            # self.upload_config(generated_config)
+            print(generated_config)
+            # id_when_sent_config = self.upload_config(generated_config)
 
 
 class StartTrainingContainerEdge(Generic):

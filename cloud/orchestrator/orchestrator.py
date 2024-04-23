@@ -61,8 +61,7 @@ class Orchestrator(object):
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config['url_mgt_service'] + ServiceConfig.MGT_SERVICE_HOST + ":" \
                                + str(ServiceConfig.MGT_SERVICE_PORT)
-        self.url_storage_service = self.config['url_storage_service'] + ServiceConfig.STORAGE_SERVICE_HOST \
-                                   + ":" + str(ServiceConfig.STORAGE_SERVICE_PORT)
+        self.url_storage_service = self.config['url_storage_service']
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
