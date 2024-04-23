@@ -101,7 +101,8 @@ class GenerateConfiguration(Generic):
         with open(json_file_path, 'w') as json_file:
             json.dump(config, json_file)
 
-        uri = "http://192.168.10.234:8081/storage/obj"
+        # uri = "http://192.168.10.234:8081/storage/obj"
+        uri = "{}/{}/{}".format(self.orchestrator.url_storage_service, 'storage', 'obj')
         # It will be set automatically to 'multipart/form-data'
         files = {'file': (json_file_path, open(json_file_path, 'rb'), 'application/json')}  # Specify the file to upload
         data = {'user': 'dongdong'}  # Include the user parameter in the request body
