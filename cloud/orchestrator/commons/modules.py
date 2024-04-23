@@ -1,15 +1,16 @@
 from abc import ABC, abstractmethod
+
 import qoa4ml.qoaUtils as utils
 import traceback, sys
 from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
 
-
 # template_folder = utils.get_parent_dir(__file__, 1) + "/template"
 # config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
 # temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
 # jinja_env = Environment(loader=FileSystemLoader(template_folder))
+
 
 
 class Generic(ABC):
@@ -91,9 +92,13 @@ class GenerateConfiguration(Generic):
 
     def upload_config(self, config):
         # post to mongo to get id
-        storage_url = self.orchestrator.url_storage_service
-
-        pass
+        uri = self.orchestrator.url_storage_service + '/storage' + '/obj'
+        newHeader = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+        json_object = json.dumps(config)
+        response = requests.post(uri,
+                                 data=json_object,
+                                 headers=newHeader)
+        print(response.text)
 
     def exec(self, params):
         template_id = []
