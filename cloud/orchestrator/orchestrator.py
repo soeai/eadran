@@ -18,40 +18,6 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 
 def start_train(params, _orchestrator=None):
-    # ======================= MESSAGE RECEIVE FROM CLIENT
-    # {
-    #   "consumer_id": "who request",
-    #   "model_id": "",
-    #   "datasets": [{
-    #     "dataset_id": "uuid of dataset",
-    #     "edge_id": "specific computing infrastructure for this training",
-    #     "extract_response_id": "response id from data service (file data_response_v0.1.json)"
-    #   }],
-    #   "requirement_libs": [{
-    #     "name": "tensorflow",
-    #     "version": "2.10"
-    #   }],
-    #   "model_conf":{
-    #         "storage_ref_id":"id of code that manages in storage service",
-    #         "module_name": "code for training at edges, must be attached",
-    #         "function_map":{
-    #             "train": "fit",
-    #             "evaluate": "evaluate",
-    #             "set_weights": "set_weights",
-    #             "get_weights": "get_weights"
-    #         },
-    #         "train_hyper_param":{
-    #             "epochs": 10,
-    #             "batch_size": 32
-    #         }
-    #     },
-    #   "pre_train_model": {
-    #       "url": "link to get pre-train model from storage service",
-    #       "name": "name of model on model management module/service",
-    #       "params": "optional params to download"
-    #     }
-    # }
-    # ============== END OF MESSAGE
     logging.info("Request content: {}".format(params))
     pipeline = Pipeline(task_list=[StartFedServer(_orchestrator),
                                    ResourceComputing(),

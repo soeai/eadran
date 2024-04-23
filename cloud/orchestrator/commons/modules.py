@@ -126,7 +126,7 @@ def fetch_source_code(config, folder_path):
     pass
 
 
-class ResourceComputing(Generic):
+class ResourceComputingGenerateConfiguration(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
@@ -151,89 +151,7 @@ class ResourceComputing(Generic):
         return response
 
 
-class GenerateConfiguration(Generic):
-    def __init__(self, orchestrator):
-        self.orchestrator = orchestrator
-
-    def get_fed_server_url(self, params):
-        return params["start_fed_resp"]["ip"] + ":" + str(params["start_fed_resp"]["fed_server_port"])
-
-    def generate_model_id(self, params):
-        return params["model_id"]
-
-    def get_run_th(self, params):
-        # To do
-        pass
-
-    def get_monitor_interval(self, params):
-        # To do
-        pass
-
-    def get_rmq_config(self, params):
-
-        # To do
-        # return rmq_config = {
-        #     "url": "",
-        #     "exchange_name": "",
-        #     "our_routing": "",
-        #     "queue_name": "" 
-        # }
-        pass
-
-    def generate_data_configuration(self, params):
-        # To do
-        pass
-
-    def exec(self, params):
-        # report all necessary info for next step
-        if params["resource_response"]:  # if dataset and resource ready
-            dataset = params["datasets"]
-            for data in dataset:
-                jinja_var = {}
-                # init config for RMQ
-                tem_conf = jinja_env.get_template("config4edge.json")
-                jinja_var["fed_server_url"] = self.get_fed_server_url(params)
-                jinja_var["model_id"] = self.generate_model_id(params)
-                jinja_var["run_th"] = self.get_run_th(params)
-                jinja_var["monitor_interval"] = self.get_monitor_interval(params)
-
-                jinja_var["rmq_conf"] = self.get_rmq_config(params)
-
-                configuration = tem_conf.render(jinja_var)
-                configuration["fedml_info"]["model_conf"] = params["model_conf"]
-                configuration["fedml_info"]["pre_train_model"] = params["pre_train_model"]
-                configuration["data"] = self.generate_data_configuration(params)
-                temp_f_name = "edge_configurations"
-                make_temp_dir(temp_f_name)
-                folder_path = temporary_folder + "/" + temp_f_name
-
-                with open(folder_path + "/configuration" + data["dataset_id"] + ".json",
-                          "w") as f:  # data must have feature name
-                    f.write(configuration)
-
-        response = {}
-        return response
-
-
 class StartTrainingContainerEdge(Generic):
-    # start edge <-> config file
-    # send to orchestration at edge
-    # {
-    #     "edge_id": "specific resource id or *",
-    #     "command": "docker",
-    #     "params": "start",
-    #     "config":[
-    #         {
-    #             "image": "repo:docker_image_ML_client",
-    #             "container_name": "ML_client_container_01",
-    #             "detach": "True",
-    #             "binding_port":{
-    #                 "1111/tcp":"2222",
-    #                 "3333/tcp":"4444"}
-    #         }
-    #     ],
-    #     "conf_path": "configuration path in docker container, optional"
-    # }
     def __init__(self, orchestrator, config=None):
         if config is not None:
             self.config = utils.load_config(config)
@@ -241,46 +159,8 @@ class StartTrainingContainerEdge(Generic):
             self.config = None
         self.orchestrator = orchestrator
 
-    def generate_config(self, params):
-        config = {}
-        # Example config
-        # config = {
-        #     "edge_id": "",
-        #     "image_repo":"",
-        #     "container_name": "",
-        #     "port_mapping" : [{
-        #         "con_port": 4002,
-        #         "phy_port": 4002,
-        #         "port_protocol": "tcp"
-        #     },{
-        #         "con_port": 4003,
-        #         "phy_port": 4003,
-        #         "port_protocol": "tcp"
-        #     }],
-        #     "conf_path": ""
-        # }
-        return config
-
-    def get_edge_resource(self, params):
-        # To do
-        return []
-
     def send_command(self, edge_command):
-        # asynchronously send
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        # prepare and run command to build docker
-        # subprocess.run()
-
-        # report all necessary info for next step
-        temp_conf = jinja_env.get_template("docker_edge.json")
-        edges = self.get_edge_resource(params)  # list of edge resources
-        for edge in edges:
-            config = self.generate_config(params)
-
-            edge_command = temp_conf.render(config)
-            self.send_command(edge_command)
-
-        response = {}
-        return response
+        return pass
