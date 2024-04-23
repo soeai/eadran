@@ -8,8 +8,8 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
 from commons.pipeline import Pipeline
-from commons.modules import BuildDocker, ResourceComputing, GenerateConfiguration, StartFedServer, \
-    StartTrainingContainerEdge
+from commons.modules import (ResourceComputing, GenerateConfiguration,
+                             StartFedServer, StartTrainingContainerEdge)
 import logging
 import requests
 
@@ -54,7 +54,6 @@ def start_train(params, _orchestrator=None):
     # ============== END OF MESSAGE
     logging.info("Request content: {}".format(params))
     pipeline = Pipeline(task_list=[StartFedServer(_orchestrator),
-                                   BuildDocker(),
                                    ResourceComputing(),
                                    GenerateConfiguration(),
                                    StartTrainingContainerEdge(_orchestrator)],

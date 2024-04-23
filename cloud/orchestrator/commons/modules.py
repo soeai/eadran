@@ -126,59 +126,6 @@ def fetch_source_code(config, folder_path):
     pass
 
 
-# class BuildDocker(Generic):
-#     #   "requirement_libs": [{
-#     #     "name": "tensorflow",
-#     #     "version": "2.10"
-#     #   }],
-#     #   "model_conf":{
-#     #         "storage_ref_id":"id of code that manages in storage service"
-#     #     },
-#     # build docker from user config source code + library (from storage service - MinIO)
-#     # push docker
-#     # return docker name:tag:version
-#     def __init__(self, config=None):
-#         if config is not None:
-#             self.config = utils.load_config(config)
-#         else:
-#             self.config = None
-#
-#     def generate_dockerfile(self, folder_path):
-#         # Example:
-#         # docker_config = {
-#         #     "base_image": "python@latest",
-#         #     "work_folder": "workspace",
-#         #     "source_code": folder_path,
-#         #     "ports": [5000,5001],
-#         #     "cmd": "python service.py"
-#         # }
-#         # init config for RMQ
-#         tem_doc = jinja_env.get_template("Dockerfile")
-#         docker_file = tem_doc.render(self.config['docker_config'])
-#         with open(folder_path + "/Dockerfile", "w") as f:
-#             f.write(docker_file)
-#
-#     def exec(self, params):
-#         # prepare and run command to build docker
-#         # report all necessary info for next step
-#         temp_folder = make_temp_dir(params["consumer_id"] + "_folder")
-#         generate_requirements(params["requirement_libs"], temp_folder)
-#
-#         # THERE IS NO DOCKER_CONFIG IN PARAMS
-#         self.generate_dockerfile(params["docker_config"], temp_folder)
-#
-#         image_repo = params["consumer_id"] + "_" + params['model_id']
-#
-#         if fetch_source_code(params["model_conf"], temp_folder):
-#             sub_thread = threading.Thread(target=docker_build, args=(temp_folder, image_repo))
-#             sub_thread.start()
-#
-#         response = params
-#         # Add more info here
-#         response["build_docker"] = {"image": image_repo}
-#         return response
-#
-
 class ResourceComputing(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
@@ -209,12 +156,10 @@ class GenerateConfiguration(Generic):
         self.orchestrator = orchestrator
 
     def get_fed_server_url(self, params):
-        # To do
-        pass
+        return params["start_fed_resp"]["ip"] + ":" + str(params["start_fed_resp"]["fed_server_port"])
 
     def generate_model_id(self, params):
-        # To do
-        pass
+        return params["model_id"]
 
     def get_run_th(self, params):
         # To do
