@@ -6,11 +6,11 @@ from jinja2 import Environment, FileSystemLoader
 import requests, json, os
 import docker, threading
 
+
 # template_folder = utils.get_parent_dir(__file__, 1) + "/template"
 # config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
 # temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
 # jinja_env = Environment(loader=FileSystemLoader(template_folder))
-
 
 
 class Generic(ABC):
@@ -110,18 +110,18 @@ class GenerateConfiguration(Generic):
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = edge_id
             generated_config['monitor_interval'] = 10
-            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-                                                 + str(params['start_fed_resp']['port']))
+            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+            #                                      + str(params['start_fed_resp']['port']))
             generated_config['read_info'] = dataset['read_info']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
             # UPLOAD GENERATE CONFIG TO STORAGE
-            # print(generated_config)
             temp_id = self.upload_config(generated_config)
-            template_id.append(template_id)
+            template_id.append(temp_id)
         response = params
         response['template_id'] = template_id
+        print(response)
 
         return response
 
