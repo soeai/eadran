@@ -4,7 +4,7 @@
   "model_id": "fraud_model",
   "datasets": [ {
             "dataset_id": "data01",
-            "edge_id": " the tranining edge ",
+            "edge_id": " the training edge ",
             "read_info": {
                   "method": " wget |s3| minio | local ",
                   "location": " location of data ",

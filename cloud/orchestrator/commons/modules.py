@@ -1,12 +1,8 @@
 from abc import ABC, abstractmethod
-import requests
-import json
-import os
 import qoa4ml.qoaUtils as utils
 import traceback, sys
-from jinja2 import Environment, FileSystemLoader
-import requests, json, os
-import docker, threading
+import requests, json, os, time
+
 
 
 class Generic(ABC):
@@ -107,7 +103,7 @@ class GenerateConfiguration(Generic):
         return storage_id
 
     def exec(self, params):
-        template_id = []
+        template_id = {}
         for dataset in params['datasets']:
             generated_config = {}
             edge_id = dataset['edge_id']
@@ -116,8 +112,8 @@ class GenerateConfiguration(Generic):
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = edge_id
             generated_config['monitor_interval'] = 10
-            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-                                                 + str(params['start_fed_resp']['port']))
+            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+            #                                      + str(params['start_fed_resp']['port']))
             generated_config['read_info'] = dataset['read_info']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
@@ -125,10 +121,10 @@ class GenerateConfiguration(Generic):
 
             # UPLOAD GENERATED CONFIG TO STORAGE
             temp_id = self.upload_config(generated_config, params['consumer_id'])
-            template_id.append(temp_id)
+            template_id[edge_id] = temp_id
         response = params
         response['template_id'] = template_id
-
+        # print(response)
         return response
 
 
@@ -154,4 +150,20 @@ class StartTrainingContainerEdge(Generic):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        pass
+        templates = params['template_id'].copy()
+        while len(templates) > 0:
+            for edge_id in templates:
+                if self.is_edge_ready(edge_id):
+                    # SEND COMMAND TO START EDGE ---> json
+                    # templates remove edge_id
+                else:
+                    pass
+
+            # WAIT 30MIN FOR EDGE TO BE AVAILABLE
+            time.sleep(30*60)
+
+        print('Done Starting All Edges')
+
+
+
+
