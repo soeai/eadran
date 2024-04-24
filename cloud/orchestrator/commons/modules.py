@@ -9,12 +9,6 @@ import requests, json, os
 import docker, threading
 
 
-# template_folder = utils.get_parent_dir(__file__, 1) + "/template"
-# config_folder = utils.get_parent_dir(__file__, 1) + "/conf"
-# temporary_folder = utils.get_parent_dir(__file__, 1) + "/temp"
-# jinja_env = Environment(loader=FileSystemLoader(template_folder))
-
-
 class Generic(ABC):
     @abstractmethod
     def exec(self, params):
@@ -92,8 +86,7 @@ class GenerateConfiguration(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
-    def upload_config(self, config):
-
+    def upload_config(self, config, username):
         # Specify the file path
         json_file_path = "config.json"
 
@@ -104,14 +97,14 @@ class GenerateConfiguration(Generic):
         # uri = "http://192.168.10.234:8081/storage/obj"
         uri = "{}/{}/{}".format(self.orchestrator.url_storage_service, 'storage', 'obj')
         files = {'file': (json_file_path, open(json_file_path, 'rb'), 'application/json')}
-        data = {'user': 'dongdong'}
+        data = {'user': username}
 
         response = requests.post(uri, files=files, data=data)
 
         storage_id = response.json()['storage_id']
-        print(storage_id)
-
         os.remove(json_file_path)
+
+        return storage_id
 
     def exec(self, params):
         template_id = []
@@ -123,18 +116,18 @@ class GenerateConfiguration(Generic):
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = edge_id
             generated_config['monitor_interval'] = 10
-            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-            #                                      + str(params['start_fed_resp']['port']))
+            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+                                                 + str(params['start_fed_resp']['port']))
             generated_config['read_info'] = dataset['read_info']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
-            # UPLOAD GENERATE CONFIG TO STORAGE
-            temp_id = self.upload_config(generated_config)
+
+            # UPLOAD GENERATED CONFIG TO STORAGE
+            temp_id = self.upload_config(generated_config, params['consumer_id'])
             template_id.append(temp_id)
         response = params
         response['template_id'] = template_id
-        print(response)
 
         return response
 
