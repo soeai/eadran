@@ -4,7 +4,6 @@ import traceback, sys
 import requests, json, os, time
 
 
-
 class Generic(ABC):
     @abstractmethod
     def exec(self, params):
@@ -151,19 +150,16 @@ class StartTrainingContainerEdge(Generic):
 
     def exec(self, params):
         templates = params['template_id'].copy()
-        while len(templates) > 0:
+        while templates:
             for edge_id in templates:
                 if self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
                     # templates remove edge_id
+                    templates.pop(edge_id)
                 else:
                     pass
 
             # WAIT 30MIN FOR EDGE TO BE AVAILABLE
-            time.sleep(30*60)
+            time.sleep(30 * 60)
 
         print('Done Starting All Edges')
-
-
-
-
