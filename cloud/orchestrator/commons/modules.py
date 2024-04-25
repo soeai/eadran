@@ -149,9 +149,10 @@ class StartTrainingContainerEdge(Generic):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        templates = params['template_id'].copy()
+        templates = params['template_id']
+        templates_copy = templates.copy()
         while templates:
-            for edge_id in templates:
+            for edge_id in templates_copy:
                 if self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
                     # templates remove edge_id
