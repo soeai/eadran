@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import qoa4ml.qoaUtils as utils
 import traceback, sys
 import requests, json, os, time
-
+import logging
 
 class Generic(ABC):
     @abstractmethod
@@ -10,7 +10,7 @@ class Generic(ABC):
         pass
 
 
-class StartFedServer(Generic):
+class FedServerContainer(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
         self.server_id = orchestrator.config['server_id']
@@ -29,7 +29,7 @@ class StartFedServer(Generic):
                 server_check = requests.get(url_mgt_service).json()
                 if server_check['status'] == 0:
                     command = {
-                        "server_id": self.server_id,
+                        "edge_id": self.server_id,
                         "command": "docker",
                         "params": "start",
                         "docker": [
@@ -37,24 +37,21 @@ class StartFedServer(Generic):
                                 "image": self.fed_server_image_name,
                                 "options": {
                                     "--name": f"fed_server_container_{params['consumer_id']}",
-                                    "-v": "",
                                     "-p": [f"{self.fed_server_image_port}/tcp:{self.fed_server_image_port}"],
-                                    "-mount": ""
                                 },
-                                "epochs": params['model_conf']['train_hyper_param']['epochs']
+                                "arguments": [params['model_conf']['train_hyper_param']['epochs']]
                             },
                             {
                                 "image": self.rabbit_image_name,
                                 "options": {
                                     "--name": f"rabbit_container_{params['consumer_id']}",
-                                    "-v": "",
                                     "-p": [f"{self.rabbit_image_port}/tcp:{self.rabbit_image_port}"],
-                                    "-mount": ""
                                 }
                             },
                         ]
                     }
                     try:
+                        logging.debug("Sending command to server {}\n{}".format(self.server_id, command))
                         # asynchronously send
                         self.orchestrator.send(command)
                         fed_server_ip = server_check['result']['ip']
@@ -77,13 +74,13 @@ class StartFedServer(Generic):
         return response
 
 
-class GenerateConfiguration(Generic):
+class Config4Edge(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
     def upload_config(self, config, username):
         # Specify the file path
-        json_file_path = "config.json"
+        json_file_path = "{}_config_{}.json".format(username, config['edge_id'])
 
         # Write the config dictionary to the JSON file
         with open(json_file_path, 'w') as json_file:
@@ -102,7 +99,7 @@ class GenerateConfiguration(Generic):
         return storage_id
 
     def exec(self, params):
-        template_id = {}
+        config_id = {}
         for dataset in params['datasets']:
             generated_config = {}
             edge_id = dataset['edge_id']
@@ -111,24 +108,23 @@ class GenerateConfiguration(Generic):
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = edge_id
             generated_config['monitor_interval'] = 10
-            # generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
-            #                                      + str(params['start_fed_resp']['port']))
+            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+                                                 + str(params['start_fed_resp']['port']))
             generated_config['read_info'] = dataset['read_info']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
 
             # UPLOAD GENERATED CONFIG TO STORAGE
-            temp_id = self.upload_config(generated_config, params['consumer_id'])
-            template_id[edge_id] = temp_id
+            config_id[edge_id] = self.upload_config(generated_config, params['consumer_id'])
         response = params
-        response['template_id'] = template_id
+        response['configs'] = config_id
         # print(response)
         return response
 
 
-class StartTrainingContainerEdge(Generic):
-    def __init__(self, orchestrator, config=None):
+class EdgeContainer(Generic):
+    def __init__(self, orchestrator, config='./conf/image4edge.json'):
         if config is not None:
             self.config = utils.load_config(config)
         else:
@@ -149,18 +145,53 @@ class StartTrainingContainerEdge(Generic):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        templates = params['template_id']
-        templates_copy = templates.copy()
-        while templates:
-            for edge_id in templates_copy:
+        configs = params['configs']
+        temps = configs.copy()
+
+        command_template = {
+            "edge_id": "",
+            "command": "docker",
+            "params": "start",
+            "docker": [
+                {
+                    "image": None,
+                    "options": {
+                        "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
+                        "-mount": ""
+                    },
+                    "arguments": []
+                }]
+        }
+
+        while True:
+            for (edge_id, storage_id) in enumerate(configs):
                 if self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
-                    # templates remove edge_id
-                    templates.pop(edge_id)
+                    command = command_template.copy()
+                    command['edge_id'] = edge_id
+
+                    # We now support only CPU tensorflow on Ubuntu for testing
+                    # in next version, we analyse info from edge to get correspondant image
+                    command['docker']['image'] = self.config['image_tensorflow_cpu']
+                    command['docker']['arguments'] = [self.orchestrator.url_storage_service, storage_id]
+
+                    for d in params['datasets']:
+                        # if dataset on edge is local, we mount it into container
+                        if d['edge_id'] == edge_id and d['read_info']['method'] == 'local':
+                            mount = 'type=bind,src={},target={}'.format(d['read_info']['location'],'/data')
+                            command['docker']['options']['-mount'] = mount
+
+                    logging.DEBUG("Sending command to edge {}\n{}".format(edge_id, command))
+                    # send command to edge
+                    self.send_command(command)
+
+                    # remove edge_id
+                    temps.pop(edge_id)
                 else:
                     pass
-
-            # WAIT 30MIN FOR EDGE TO BE AVAILABLE
-            time.sleep(30 * 60)
+            if len(temps) == 0:
+                break
+            # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
+            time.sleep(5 * 60)
 
         print('Done Starting All Edges')

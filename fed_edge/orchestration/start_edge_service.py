@@ -33,7 +33,6 @@ class EdgeOrchestrator(object):
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
-    
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -116,9 +115,10 @@ class EdgeOrchestrator(object):
             #                   "-p": ["5672/tcp:5672"],
             #                   "-mount":""
             #                       }
+            #             "arguments": []
             #         }
 
-            # check container is runing with the same name, stop it
+            # check container is running with the same name, stop it
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
                                  capture_output=True)
             if res.returncode == 0 and str(res.stdout).find(config["options"]["--name"]) >= 0:
@@ -136,6 +136,10 @@ class EdgeOrchestrator(object):
                     else:
                         command.append(k)
                 command.append(config["image"])
+
+                if "arguments" in config.keys():
+                    command.extend(config['arguments'])
+
                 res = subprocess.run(command, capture_output=True)
                 self.containers.append(config["options"]["--name"])
                 return res.returncode

@@ -19,7 +19,7 @@
     "dest_path": "../../data_samples",
     "method": "local",
     "reader_conf": {
-        "id": "storage id of module",
+        "storage_ref_id": "storage id of module",
         "module_name": "data_reader",
         "function_map": "read_data"
     }

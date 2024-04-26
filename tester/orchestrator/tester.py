@@ -1,4 +1,4 @@
-from cloud.orchestrator.commons.modules import StartFedServer, GenerateConfiguration
+from cloud.orchestrator.commons.modules import FedServerContainer, Config4Edge
 from cloud.orchestrator.commons.pipeline import Pipeline
 from cloud.orchestrator.orchestrator import Orchestrator
 import argparse
@@ -22,6 +22,6 @@ with open("train_request.json") as train_request_file:
 orchestrator = Orchestrator("../../cloud/orchestrator/conf/config.json")
 orchestrator.start()
 
-pipeline = Pipeline(task_list=[GenerateConfiguration(orchestrator)],
+pipeline = Pipeline(task_list=[Config4Edge(orchestrator)],
                     params=params)
 pipeline.exec()

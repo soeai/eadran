@@ -104,7 +104,7 @@ class TabularHandle(ABCTabular):
             },
             "data": {
                 "method": method,
-                "url": filename_url,
+                "location": filename_url,
                 "format": "last",
                 "params": "",
                 "module_conf": reader_conf

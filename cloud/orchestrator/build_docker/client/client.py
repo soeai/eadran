@@ -108,7 +108,7 @@ class FedMarkClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
-    parser.add_argument('--service', help='ip:port of storage service', default='127.0.0.1:8081')
+    parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
     parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # print(args.)
     # print(args.conf)
-    url_service = "http://" + args.service + "/storage/obj?id="
+    url_service = args.service + "/storage/obj?id="
     client_conf = qoa_utils.load_config(args.conf)
 
     print(client_conf)

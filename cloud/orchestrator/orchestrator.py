@@ -8,7 +8,7 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import ServiceConfig
 from cloud.orchestrator.commons.pipeline import Pipeline
-from cloud.orchestrator.commons.modules import GenerateConfiguration, StartFedServer, StartTrainingContainerEdge
+from cloud.orchestrator.commons.modules import Config4Edge, FedServerContainer, EdgeContainer
 import logging
 import requests
 
@@ -18,9 +18,9 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 def start_train(params, _orchestrator=None):
     logging.info("Request content: {}".format(params))
-    pipeline = Pipeline(task_list=[StartFedServer(_orchestrator),
-                                   GenerateConfiguration(_orchestrator),
-                                   StartTrainingContainerEdge(_orchestrator)],
+    pipeline = Pipeline(task_list=[FedServerContainer(_orchestrator),
+                                   Config4Edge(_orchestrator),
+                                   EdgeContainer(_orchestrator)],
                         params=params)
     pipeline.exec()
 
@@ -30,7 +30,7 @@ def start_train(params, _orchestrator=None):
 
 
 def start_edge(params, _orchestrator=None):
-    pipeline = Pipeline([GenerateConfiguration(_orchestrator)], params)
+    pipeline = Pipeline([Config4Edge(_orchestrator)], params)
     pipeline.exec()
     # send something to others if needed
     if _orchestrator is not None:

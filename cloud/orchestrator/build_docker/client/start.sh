@@ -9,7 +9,7 @@ echo "Starting Federated Client with: --service=$1 --conf=$2"
 
 #get config file from storage
 if [ ! -f "$2" ]; then
-  wget http://$1/storage/obj?id=$2 -O ./conf/client.json
+  wget $1/storage/obj?id=$2 -O ./conf/client.json
 fi
 
 python3 client.py --service=$1

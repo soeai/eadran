@@ -128,10 +128,13 @@ class FedServerOrchestrator(object):
                     else:
                         command.append(k)
                 command.append(config["image"])
+
                 if fed_port is not None:
                     command.append(fed_port)
-                if 'epochs' in config.keys():
-                    command.append(config['epochs'])
+
+                if 'arguments' in config.keys():
+                    command.extend(config['arguments'])
+
                 res = subprocess.run(command, capture_output=True)
                 self.containers.append(config["options"]["--name"])
                 return res.returncode
