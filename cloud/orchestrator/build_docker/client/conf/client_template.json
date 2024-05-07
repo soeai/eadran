@@ -7,7 +7,7 @@
     "fed_server": "192.168.80.87:8080",
     "run_id": 1,
     "model_conf":{
-        "storage_ref_id":"661f9262871c7abc5338d709",
+        "storage_ref_id":"6639e972871c7abc5338d729",
         "module_name": "ml_model",
         "model_var": "model",
         "function_map":{
@@ -18,7 +18,7 @@
         }
     },
     "data_conf": {
-        "storage_ref_id": "661eb394871c7abc5338d706",
+        "storage_ref_id": "6639e9b2871c7abc5338d72a",
         "module_name": "data_reader",
         "function_map": "read_data",
         "data_path": "/data/fraudTrain_processed_SMOTE_1.csv"
