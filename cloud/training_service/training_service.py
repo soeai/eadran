@@ -26,8 +26,8 @@ logger = CustomLogger().get_logger().setLevel(logging.INFO)
 # orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
 #                   'exchange_name': 'fedmarketplace.com',
 #                   'exchange_type': 'topic',
-#                   'out_routing_key': 'in.config4edge.fedmarketplace.com',
-#                   'out_queue': 'config4edge.queue.in'
+#                   'out_routing_key': 'in.orchestrator.fedmarketplace.com',
+#                   'out_queue': 'orchestrator.queue.in'
 #                 }"""
 # orchestrator_service_port= "8005"
 
@@ -129,7 +129,7 @@ class TrainModel(Resource):
         # ============== END OF MESSAGE
         if request.is_json:
             json_msg = request.get_json(force=True)
-            # send the command to config4edge
+            # send the command to orchestrator
             orchestrator_command = {"command": "train_model",
                                     "params":json_msg}
             self.queue.send(orchestrator_command)
@@ -192,7 +192,7 @@ class Queue(object):
 
 
 with open("conf/config.json") as f:
-    orchestrator_config = json.load(f)['config4edge']
+    orchestrator_config = json.load(f)['orchestrator']
 queue = Queue(orchestrator_config)
 
 api.add_resource(TrainModel, '/trainmodel',resource_class_args=(queue,))

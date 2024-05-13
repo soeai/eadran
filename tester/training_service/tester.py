@@ -59,7 +59,7 @@ class TrainModel(Resource):
         # ============== END OF MESSAGE
         if request.is_json:
             json_msg = request.get_json(force=True)
-            # send the command to config4edge
+            # send the command to orchestrator
             orchestrator_command = {"command": "train_model",
                                     "params":json_msg}
             self.queue.send(orchestrator_command)
@@ -122,7 +122,7 @@ class Queue(object):
 
 
 with open("config.json") as f:
-    orchestrator_config = json.load(f)['config4edge']
+    orchestrator_config = json.load(f)['orchestrator']
 queue = Queue(orchestrator_config)
 
 api.add_resource(TrainModel, '/trainmodel',resource_class_args=(queue,))
