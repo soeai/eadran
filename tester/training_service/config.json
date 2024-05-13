@@ -1,8 +1,0 @@
-{
-  "orchestrator": {
-    "end_point":"192.168.10.235",
-    "exchange_name": "fedmarketplace.com",
-    "exchange_type": "topic",
-    "out_routing_key": "in.orchestrator.fedmarketplace.com",
-    "out_queue": "orchestrator.queue.in"}
-}

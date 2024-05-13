@@ -19,8 +19,8 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 # orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
 #                   'exchange_name': 'fedmarketplace',
 #                   'exchange_type': 'topic',
-#                   'out_routing_key': 'config4edge.dataservice',
-#                   'out_queue': 'config4edge.queue.out'
+#                   'out_routing_key': 'orchestrator.dataservice',
+#                   'out_queue': 'orchestrator.queue.out'
 #                 }"""
 
 # def get_node_name():
@@ -58,7 +58,7 @@ class DataService(Resource):
     def post(self):
         if request.is_json:
             json_msg = request.get_json(force=True)
-            # send the command to config4edge
+            # send the command to orchestrator
             orchestrator_command = {
                 "type":"request",
                 "requester":"dataservice",
@@ -78,7 +78,7 @@ class Queue(object):
 
 
 with open("conf/config.json") as f:
-    orchestrator_config = json.load(f)['config4edge']
+    orchestrator_config = json.load(f)['orchestrator']
 
 queue = Queue(orchestrator_config)
 
