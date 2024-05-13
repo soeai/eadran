@@ -130,8 +130,12 @@ class TrainModel(Resource):
         if request.is_json:
             json_msg = request.get_json(force=True)
             # send the command to orchestrator
-            orchestrator_command = {"command": "train_model",
-                                    "params":json_msg}
+            orchestrator_command = \
+                msg = {"type": "request",
+                       "requester": "trainingservice",
+                       "command": "train_model",
+                       "content": json_msg}
+
             self.queue.send(orchestrator_command)
             return jsonify({'status': "starting"})
         return jsonify({'status': 'request must enclose a json object'}),400
@@ -201,4 +205,4 @@ api.add_resource(StopEdge, '/stopedge',resource_class_args=(queue,))
 
 if __name__ == '__main__': 
     # init_env_variables()
-    app.run(debug=True, port=ServiceConfig.TRAINING_SERVICE_PORT)
+    app.run("0.0.0.0", debug=True, port=ServiceConfig.TRAINING_SERVICE_PORT)
