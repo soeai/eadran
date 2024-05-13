@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orchestrator-service
+  name: config4edge-service
   labels:
-    app: orchestrator-service
+    app: config4edge-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: orchestrator-service
+      app: config4edge-service
   template:
     metadata:
       labels:
-        app: orchestrator-service
+        app: config4edge-service
     spec:
       # nodeSelector:
         # kubernetes.io/hostname: aaltosea-node_name-worker
       containers:
-        - name: orchestrator-service
+        - name: config4edge-service
           image: rdsea/fed_orchestrator_service:1.0
           imagePullPolicy: Always
           ports:

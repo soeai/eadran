@@ -1,0 +1,23 @@
+{
+  "amqp_in": {
+    "end_point":"192.168.10.235",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "in_routing_key": "orchestrator.#",
+    "in_queue": "orchestrator.queue.in"
+  },
+  "amqp_out": {
+    "end_point":"192.168.10.235",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "out_routing_key": "edge",
+    "out_queue": "orchestrator.queue.out"
+  },
+  "url_mgt_service": "http://192.168.10.234:8080",
+  "url_storage_service": "http://192.168.10.234:8081",
+  "server_id": "fedserver001",
+  "fed_server_image_name": "trungdonggg/server",
+  "fed_server_image_port": 8080,
+  "rabbitmq_image_name": "rabbitmq",
+  "rabbitmq_image_port": 5672
+}

@@ -42,7 +42,7 @@ with open('request.json') as f:
     #        }
     # add message header
     msg = {"type":"request",
-           "requester":"orchestrator",
+           "requester":"config4edge",
             "command": "docker",
             "content": req}
     req["request_id"] = request_id = str(uuid.uuid4())

@@ -25,8 +25,8 @@ def start_train(params, _orchestrator=None):
     pipeline.exec()
 
     # send something to others if needed
-    # if orchestrator is not None:
-    #     orchestrator.send("")
+    # if config4edge is not None:
+    #     config4edge.send("")
 
 
 def start_edge(params, _orchestrator=None):
