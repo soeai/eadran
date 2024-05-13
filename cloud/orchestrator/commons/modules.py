@@ -4,6 +4,7 @@ import traceback, sys
 import requests, json, os, time
 import logging
 
+
 class Generic(ABC):
     @abstractmethod
     def exec(self, params):
@@ -101,16 +102,18 @@ class Config4Edge(Generic):
     def exec(self, params):
         config_id = {}
         for dataset in params['datasets']:
+
+            # this is a single template
             generated_config = {}
-            edge_id = dataset['edge_id']
+
             generated_config['consumer_id'] = params['consumer_id']
             generated_config['model_id'] = params['model_id']
             generated_config['dataset_id'] = dataset['dataset_id']
-            generated_config['edge_id'] = edge_id
+            generated_config['edge_id'] = dataset['edge_id']
             generated_config['monitor_interval'] = 10
             generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
                                                  + str(params['start_fed_resp']['port']))
-            generated_config['read_info'] = dataset['read_info']
+            generated_config['data_conf'] = dataset['read_info']['module_conf']
             generated_config['model_conf'] = params['model_conf']
             generated_config['requirement_libs'] = params['requirement_libs']
             generated_config['pre_train_model'] = params['pre_train_model']
@@ -178,7 +181,7 @@ class EdgeContainer(Generic):
                     for d in params['datasets']:
                         # if dataset on edge is local, we mount it into container
                         if d['edge_id'] == edge_id and d['read_info']['method'] == 'local':
-                            mount = 'type=bind,src={},target={}'.format(d['read_info']['location'],'/data')
+                            mount = 'type=bind,src={},target={}'.format(d['read_info']['location'], '/data')
                             command['docker']['options']['-mount'] = mount
 
                     logging.DEBUG("Sending command to edge {}\n{}".format(edge_id, command))

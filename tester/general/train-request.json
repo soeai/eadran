@@ -1,0 +1,61 @@
+{
+  "consumer_id": "dung cao",
+  "model_id": "tensorflow001",
+  "datasets": [
+    {
+      "dataset_id": "fraud001",
+      "edge_id": "edge001",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_1.csv",
+        "format": "",
+        "params": "",
+        "module_conf": {
+          "storage_ref_id": "66417b52627af2fd8903d156",
+          "module_name": "data_reader",
+          "function_map": "read_data",
+          "data_path": "/data/fraudTrain_processed_SMOTE_1.csv"
+        }
+      }
+    },
+    {
+      "dataset_id": "fraud002",
+      "edge_id": "edge002",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_2.csv",
+        "format": "",
+        "params": "",
+        "module_conf": {
+          "storage_ref_id": "66417b52627af2fd8903d156",
+          "module_name": "data_reader",
+          "function_map": "read_data",
+          "data_path": "/data/fraudTrain_processed_SMOTE_2.csv"
+        }
+      }
+    }
+  ],
+  "requirement_libs": [
+    {
+      "name": "tensorflow",
+      "version": "2.10"
+    }
+  ],
+  "model_conf": {
+    "storage_ref_id": "66417bef627af2fd8903d157",
+    "module_name": "model_tf",
+    "function_map": {
+      "train": "fit",
+      "evaluate": "evaluate",
+      "set_weights": "set_weights",
+      "get_weights": "get_weights"
+    },
+    "train_hyper_param": {
+      "epochs": 10,
+      "batch_size": 32
+    }
+  },
+  "pre_train_model": {
+    "storage_ref_id": ""
+  }
+}
