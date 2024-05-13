@@ -244,7 +244,7 @@ class EdgeOrchestrator(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
-    parser.add_argument('--conf', help='config file', default="../conf/config.json")
+    parser.add_argument('--conf', help='config file', default="conf/config.json")
     args = parser.parse_args()
 
     orchestrator = EdgeOrchestrator(args.conf)
