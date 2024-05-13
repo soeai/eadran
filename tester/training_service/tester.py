@@ -5,84 +5,14 @@ import json
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, reqparse
 from cloud.commons.default import ServiceConfig
-from helpers.custom_logger import CustomLogger
+# from helpers.custom_logger import CustomLogger
 import logging
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 # import qoa4ml.utils as utils
 
 app = Flask(__name__)
 api = Api(app)
-logger = CustomLogger().get_logger().setLevel(logging.INFO)
-
-# headers = {'content-type': 'application/json'}
-# metadata_service = "metadata_service"
-# metadata_service_port= "8001"
-# data_service = "data_service"
-# data_service_port= "8002"
-# resource_service = "resource_service"
-# resource_service_port= "8003"
-# storage_service = "storage_service"
-# storage_service_port= "8004"
-# orchestrator_queue = """{'end_point':'amqps://schhmhpp:acDe6WuRj-sP0NtVIs5pE8wkroPnx0w-@armadillo.rmq.cloudamqp.com/schhmhpp',
-#                   'exchange_name': 'fedmarketplace.com',
-#                   'exchange_type': 'topic',
-#                   'out_routing_key': 'in.orchestrator.fedmarketplace.com',
-#                   'out_queue': 'orchestrator.queue.in'
-#                 }"""
-# orchestrator_service_port= "8005"
-
-# def get_node_name():
-#     node_name = os.environ.get('NODE_NAME')
-#     if not node_name:
-#         print("NODE_NAME is not defined")
-#         node_name = "Empty"
-#     return node_name
-#
-# def get_instance_id():
-#     pod_id = os.environ.get('POD_ID')
-#     if not pod_id:
-#         print("POD_ID is not defined")
-#         pod_id = "Empty"
-#     return pod_id
-#
-# def init_env_variables():
-#     metadata_service = os.environ.get('METADATA_SERVICE')
-#     metadata_service_port = os.environ.get("METADATA_SERVICE_PORT")
-#     data_service = os.environ.get('DATA_SERVICE')
-#     data_service_port = os.environ.get("DATA_SERVICE_PORT")
-#     resource_service = os.environ.get('RESOURCE_SERVICE')
-#     resource_service_port = os.environ.get("RESOURCE_SERVICE_PORT")
-#     storage_service = os.environ.get('STORAGE_SERVICE')
-#     storage_service_port = os.environ.get("STORAGE_SERVICE_PORT")
-#     orchestrator_queue = os.environ.get('ORCHESTRATOR_QUEUE_CONFIG')
-#     # orchestrator_service_port = os.environ.get("ORCHESTRATOR_SERVICE_PORT")
-#     if not metadata_service:
-#         logger.error("METADATA_SERVICE is not defined")
-#         raise Exception("METADATA_SERVICE is not defined")
-#     if not metadata_service_port:
-#         logger.error("METADATA_SERVICE_PORT is not defined")
-#         raise Exception("METADATA_SERVICE_PORT is not defined")
-#     if not data_service:
-#         logger.error("DATA_SERVICE is not defined")
-#         raise Exception("DATA_SERVICE is not defined")
-#     if not data_service_port:
-#         logger.error("DATA_SERVICE_PORT is not defined")
-#         raise Exception("DATA_SERVICE_PORT is not defined")
-#     if not resource_service:
-#         logger.error("RESOURCE_SERVICE is not defined")
-#         raise Exception("RESOURCE_SERVICE is not defined")
-#     if not resource_service_port:
-#         logger.error("RESOURCE_SERVICE_PORT is not defined")
-#         raise Exception("RESOURCE_SERVICE_PORT is not defined")
-#     if not storage_service:
-#         logger.error("STORAGE_SERVICE is not defined")
-#         raise Exception("STORAGE_SERVICE is not defined")
-#     if not storage_service_port:
-#         logger.error("STORAGE_SERVICE_PORT is not defined")
-#         raise Exception("STORAGE_SERVICE_PORT is not defined")
-#     if not orchestrator_queue:
-#         logger.error("ORCHESTRATOR_QUEUE_CONFIG is not defined")
-#         raise Exception("ORCHESTRATOR_QUEUE_CONFIG is not defined")
+# logger = CustomLogger().get_logger().setLevel(logging.INFO)
 
 
 class TrainModel(Resource):
@@ -191,7 +121,7 @@ class Queue(object):
         self.amqp_connector.send_data(json.dumps(msg))
 
 
-with open("conf/config.json") as f:
+with open("config.json") as f:
     orchestrator_config = json.load(f)['orchestrator']
 queue = Queue(orchestrator_config)
 
@@ -199,6 +129,6 @@ api.add_resource(TrainModel, '/trainmodel',resource_class_args=(queue,))
 api.add_resource(StartEdge, '/startedge',resource_class_args=(queue,))
 api.add_resource(StopEdge, '/stopedge',resource_class_args=(queue,))
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     # init_env_variables()
     app.run(debug=True, port=ServiceConfig.TRAINING_SERVICE_PORT)
