@@ -1,0 +1,49 @@
+{
+  "edge_id": "edge001",
+  "amqp_in": {
+    "end_point":"192.168.10.235",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "in_routing_key": "edge.edge001",
+    "in_queue": "queue_edge001"
+  },
+  "amqp_out": {
+    "end_point":"192.168.10.235",
+    "exchange_name": "fedmarketplace",
+    "exchange_type": "topic",
+    "out_routing_key": "orchestrator.edge001"
+  },
+  "data":{
+    "owner_id": "dc001",
+    "dataset_id": "fraud001",
+    "dest_path": "../../data_samples",
+    "method": "local",
+    "reader_conf": {
+        "storage_ref_id": "storage id of module",
+        "module_name": "data_reader",
+        "function_map": "read_data"
+    }
+  },
+  "modules": {
+    "extract_data": {
+      "command": "python3",
+      "module_name": "../data_extraction/simple_data_extraction.py",
+      "params": "--request"
+      },
+    "process_data": {
+      "command": "python3",
+      "module_name": "../data_processing/xxx.py",
+      "params": "--request"},
+    "qod_eval": {
+      "command": "python3",
+      "module_name": "../qod_evaluation/xxx.py",
+      "params": "--request"
+    }
+  },
+  "docker": {
+    "conf_path": "",
+    "conf_file": ""
+  },
+  "amqp_health_report": "healthreport.edge001",
+  "report_delay_time": 300
+}
