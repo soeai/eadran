@@ -28,6 +28,7 @@ class FedServerContainer(Generic):
                 # check service to make sure server is running well
                 url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                 server_check = requests.get(url_mgt_service).json()
+                print(server_check)
                 if server_check['status'] == 0:
                     command = {
                         "edge_id": self.server_id,
@@ -119,7 +120,7 @@ class Config4Edge(Generic):
             generated_config['pre_train_model'] = params['pre_train_model']
 
             # UPLOAD GENERATED CONFIG TO STORAGE
-            config_id[edge_id] = self.upload_config(generated_config, params['consumer_id'])
+            config_id[dataset['edge_id']] = self.upload_config(generated_config, params['consumer_id'])
         response = params
         response['configs'] = config_id
         # print(response)

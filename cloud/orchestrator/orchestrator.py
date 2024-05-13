@@ -59,8 +59,7 @@ class Orchestrator(object):
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.thread = Thread(target=self.start_receive)
-        self.url_mgt_service = self.config['url_mgt_service'] + ServiceConfig.MGT_SERVICE_HOST + ":" \
-                               + str(ServiceConfig.MGT_SERVICE_PORT)
+        self.url_mgt_service = self.config['url_mgt_service']
         self.url_storage_service = self.config['url_storage_service']
 
     def message_processing(self, ch, method, props, body):

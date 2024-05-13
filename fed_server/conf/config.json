@@ -1,6 +1,6 @@
 {
   "edge_id": "fedserver001",
-  "ip": "",
+  "ip": "192.168.80.65",
   "amqp_in": {
     "end_point":"192.168.10.235",
     "exchange_name": "fedmarketplace",
