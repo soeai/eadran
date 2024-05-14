@@ -206,10 +206,10 @@ class EdgeMgt(Resource):
 class ComputingResourceHealth(Resource):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        self.db = mongo_client.get_database(kwargs["edge_health_log"]["db_name"]) \
-            if kwargs["edge_health_log"]["db_name"] in mongo_client.list_database_names() \
-            else mongo_client[kwargs["edge_health_log"]["db_name"]]
-        self.collection = self.db[kwargs["edge_health_log"]["db_col"]]
+        self.db = mongo_client.get_database(kwargs["health_log"]["db_name"]) \
+            if kwargs["health_log"]["db_name"] in mongo_client.list_database_names() \
+            else mongo_client[kwargs["health_log"]["db_name"]]
+        self.collection = self.db[kwargs["health_log"]["db_col"]]
 
     def get(self):
         req_args = request.query_string.decode("utf-8").split("&")
