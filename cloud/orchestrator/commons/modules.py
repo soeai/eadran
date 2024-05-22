@@ -140,7 +140,7 @@ class EdgeContainer(Generic):
             url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             edge_check = requests.get(url_mgt_service).json()
             print("Status: ",edge_check['status'])     #test...
-            return bool(edge_check['status'])
+            return not bool(edge_check['status'])
         except Exception as e:
             print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
@@ -174,7 +174,7 @@ class EdgeContainer(Generic):
         while True:
             for edge_id in configs:
                 print('Edge_id: ', edge_id)
-                if not self.is_edge_ready(edge_id):
+                if self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
                     command = command_template.copy()
                     command['edge_id'] = edge_id
@@ -195,7 +195,7 @@ class EdgeContainer(Generic):
                     self.send_command(command)
 
                     # print("Temp:", temps)  # testing purposes
-                    print(command)      #test
+                    print('Command: ', command)      #test
                     # remove edge_id
                     temps.pop(edge_id, None)
 
