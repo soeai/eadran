@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 import qoa4ml.qoaUtils as utils
 import traceback, sys
@@ -32,6 +33,7 @@ class FedServerContainer(Generic):
                 if server_check['status'] == 0:
                     command = {
                         "edge_id": self.server_id,
+                        "request_id": uuid.uuid4(),
                         "command": "docker",
                         "params": "start",
                         "docker": [

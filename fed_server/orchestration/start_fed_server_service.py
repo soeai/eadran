@@ -30,7 +30,7 @@ class FedServerOrchestrator(object):
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.amqp_thread = Thread(target=self.start)
-        # Thread(target=self.health_report).start()
+        Thread(target=self.health_report).start()
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
