@@ -141,7 +141,8 @@ class EdgeContainer(Generic):
         try:
             url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             edge_check = requests.get(url_mgt_service).json()
-            return bool(edge_check['status'])
+            print("Status: ",edge_check['status'])     #test...
+            return not bool(edge_check['status'])
         except Exception as e:
             print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
@@ -155,7 +156,7 @@ class EdgeContainer(Generic):
         # 'configs': {'edge001': '664329d0489dd2fcd9da397b', 'edge004': '664329d0489dd2fcd9da397c'}
         configs = params['configs']
         temps = configs.copy()
-
+        print('config:  ', configs)      #test
         command_template = {
             "edge_id": "",
             "command": "docker",
@@ -173,7 +174,8 @@ class EdgeContainer(Generic):
         print('Check point')    #test...
 
         while True:
-            for edge_id in temps:
+            for edge_id in configs:
+                print('Edge_id: ', edge_id)
                 if self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
                     command = command_template.copy()
@@ -195,12 +197,15 @@ class EdgeContainer(Generic):
                     self.send_command(command)
 
                     # print("Temp:", temps)  # testing purposes
-                    print(command)
+                    print('Command: ', command)      #test
                     # remove edge_id
                     temps.pop(edge_id, None)
+
+                    print('Popped, temps:', temps)   #test
                 # else:
                 #     pass
             if len(temps) == 0:
+                print('Breaking...')
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
             print("Sleeping 5 minutes")
