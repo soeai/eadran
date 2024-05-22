@@ -33,7 +33,7 @@ class FedServerContainer(Generic):
                 if server_check['status'] == 0:
                     command = {
                         "edge_id": self.server_id,
-                        "request_id": uuid.uuid4(),
+                        "request_id": str(uuid.uuid4()),
                         "command": "docker",
                         "params": "start",
                         "docker": [
@@ -56,6 +56,7 @@ class FedServerContainer(Generic):
                     }
                     try:
                         logging.debug("Sending command to server {}\n{}".format(self.server_id, command))
+                        print(command)
                         # asynchronously send
                         self.orchestrator.send(command)
                         fed_server_ip = server_check['result']['ip']
@@ -142,7 +143,7 @@ class EdgeContainer(Generic):
             url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             edge_check = requests.get(url_mgt_service).json()
             print("Status: ",edge_check['status'])     #test...
-            return not bool(edge_check['status'])
+            return bool(edge_check['status'])
         except Exception as e:
             print("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
@@ -176,7 +177,7 @@ class EdgeContainer(Generic):
         while True:
             for edge_id in configs:
                 print('Edge_id: ', edge_id)
-                if self.is_edge_ready(edge_id):
+                if not self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
                     command = command_template.copy()
                     command['edge_id'] = edge_id
