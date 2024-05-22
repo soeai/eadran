@@ -22,10 +22,9 @@ try:
         subprocess.run(["docker", "rm", container_name])
 
     # Assemble the docker run command
-    docker_run_command = ["sudo", "docker", "run", "-d", "--name", container_name]
+    docker_run_command = ["docker", "run", "-d", "--name", container_name]
     docker_run_command += ["-p"] + binding_ports
     docker_run_command += [image_name]
-
     res = subprocess.run(docker_run_command, capture_output=True)
     print(res)
 except Exception as e:

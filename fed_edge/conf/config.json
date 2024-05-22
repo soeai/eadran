@@ -4,7 +4,7 @@
     "end_point":"192.168.10.235",
     "exchange_name": "fedmarketplace",
     "exchange_type": "topic",
-    "in_routing_key": "edge.edge003",
+    "in_routing_key": "edge.#",
     "in_queue": "queue_edge003"
   },
   "amqp_out": {
@@ -44,6 +44,6 @@
     "conf_path": "",
     "conf_file": ""
   },
-  "amqp_health_report": "healthreport.edge001",
+  "amqp_health_report": "healthreport.edge003",
   "report_delay_time": 300
 }
