@@ -160,6 +160,7 @@ class EdgeContainer(Generic):
         print('config:  ', configs)      #test
         command_template = {
             "edge_id": "",
+            "request_id": str(uuid.uuid4()),
             "command": "docker",
             "params": "start",
             "docker": [
