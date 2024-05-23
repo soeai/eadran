@@ -119,30 +119,38 @@ class EdgeOrchestrator(object):
             #         }
 
             # check container is running with the same name, stop it
+
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
                                  capture_output=True)
-            if res.returncode == 0 and str(res.stdout).find(config["options"]["--name"]) >= 0:
+            print('check point...')
+            if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
+                print('joined to condition...')
                 subprocess.run(["docker", "stop", config["options"]["--name"]])
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
-                command = ["docker", "run", "-d"]
-                for (k, v) in config["options"].items():
-                    if v is not None and len(v) > 0:
-                        if k == "-p":
-                            for port in v:
-                                command.extend(["-p", port])
-                        elif k != "-d":
-                            command.extend([k, v])
-                    else:
-                        command.append(k)
-                command.append(config["image"])
+            command = ["docker", "run", "-d"]
+            fed_port = None
+            for (k, v) in config["options"].items():
+                if v is not None and len(v) > 0:
+                    if k == "-p":
+                        for port in v:
+                            command.extend(["-p", port])
+                        fed_port = v[0]
+                    elif k != "-d":
+                        command.extend([k, v])
+                else:
+                    command.append(k)
+            command.append(config["image"])
 
-                if "arguments" in config.keys():
-                    command.extend(config['arguments'])
+            # if fed_port is not None:
+            #     command.append(fed_port)
 
-                res = subprocess.run(command, capture_output=True)
-                self.containers.append(config["options"]["--name"])
-                return res.returncode
+            if 'arguments' in config.keys():
+                command.append(str(config['arguments'][0]))
+            res = subprocess.run(command, capture_output=True)
+            print(res)
+            self.containers.append(config["options"]["--name"])
+            return res.returncode
             # self.containers[config["container_name"]] = self.docker_client.containers.run(image=config["image"],
             #                                                                               detach=bool(config["detach"]),
             #                                                                               name=config["container_name"],
@@ -248,4 +256,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     orchestrator = EdgeOrchestrator(args.conf)
+    # orchestrator.start_container({'image': 'rabbitmq', 'options': {'--name': 'rabbit_container_dungcao', '-p': ['5672:5672']}})
     orchestrator.start_amqp()
