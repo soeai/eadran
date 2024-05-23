@@ -42,23 +42,15 @@ class EdgeOrchestrator(object):
             response = None
             if req_msg['command'].lower() == 'docker':
                 if req_msg['command'].lower() == 'docker':
-                    # {
-                    #     "edge_id": "specific resource id or *",
-                    #     "command": "docker",
-                    #     "params": "start",
-                    #     "docker":[
-                    #         {
-                    #             "image": "repo:docker_image_rabbitmq",
-                    #             "options":{
-                    #                   "--name": "rabbit_container_01",
-                    #                   "-v":""
-                    #                   "-p": ["5672/tcp":"5672"],
-                    #                   "-mount":"
-                    #                       }
-                    #         }
-                    #     ]
-                    # }
-                    # self.docker_client = docker.from_env()
+
+
+        # {'edge_id': 'edge001', 'command': 'docker', 'params': 'start', 'docker': [
+        #     {'image': 'trungdonggg/edge:latest',
+        #      'options': {'--name': 'fed_worker_container_dungcao_tensorflow001',
+        #                  '-mount': 'type=bind,src=/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_1.csv,target=/data'},
+        #      'arguments': ['http://192.168.10.234:8081', '664c66d62f5b6370d9e1e716']}]}
+
+
                     if req_msg['params'].lower() == 'start':
                         status = 1
                         for config in req_msg["docker"]:
@@ -107,16 +99,11 @@ class EdgeOrchestrator(object):
 
     def start_container(self, config):
         try:
-            # {
-            #             "image": "repo:docker_image_rabbitmq",
-            #             "options":{
-            #                   "--name": "rabbit_container_01",
-            #                   "-v":"",
-            #                   "-p": ["5672/tcp:5672"],
-            #                   "-mount":""
-            #                       }
-            #             "arguments": []
-            #         }
+
+     # {'image': 'trungdonggg/edge:latest',
+     #      'options': {'--name': 'fed_worker_container_dungcao_tensorflow001',
+     #                  '-mount': 'type=bind,src=/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_1.csv,target=/data'},
+     #      'arguments': ['http://192.168.10.234:8081', '664c66d62f5b6370d9e1e716']}
 
             # check container is running with the same name, stop it
 

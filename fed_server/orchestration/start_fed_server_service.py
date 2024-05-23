@@ -39,23 +39,7 @@ class FedServerOrchestrator(object):
             logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
             response = None
             if req_msg['command'].lower() == 'docker':
-                # {
-                #     "server_id": "specific resource id or *",
-                #     "command": "docker",
-                #     "params": "start",
-                #     "docker":[
-                #         {
-                #             "image": "repo:docker_image_rabbitmq",
-                #             "options":{
-                #                   "--name": "rabbit_container_01",
-                #                   "-v":""
-                #                   "-p": ["5672/tcp":"5672"],
-                #                   "-mount":"
-                #                       }
-                #         }
-                #     ]
-                # }
-                # self.docker_client = docker.from_env()
+
                 if req_msg['params'].lower() == 'start':
                     status = 1
                     for config in req_msg["docker"]:
@@ -64,12 +48,7 @@ class FedServerOrchestrator(object):
                         "edge_id": self.edge_id,
                         "status": status
                     }
-                # {
-                #     "edge_id": "specific resource id or *",
-                #     "command": "docker",
-                #     "params": "stop",
-                #     "containers": ["rabbit_container_01", "fedserver_container_01"]
-                # }
+
                 elif req_msg['params'].lower() == 'stop':
                     for container in req_msg["containers"]:
                         self.stop_container(container)
@@ -77,10 +56,7 @@ class FedServerOrchestrator(object):
                         "edge_id": self.edge_id,
                         "status": "success"
                     }
-            # elif req_msg['command'].lower() == 'data_extract':
-            #     response = self.extract_data(req_msg)
 
-            # send response back to server
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
                 # add header of message before responding
@@ -98,15 +74,6 @@ class FedServerOrchestrator(object):
 
     def start_container(self, config):
         try:
-            # {
-            #             "image": "repo:docker_image_rabbitmq",
-            #             "options":{
-            #                   "--name": "rabbit_container_01",
-            #                   "-v":"",
-            #                   "-p": ["5672/tcp:5672"],
-            #                   "-mount":""
-            #                       }
-            #         }
 
             # check container is running with the same name, stop it
 

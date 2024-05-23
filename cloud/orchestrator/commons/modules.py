@@ -41,15 +41,15 @@ class FedServerContainer(Generic):
                                 "image": self.fed_server_image_name,
                                 "options": {
                                     "--name": f"fed_server_container_{params['consumer_id']}",
-                                    "-p": [f"{self.fed_server_image_port}/tcp:{self.fed_server_image_port}"],
+                                    "-p": [f"{self.fed_server_image_port}:{self.fed_server_image_port}"],
                                 },
-                                "arguments": [params['model_conf']['train_hyper_param']['epochs']]
+                                "arguments": [str(self.fed_server_image_port), str(params['model_conf']['train_hyper_param']['epochs'])]
                             },
                             {
                                 "image": self.rabbit_image_name,
                                 "options": {
                                     "--name": f"rabbit_container_{params['consumer_id']}",
-                                    "-p": [f"{self.rabbit_image_port}/tcp:{self.rabbit_image_port}"],
+                                    "-p": [f"{self.rabbit_image_port}:{self.rabbit_image_port}"],
                                 }
                             },
                         ]
@@ -115,7 +115,7 @@ class Config4Edge(Generic):
             generated_config['dataset_id'] = dataset['dataset_id']
             generated_config['edge_id'] = dataset['edge_id']
             generated_config['monitor_interval'] = 10
-            generated_config['fed_server_id'] = (params['start_fed_resp']['ip'] + ':'
+            generated_config['fed_server'] = (params['start_fed_resp']['ip'] + ':'
                                                  + str(params['start_fed_resp']['fed_server_port']))
             generated_config['data_conf'] = dataset['read_info']['module_conf']
             generated_config['model_conf'] = params['model_conf']
@@ -168,7 +168,7 @@ class EdgeContainer(Generic):
                     "image": None,
                     "options": {
                         "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
-                        "-mount": ""
+                        "--mount": ""
                     },
                     "arguments": []
                 }]
@@ -191,8 +191,8 @@ class EdgeContainer(Generic):
                     for d in params['datasets']:
                         # if dataset on edge is local, we mount it into container
                         if d['edge_id'] == edge_id and d['read_info']['method'] == 'local':
-                            mount = 'type=bind,src={},target={}'.format(d['read_info']['location'], '/data')
-                            command['docker'][0]['options']['-mount'] = mount
+                            mount = 'type=bind,source={},target={}'.format(d['read_info']['location'], '/data/')
+                            command['docker'][0]['options']['--mount'] = mount
 
                     # logging.DEBUG(f"Sending command to edge {str(edge_id)}\n{command}")
                     # send command to edge
