@@ -133,7 +133,7 @@ class EdgeOrchestrator(object):
             #     command.append(fed_port)
 
             if 'arguments' in config.keys():
-                command.append(str(config['arguments'][0]))
+                command.extend(config['arguments'])
             res = subprocess.run(command, capture_output=True)
             print(res)
             self.containers.append(config["options"]["--name"])
