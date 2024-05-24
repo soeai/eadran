@@ -26,7 +26,6 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 class EdgeOrchestrator(object):
     def __init__(self, config, ):
         self.config = utils.load_config(config)
-        # self.docker_client = None
         self.edge_id = self.config['edge_id']
         self.containers = []
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
@@ -42,35 +41,23 @@ class EdgeOrchestrator(object):
             response = None
             if req_msg['command'].lower() == 'docker':
                 if req_msg['command'].lower() == 'docker':
-
-
-        # {'edge_id': 'edge001', 'command': 'docker', 'params': 'start', 'docker': [
-        #     {'image': 'trungdonggg/edge:latest',
-        #      'options': {'--name': 'fed_worker_container_dungcao_tensorflow001',
-        #                  '-mount': 'type=bind,src=/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_1.csv,target=/data'},
-        #      'arguments': ['http://192.168.10.234:8081', '664c66d62f5b6370d9e1e716']}]}
-
-
                     if req_msg['params'].lower() == 'start':
-                        status = 1
+                        status = []
                         for config in req_msg["docker"]:
-                            status = self.start_container(config)
+                            status.append(self.start_container(config))
                         response = {
                             "edge_id": self.edge_id,
-                            "status": status
+                            "status": int(sum(status)),
+                            "detail": status
                         }
-                # {
-                #     "edge_id": "specific resource id or *",
-                #     "command": "docker",
-                #     "params": "stop",
-                #     "containers": ["rabbit_container_01", "fedserver_container_01"]
-                # }
                 elif req_msg['params'].lower() == 'stop':
+                    status = []
                     for container in req_msg["containers"]:
                         self.stop_container(container)
                     response = {
                         "edge_id": self.edge_id,
-                        "status": "success"
+                        "status": int(sum(status)),
+                        "detail": status
                     }
             elif req_msg['command'].lower() == 'extract_data':
                 response = self.extract_data(req_msg)
@@ -99,67 +86,57 @@ class EdgeOrchestrator(object):
 
     def start_container(self, config):
         try:
-
-     # {'image': 'trungdonggg/edge:latest',
-     #      'options': {'--name': 'fed_worker_container_dungcao_tensorflow001',
-     #                  '-mount': 'type=bind,src=/home/labsoe/Downloads/Fraud_Date/fraudTrain_processed_SMOTE_1.csv,target=/data'},
-     #      'arguments': ['http://192.168.10.234:8081', '664c66d62f5b6370d9e1e716']}
-
             # check container is running with the same name, stop it
-
+            logging.info('Checking if a running container with the same name exists ...')
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
                                  capture_output=True)
-            print('check point...')
+
             if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
-                print('joined to condition...')
+                logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", config["options"]["--name"]])
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
-            command = ["docker", "run", "-d"]
-            fed_port = None
+            logging.info("Starting a new container...")
+            command = ["docker", "run", "-d", "--rm"]
             for (k, v) in config["options"].items():
                 if v is not None and len(v) > 0:
                     if k == "-p":
                         for port in v:
                             command.extend(["-p", port])
-                        fed_port = v[0]
                     elif k != "-d":
                         command.extend([k, v])
                 else:
                     command.append(k)
             command.append(config["image"])
 
-            # if fed_port is not None:
-            #     command.append(fed_port)
-
             if 'arguments' in config.keys():
                 command.extend(config['arguments'])
+
             res = subprocess.run(command, capture_output=True)
-            print(res)
+            logging.info("Start container result: {}".format(res))
+
             self.containers.append(config["options"]["--name"])
             return res.returncode
-            # self.containers[config["container_name"]] = self.docker_client.containers.run(image=config["image"],
-            #                                                                               detach=bool(config["detach"]),
-            #                                                                               name=config["container_name"],
-            #                                                                               ports=config["binding_port"])
+
         except Exception as e:
-            print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
+            logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
         return 1
 
     def stop_container(self, container_name):
         try:
             # if container_name in self.containers:
+            logging.info('Checking if the container [{}] is running ...'.format(container_name))
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + container_name],
                                  capture_output=True)
             if res.returncode == 0 and str(res.stdout).find(container_name) >= 0:
+                logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", container_name])
                 subprocess.run(["docker", "remove", container_name])
-
-            # self.containers[container_name].stop()
-            self.containers.pop(container_name, None)
+                self.containers.pop(container_name, None)
+                logging.info("The container [{}] has been stopped...".format(container_name))
         except Exception as e:
-            print("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
+            logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
             return 1
         return 0
@@ -176,7 +153,7 @@ class EdgeOrchestrator(object):
         module_name = self.config['modules']['extract_data']['module_name']
         params = self.config['modules']['extract_data']['params']
         rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-        print(rep_msg.stdout)
+        logging.info(rep_msg.stdout)
         response = json.loads(rep_msg.stdout)
         # cleanup
         os.remove(fname)
@@ -224,15 +201,15 @@ class EdgeOrchestrator(object):
                 docker_res = {}
 
             health_post = {
-                    "edge_id": self.edge_id,
-                    "routing_key": self.config['amqp_in']['in_routing_key'],
-                    "health": {
-                        "mem": psutil.virtual_memory()[1],
-                        "cpu": psutil.cpu_count(),
-                        "gpu": -1  # code to get GPU device here
-                    },
-                    "docker_available": docker_res  # code to check docker available or not
-                }
+                "edge_id": self.edge_id,
+                "routing_key": self.config['amqp_in']['in_routing_key'],
+                "health": {
+                    "mem": psutil.virtual_memory()[1],
+                    "cpu": psutil.cpu_count(),
+                    "gpu": -1  # code to get GPU device here
+                },
+                "docker_available": docker_res  # code to check docker available or not
+            }
             self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
 
