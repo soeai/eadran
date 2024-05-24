@@ -62,11 +62,11 @@ class EdgeOrchestrator(object):
             elif req_msg['command'].lower() == 'extract_data':
                 response = self.extract_data(req_msg)
 
-            elif req_msg['command'].lower() == 'process_data':
-                response = self.data_processing(req_msg)
-
-            elif req_msg['command'].lower() == 'eval_qod':
-                response = self.qod_eval(req_msg)
+            # elif req_msg['command'].lower() == 'process_data':
+            #     response = self.data_processing(req_msg)
+            #
+            # elif req_msg['command'].lower() == 'eval_qod':
+            #     response = self.qod_eval(req_msg)
 
             # send response back to server
             if response is not None:
@@ -141,63 +141,65 @@ class EdgeOrchestrator(object):
             return 1
         return 0
 
+    # this module is implemented by DP and install on edge
     def extract_data(self, req_msg):
         if not os.path.isdir("temp"):
             os.mkdir('temp')
-        fname = "temp/request_{}.json".format(uuid.uuid4())
-        with open(fname, 'w') as f:
+        filename = "temp/request_{}.json".format(uuid.uuid4())
+        with open(filename, 'w') as f:
             # save data request to file
             json.dump(req_msg['data_request'], f)
             # execute data extraction module
         command = self.config['modules']['extract_data']['command']
         module_name = self.config['modules']['extract_data']['module_name']
         params = self.config['modules']['extract_data']['params']
-        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
+        rep_msg = subprocess.run([command, module_name, params, filename], capture_output=True)
         logging.info(rep_msg.stdout)
         response = json.loads(rep_msg.stdout)
         # cleanup
-        os.remove(fname)
+        os.remove(filename)
         return response
 
-    def qod_eval(self, req_msg):
-        if not os.path.isdir("temp"):
-            os.mkdir('temp')
-        fname = "temp/request_{}.json".format(uuid.uuid4())
-        with open(fname, 'w') as f:
-            # save data request to file
-            json.dump(req_msg['data_request'], f)
-            # execute data extraction module
-        command = self.config['modules']['qod_eval']['command']
-        module_name = self.config['modules']['qod_eval']['module_name']
-        params = self.config['modules']['qod_eval']['params']
-        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-        response = json.loads(rep_msg.stdout)
-        # cleanup
-        os.remove(fname)
-        return response
-
-    def data_processing(self, req_msg):
-        if not os.path.isdir("temp"):
-            os.mkdir('temp')
-        fname = "temp/request_{}.json".format(uuid.uuid4())
-        with open(fname, 'w') as f:
-            # save data request to file
-            json.dump(req_msg['data_request'], f)
-            # execute data extraction module
-        command = self.config['modules']['process_data']['command']
-        module_name = self.config['modules']['process_data']['module_name']
-        params = self.config['modules']['process_data']['params']
-        rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-        response = json.loads(rep_msg.stdout)
-        # cleanup
-        os.remove(fname)
-        return response
+    # def qod_eval(self, req_msg):
+    #     if not os.path.isdir("temp"):
+    #         os.mkdir('temp')
+    #     fname = "temp/request_{}.json".format(uuid.uuid4())
+    #     with open(fname, 'w') as f:
+    #         # save data request to file
+    #         json.dump(req_msg['data_request'], f)
+    #         # execute data extraction module
+    #     command = self.config['modules']['qod_eval']['command']
+    #     module_name = self.config['modules']['qod_eval']['module_name']
+    #     params = self.config['modules']['qod_eval']['params']
+    #     rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
+    #     response = json.loads(rep_msg.stdout)
+    #     # cleanup
+    #     os.remove(fname)
+    #     return response
+    #
+    # def data_processing(self, req_msg):
+    #     if not os.path.isdir("temp"):
+    #         os.mkdir('temp')
+    #     fname = "temp/request_{}.json".format(uuid.uuid4())
+    #     with open(fname, 'w') as f:
+    #         # save data request to file
+    #         json.dump(req_msg['data_request'], f)
+    #         # execute data extraction module
+    #     command = self.config['modules']['process_data']['command']
+    #     module_name = self.config['modules']['process_data']['module_name']
+    #     params = self.config['modules']['process_data']['params']
+    #     rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
+    #     response = json.loads(rep_msg.stdout)
+    #     # cleanup
+    #     os.remove(fname)
+    #     return response
 
     def health_report(self):
         while True:
             try:
                 docker_res = docker.from_env().version()
             except:
+                logging.warning("Docker is not installed. Thus service cannot serve fully function!")
                 docker_res = {}
 
             health_post = {
@@ -220,5 +222,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     orchestrator = EdgeOrchestrator(args.conf)
-    # orchestrator.start_container({'image': 'rabbitmq', 'options': {'--name': 'rabbit_container_dungcao', '-p': ['5672:5672']}})
     orchestrator.start_amqp()

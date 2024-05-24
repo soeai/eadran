@@ -24,21 +24,10 @@
         "function_map": "read_data"
     }
   },
-  "modules": {
-    "extract_data": {
+  "extract_data_module": {
       "command": "python3",
       "module_name": "../data_extraction/simple_data_extraction.py",
       "params": "--request"
-      },
-    "process_data": {
-      "command": "python3",
-      "module_name": "../data_processing/xxx.py",
-      "params": "--request"},
-    "qod_eval": {
-      "command": "python3",
-      "module_name": "../qod_evaluation/xxx.py",
-      "params": "--request"
-    }
   },
   "docker": {
     "conf_path": "",

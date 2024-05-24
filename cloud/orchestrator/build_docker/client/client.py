@@ -135,7 +135,7 @@ if __name__ == '__main__':
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
                                    client_conf['data_conf']["function_map"])
 
-    X, y = dps_read_data_module(client_conf['data_conf']['data_path'])
+    X, y = dps_read_data_module("/data/" + client_conf['data_conf']['data_path'])
 
     # Create monitor
     # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']

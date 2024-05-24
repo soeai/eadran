@@ -109,6 +109,8 @@ class Config4Edge(Generic):
         config_id = {}
         for dataset in params['datasets']:
             # this is a single template
+            data_conf = dataset['read_info']['module_conf']
+            data_conf['data_path'] = dataset['read_info']["location"].split('/')[-1]
             generated_config = {'consumer_id': params['consumer_id'],
                                 'model_id': params['model_id'],
                                 'dataset_id': dataset['dataset_id'],
@@ -116,7 +118,7 @@ class Config4Edge(Generic):
                                 'monitor_interval': 10,
                                 'fed_server': "{}:{}".format(params['start_fed_resp']['ip'],
                                                              params['start_fed_resp']['fed_server_port']),
-                                'data_conf': dataset['read_info']['module_conf'],
+                                'data_conf': data_conf,
                                 'model_conf': params['model_conf'],
                                 'requirement_libs': params['requirement_libs'],
                                 'pre_train_model': params['pre_train_model']}
@@ -183,7 +185,7 @@ class EdgeContainer(Generic):
         }
 
         while True:
-            for edge_id in configs:
+            for edge_id in configs.keys():
                 logging.info('Starting Edge [{}]: '.format(edge_id))
                 if not self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
@@ -199,7 +201,10 @@ class EdgeContainer(Generic):
                     for d in params['datasets']:
                         # if dataset on edge is local, we mount it into container
                         if d['edge_id'] == edge_id and d['read_info']['method'] == 'local':
-                            mount = 'type=bind,source={},target={}'.format(d['read_info']['location'], '/data/')
+                            fullpath = d['read_info']['location']
+                            filename = fullpath.split('/')[-1]
+                            folder_path = fullpath[:fullpath.index(filename)]
+                            mount = 'type=bind,source={},target={}'.format(folder_path, '/data/')
                             command['docker'][0]['options']['--mount'] = mount
 
                     # send command to edge
