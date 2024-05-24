@@ -2,5 +2,6 @@
   "image_tensorflow_cpu": "trungdonggg/edge:latest",
   "image_tensorflow_gpu": "",
   "image_torch_cpu": "",
-  "image_torch_gpu": ""
+  "image_torch_gpu": "",
+  "image_default": "trungdonggg/edge:latest"
 }

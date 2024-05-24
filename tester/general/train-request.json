@@ -14,7 +14,7 @@
           "storage_ref_id": "66417b52627af2fd8903d156",
           "module_name": "data_reader",
           "function_map": "read_data",
-          "data_path": "/data/fraudTrain_processed_SMOTE_1.csv"
+          "data_path": "fraudTrain_processed_SMOTE_1.csv"
         }
       }
     },
@@ -30,11 +30,12 @@
           "storage_ref_id": "66417b52627af2fd8903d156",
           "module_name": "data_reader",
           "function_map": "read_data",
-          "data_path": "/data/fraudTrain_processed_SMOTE_2.csv"
+          "data_path": "fraudTrain_processed_SMOTE_2.csv"
         }
       }
     }
   ],
+  "platform": "tensorflow_cpu",
   "requirement_libs": [
     {
       "name": "tensorflow",

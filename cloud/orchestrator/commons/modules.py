@@ -193,7 +193,8 @@ class EdgeContainer(Generic):
                     # We now support only CPU tensorflow on Ubuntu for testing
                     # in next version, we analyse info from edge to get correspondent image
                     command['docker'][0]['image'] = self.get_image(params['platform'])
-                    command['docker'][0]['arguments'] = [self.orchestrator.url_storage_service, temps[edge_id]]
+                    command['docker'][0]['arguments'] = [self.orchestrator.url_storage_service,
+                                                         temps[edge_id]]
 
                     for d in params['datasets']:
                         # if dataset on edge is local, we mount it into container
@@ -204,18 +205,16 @@ class EdgeContainer(Generic):
                     # send command to edge
                     self.send_command(command)
 
-                    logging.info('Sent command: '.format(command))
+                    logging.info('Sent command: {} to {}'.format(command, edge_id))
                     # remove edge_id
                     temps.pop(edge_id, None)
 
-                    print('Popped, temps:', temps)   #test
-                # else:
-                #     pass
+                    # print('Popped, temps:', temps)   #test
             if len(temps) == 0:
-                print('Breaking...')
+                # print('Breaking...')
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
-            print("Sleeping 5 minutes")
+            logging.info("Waiting to start {} more edge(s)".format(len(temps)))
             time.sleep(5 * 60)
 
-        print('Done Starting All Edges')
+        logging.info('Sent command to all edges.')
