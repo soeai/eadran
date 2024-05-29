@@ -3,6 +3,7 @@ We assume that the data for training is available that can be accessed through a
 note that other tasks have been done to prepare such a data for the training task
 '''
 import argparse
+import logging
 import time
 from urllib.request import urlretrieve
 import pandas as pd
@@ -169,7 +170,7 @@ if __name__ == '__main__':
     # import custom code of market consumer
     mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
 
-    print("OK-->: " + str(mcs_custom_module))
+    logging.info("Load data reader module successfully -->: " + str(mcs_custom_module))
     # import code of data provider to read data
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
                                    client_conf['data_conf']["function_map"])
