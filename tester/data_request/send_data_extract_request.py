@@ -4,12 +4,13 @@ from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import qoa4ml.qoaUtils as utils
 from threading import Thread
+from cloud.commons.default import Protocol
 
 class DataService_Simulation(object):
     def __init__(self):
         self.config = utils.load_config('../../fed_edge/conf/config.json')
         # self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
-        self.amqp_connector = Amqp_Connector(self.config['amqp_out'],self)
+        self.amqp_connector = Amqp_Connector(self.config['amqp_out'], self)
         # self.thread = Thread(target=self.start_receive)
         # self.thread.start()
 
@@ -32,8 +33,8 @@ with open('data_request.json') as f:
     #     "command":"ping"
     #        }
     # add message header
-    msg = {"type":"request",
-           "requester":"dataservice",
-            "command": "request_data",
-            "content": req}
+    msg = {"type": Protocol.MSG_REQUEST,
+           "requester": Protocol.ACTOR_DATA_SERVICE,
+           "command": Protocol.DATA_EXTRACTION_COMMAND,
+           "content": req}
     client.send(msg)

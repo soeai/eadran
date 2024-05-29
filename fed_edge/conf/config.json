@@ -18,7 +18,7 @@
     "dataset_id": "fraud001",
     "dest_path": "../../data_samples",
     "method": "local",
-    "reader_conf": {
+    "reader_module": {
         "storage_ref_id": "storage id of module",
         "module_name": "data_reader",
         "function_map": "read_data"
@@ -26,12 +26,8 @@
   },
   "extract_data_module": {
       "command": "python3",
-      "module_name": "../data_extraction/simple_data_extraction.py",
+      "module_name": "../data_extraction_module/simple_data_extraction.py",
       "params": "--request"
-  },
-  "docker": {
-    "conf_path": "",
-    "conf_file": ""
   },
   "amqp_health_report": "healthreport.edge003",
   "report_delay_time": 300

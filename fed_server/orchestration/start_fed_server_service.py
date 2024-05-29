@@ -9,9 +9,10 @@ import sys
 import time
 import traceback
 from threading import Thread
-
+from cloud.commons.default import Protocol
 import docker
 import psutil
+import socket
 import qoa4ml.qoaUtils as utils
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
@@ -21,7 +22,8 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 
 class FedServerOrchestrator(object):
-    def __init__(self, config, ):
+    def __init__(self, config, ip=None):
+        self.ip = ip
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
@@ -60,7 +62,7 @@ class FedServerOrchestrator(object):
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
                 # add header of message before responding
-                msg = {"type": "response",
+                msg = {"type": Protocol.MSG_RESPONSE,
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
@@ -126,32 +128,37 @@ class FedServerOrchestrator(object):
         return 0
 
     def health_report(self):
-        while True:
-            try:
-                docker_res = docker.from_env().version()
-            except Exception as e:
-                docker_res = {}
-                print(e.__traceback__)
+        try:
+            docker_res = docker.from_env().version()
+        except Exception as e:
+            docker_res = {}
+            print(e.__traceback__)
 
+        health_post = {
+            "edge_id": self.edge_id,
+            "ip": self.config['ip'] if self.ip is None else self.ip,
+            "routing_key": self.config['amqp_in']['in_routing_key'],
+            "health": {
+                "mem": psutil.virtual_memory()[1],
+                "cpu": psutil.cpu_count(),
+                "gpu": -1  # code to get GPU device here
+            },
+            "docker_available": docker_res  # code to check docker available or not
+        }
+
+        while True:
             # check how many container running
-            health_post = {
-                "edge_id": self.edge_id,
-                "ip": self.config['ip'],
-                "routing_key": self.config['amqp_in']['in_routing_key'],
-                "health": {
-                    "mem": psutil.virtual_memory()[1],
-                    "cpu": psutil.cpu_count(),
-                    "gpu": -1  # code to get GPU device here
-                },
-                "docker_available": docker_res  # code to check docker available or not
-            }
             self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
+
+            health_post['health']['mem'] = psutil.virtual_memory()[1]
+            health_post['health']['cpu'] = psutil.cpu_count()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Federated Server Orchestrator Micro-Service...")
     parser.add_argument('--conf', help='config file', default="../conf/config.json")
     args = parser.parse_args()
+    IPAddr = socket.gethostbyname(socket.gethostname())
     orchestrator = FedServerOrchestrator(args.conf)
     orchestrator.start_amqp()

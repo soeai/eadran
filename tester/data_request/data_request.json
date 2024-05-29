@@ -49,16 +49,6 @@
         "sample_limit": {
           "number": 1000,
           "method": "random"
-        },
-        "qod": {
-          "__comment": "some min requirements for qod?",
-          "__schema": "http://fed.marketplace.com/qod/schema/v1",
-          "constraints": [
-            {
-              "metric_name": "class_parity",
-              "min_value": 0.5
-            }
-          ]
         }
       }
 }

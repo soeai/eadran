@@ -31,5 +31,11 @@
         "in_routing_key": "healthreport.#",
         "in_queue": "queue_healthreport"
     },
+    "orchestrator": {
+        "end_point":"192.168.10.235",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "out_routing_key": "orchestrator.service"
+    },
     "secret_key": "PRIVATE-KEY-ENCRYPT-EADRAN-2024"
 }

@@ -32,7 +32,7 @@ class FedServerContainer(Generic):
                 if server_check['status'] == 0:
                     command = {
                         "edge_id": self.server_id,
-                        "request_id": str(uuid.uuid4()),
+                        "request_id": params['request_id'],
                         "command": "docker",
                         "params": "start",
                         "docker": [
@@ -109,8 +109,11 @@ class Config4Edge(Generic):
         config_id = {}
         for dataset in params['datasets']:
             # this is a single template
-            data_conf = dataset['read_info']['module_conf']
-            data_conf['data_path'] = dataset['read_info']["location"].split('/')[-1]
+            data_conf = dataset['read_info']['reader_module']
+            if dataset['read_info']["method"] == 'local':
+                data_conf['data_path'] = dataset['read_info']["location"].split('/')[-1]
+            else:
+                data_conf['data_path'] = dataset['read_info']["location"]
             generated_config = {'consumer_id': params['consumer_id'],
                                 'model_id': params['model_id'],
                                 'dataset_id': dataset['dataset_id'],
@@ -170,7 +173,7 @@ class EdgeContainer(Generic):
         temps = configs.copy()
         command_template = {
             "edge_id": "",
-            "request_id": str(uuid.uuid4()),
+            "request_id": params['request_id'],
             "command": "docker",
             "params": "start",
             "docker": [
@@ -223,3 +226,53 @@ class EdgeContainer(Generic):
             time.sleep(5 * 60)
 
         logging.info('Sent command to all edges.')
+
+
+class QoDContainer(Generic):
+    def __init__(self, orchestrator, config='./conf/image4edge.json'):
+        if config is not None:
+            self.config = utils.load_config(config)
+        else:
+            self.config = None
+        self.orchestrator = orchestrator
+
+    def is_edge_ready(self, edge_id):
+        try:
+            url_mgt_service = self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
+            edge_check = requests.get(url_mgt_service).json()
+            logging.info("Status of edge [{}]: ".format(edge_id, edge_check['status']))
+            return bool(edge_check['status'])
+        except Exception as e:
+            logging.error("[ERROR] - Error {} while check dataset status: {}".format(type(e), e.__traceback__))
+            traceback.print_exception(*sys.exc_info())
+            return False
+
+    def send_command(self, edge_command):
+        self.orchestrator.send(edge_command)
+
+    def exec(self, params):
+        command = {
+            "edge_id": params['edge_id'],
+            "request_id": params['request_id'],
+            "command": "docker",
+            "params": "start",
+            "docker": [
+                {
+                    "image": self.orchestrator.config["eadran_qod_image_name"],
+                    "options": {
+                        "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
+                        "--mount": ""
+                    },
+                    "arguments": [self.orchestrator.url_storage_service,params['']]
+                }]
+        }
+        if params['read_info']['method'] == 'local':
+            fullpath = params['read_info']['location']
+            filename = fullpath.split('/')[-1]
+            folder_path = fullpath[:fullpath.index(filename)]
+            mount = 'type=bind,source={},target={}'.format(folder_path, '/data/')
+            command['docker'][0]['options']['--mount'] = mount
+
+        # send command to edge
+        self.send_command(command)
+        logging.info("Sent QoD evaluation command to edge.")

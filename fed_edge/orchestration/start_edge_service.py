@@ -1,7 +1,7 @@
 # This class process 3 commands:
-# 1. start/stop docker
+# 1. start/stop docker (including: fed_worker and DoD)
 # 2. reported its health every 5 minutes
-# 3. process data extraction
+# 3. process data extraction (require module installed on Edge)
 
 import argparse
 import json
@@ -15,6 +15,7 @@ from threading import Thread
 import docker
 import psutil
 import qoa4ml.qoaUtils as utils
+from cloud.commons.default import Protocol
 from qoa4ml.collector.amqp_collector import Amqp_Collector
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import logging
@@ -59,20 +60,14 @@ class EdgeOrchestrator(object):
                         "status": int(sum(status)),
                         "detail": status
                     }
-            elif req_msg['command'].lower() == 'extract_data':
+            elif req_msg['command'].lower() == Protocol.DATA_EXTRACTION_COMMAND:
                 response = self.extract_data(req_msg)
-
-            # elif req_msg['command'].lower() == 'process_data':
-            #     response = self.data_processing(req_msg)
-            #
-            # elif req_msg['command'].lower() == 'eval_qod':
-            #     response = self.qod_eval(req_msg)
 
             # send response back to server
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
                 # add header of message before responding
-                msg = {"type": "response",
+                msg = {"type": Protocol.MSG_RESPONSE,
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
@@ -160,60 +155,31 @@ class EdgeOrchestrator(object):
         os.remove(filename)
         return response
 
-    # def qod_eval(self, req_msg):
-    #     if not os.path.isdir("temp"):
-    #         os.mkdir('temp')
-    #     fname = "temp/request_{}.json".format(uuid.uuid4())
-    #     with open(fname, 'w') as f:
-    #         # save data request to file
-    #         json.dump(req_msg['data_request'], f)
-    #         # execute data extraction module
-    #     command = self.config['modules']['qod_eval']['command']
-    #     module_name = self.config['modules']['qod_eval']['module_name']
-    #     params = self.config['modules']['qod_eval']['params']
-    #     rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-    #     response = json.loads(rep_msg.stdout)
-    #     # cleanup
-    #     os.remove(fname)
-    #     return response
-    #
-    # def data_processing(self, req_msg):
-    #     if not os.path.isdir("temp"):
-    #         os.mkdir('temp')
-    #     fname = "temp/request_{}.json".format(uuid.uuid4())
-    #     with open(fname, 'w') as f:
-    #         # save data request to file
-    #         json.dump(req_msg['data_request'], f)
-    #         # execute data extraction module
-    #     command = self.config['modules']['process_data']['command']
-    #     module_name = self.config['modules']['process_data']['module_name']
-    #     params = self.config['modules']['process_data']['params']
-    #     rep_msg = subprocess.run([command, module_name, params, fname], capture_output=True)
-    #     response = json.loads(rep_msg.stdout)
-    #     # cleanup
-    #     os.remove(fname)
-    #     return response
-
     def health_report(self):
-        while True:
-            try:
-                docker_res = docker.from_env().version()
-            except:
-                logging.warning("Docker is not installed. Thus service cannot serve fully function!")
-                docker_res = {}
+        try:
+            docker_res = docker.from_env().version()
 
-            health_post = {
-                "edge_id": self.edge_id,
-                "routing_key": self.config['amqp_in']['in_routing_key'],
-                "health": {
-                    "mem": psutil.virtual_memory()[1],
-                    "cpu": psutil.cpu_count(),
-                    "gpu": -1  # code to get GPU device here
-                },
-                "docker_available": docker_res  # code to check docker available or not
-            }
+        except:
+            logging.warning("Docker is not installed. Thus service cannot serve fully function!")
+            docker_res = {}
+
+        health_post = {
+            "edge_id": self.edge_id,
+            "routing_key": self.config['amqp_in']['in_routing_key'],
+            "health": {
+                "mem": psutil.virtual_memory()[1],
+                "cpu": psutil.cpu_count(),
+                "gpu": -1  # code to get GPU device here
+            },
+            "docker_available": docker_res  # code to check docker available or not
+        }
+
+        while True:
             self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
+
+            health_post['health']['mem'] = psutil.virtual_memory()[1]
+            health_post['health']['cpu'] = psutil.cpu_count()
 
 
 if __name__ == '__main__':

@@ -19,5 +19,6 @@
   "fed_server_image_name": "trungdonggg/server",
   "fed_server_image_port": 8080,
   "rabbitmq_image_name": "rabbitmq",
-  "rabbitmq_image_port": 5672
+  "rabbitmq_image_port": 5672,
+  "eadran_qod_image_name": ""
 }

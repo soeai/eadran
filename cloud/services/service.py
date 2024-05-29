@@ -17,54 +17,16 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
 from qoa4ml.collector.amqp_collector import Amqp_Collector
+from qoa4ml.connector.amqp_connector import Amqp_Connector
 import hashlib
-
-from cloud.commons.default import ServiceConfig
-from helpers.custom_logger import CustomLogger
+from cloud.commons.default import Service, Protocol
 
 app = Flask(__name__)
 api = Api(app)
 
-logger = CustomLogger().get_logger().setLevel(logging.INFO)
-
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 mongo_client = None
 auth_collection = None
-
-# def get_node_name():
-#     node_name = os.environ.get('NODE_NAME')
-#     if not node_name:
-#         print("NODE_NAME is not defined")
-#         node_name = "Empty"
-#     return node_name
-#
-#
-# def get_instance_id():
-#     pod_id = os.environ.get('POD_ID')
-#     if not pod_id:
-#         print("POD_ID is not defined")
-#         pod_id = "Empty"
-#     return pod_id
-#
-#
-# def init_env_variables():
-#     edge_service = os.environ.get('FEDMARKETPLACE_SERVICE')
-#     edge_service_port = os.environ.get("FEDMARKETPLACE_SERVICE_PORT")
-#     # mongo_user = os.environ.get("MONGO_USER")
-#     # mongo_pass = os.environ.get("MONGO_PASS")
-#     # mongo_host = os.environ.get("MONGO_HOST")
-#     # uri = "mongodb://%s:%s@%s" % (quote_plus(mongo_user), quote_plus(mongo_pass), mongo_host)
-#     # mongo_conn = pymongo.MongoClient(uri)
-#
-#     if not edge_service:
-#         logger.error("FEDMARKETPLACE_SERVICE is not defined")
-#         raise Exception("FEDMARKETPLACE_SERVICE is not defined")
-#     if not edge_service_port:
-#         logger.error("FEDMARKETPLACE_SERVICE_PORT is not defined")
-#         raise Exception("FEDMARKETPLACE_SERVICE_PORT is not defined")
-#     # if not mongo_conn:
-#     #     logger.error("Failed to MongoDB...{}".format(mongo_host))
-#     #     raise Exception("Failed to MongoDB...{}".format(mongo_host))
 
 
 class EdgeMgt(Resource):
@@ -217,7 +179,7 @@ class ComputingResourceHealth(Resource):
             # get param from args here
             query = req_args[0].split("=")
             if query[0] == 'id':
-                result = list(self.collection.find({"edge_id":query[1],"timestamp": {"$gt": time.time() - 600}})
+                result = list(self.collection.find({"edge_id": query[1], "timestamp": {"$gt": time.time() - 600}})
                               .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
                 if len(result) > 0:
                     response = result[0]
@@ -225,32 +187,6 @@ class ComputingResourceHealth(Resource):
                     return {"status": 0, 'result': response}
 
         return {"status": 1, "message": "missing query: id=???"}, 404
-
-
-# class FedServerHealth(Resource):
-#     def __init__(self, **kwargs) -> None:
-#         super().__init__()
-#         self.db = mongo_client.get_database(kwargs["server_health_log"]["db_name"]) \
-#             if kwargs["server_health_log"]["db_name"] in mongo_client.list_database_names() \
-#             else mongo_client[kwargs["server_health_log"]["db_name"]]
-#         self.collection = self.db[kwargs["server_health_log"]["db_col"]]
-#
-#     def get(self):
-#         req_args = request.query_string.decode("utf-8").split("&")
-#         if len(req_args) > 0:
-#             # get param from args here
-#             query = req_args[0].split("=")
-#             if query[0] == 'id':
-#                 result = list(self.collection.find({"server_id":query[1],"timestamp": {"$gt": time.time() - 600}})
-#                               .sort([('timestamp', pymongo.DESCENDING)]).limit(1))
-#                 if len(result) > 0:
-#                     response = result[0] #get ip from query result
-#                     response.pop('_id', None)
-#                     return {'result': response}
-#                 else:
-#                     return {"status": 1, "message": "server does not exist."}, 404
-#
-#         return {"status": 1, "message": "missing query: id=???"}, 404
 
 
 class ResourceHealthReport(object):
@@ -541,7 +477,7 @@ class UserMgt(Resource):
                     response.pop('_id', None)
                     response.pop('password', None)
                 else:
-                    return { "status": 1, "message":"user does not exist."}, 404
+                    return {"status": 1, "message": "user does not exist."}, 404
 
         return {"status": 0, 'result': response}
 
@@ -626,6 +562,146 @@ class Authentication(Resource):
         return {"status": 1, "message": "request body must be in JSON format. {username: xxx, password: yyy}"}, 401
 
 
+# class DataService(Resource):
+#     def __init__(self, queue):
+#         self.queue = queue
+#
+#     def get(self):
+#         return {'status': 0}
+#
+#     def post(self):
+#         if request.is_json:
+#             json_msg = request.get_json(force=True)
+#             # send the command to orchestrator
+#             orchestrator_command = {
+#                 "type": Protocol.MSG_REQUEST,
+#                 "requester": Protocol.ACTOR_DATA_SERVICE,
+#                 "command": Protocol.DATA_EXTRACTION_COMMAND,
+#                 "content": json_msg}
+#             self.queue.send(orchestrator_command)
+#             return {'status': 0, "message": "starting"}
+#         return {'status': 1, "message": 'request must enclose a json object'}, 400
+
+
+class MainService(Resource):
+    def __init__(self, queue):
+        self.queue = queue
+
+    def get(self):
+        return {'status': 0}
+
+    def post(self, op):
+        # ======================= MESSAGE RECEIVE FROM CLIENT
+        # {
+        #   "consumer_id": "who request",
+        #   "model_id": "",
+        #   "datasets": [{
+        #     "dataset_id": "uuid of dataset",
+        #     "resource_id": "specific computing infrastructure for this training",
+        #     "extract_response_id": "response id from data service (file data_response_v0.1.json)"
+        #   }],
+        #   "requirement_libs": [{
+        #     "name": "tensorflow",
+        #     "version": "2.10"
+        #   }],
+        #   "model_conf":{
+        #         "storage_ref_id":"id of code that manages in storage service",
+        #         "module_name": "code for training at edges, must be attached",
+        #         "function_map":{
+        #             "train": "fit",
+        #             "evaluate": "evaluate",
+        #             "set_weights": "set_weights",
+        #             "get_weights": "get_weights"
+        #         },
+        #         "train_hyper_param":{
+        #             "epochs": 10,
+        #             "batch_size": 32
+        #         }
+        #     },
+        #   "pre_train_model": {
+        #       "url": "link to get pre-train model from storage service",
+        #       "name": "name of model on model management module/service",
+        #       "params": "optional params to download"
+        #     }
+        # }
+        # ============== END OF MESSAGE
+        if request.is_json:
+            json_msg = request.get_json(force=True)
+            # send the command to orchestrator
+            if op == 'trainml':
+                orchestrator_command = {
+                    "type": Protocol.MSG_REQUEST,
+                    "requester": Protocol.ACTOR_TRAINING_SERVICE,
+                    "command": Protocol.TRAIN_MODEL_COMMAND,
+                    "content": json_msg}
+
+            elif op == 'data':
+                orchestrator_command = {
+                    "type": Protocol.MSG_REQUEST,
+                    "requester": Protocol.ACTOR_DATA_SERVICE,
+                    "command": Protocol.DATA_EXTRACTION_COMMAND,
+                    "content": json_msg}
+
+            self.queue.send(orchestrator_command)
+            return {'status': 0, "message": "starting"}
+        return {'status': 1, "message": 'request must enclose a json object'}, 400
+
+
+# in case of client want to start more edges/datasets
+class ControlEdge(Resource):
+    def __init__(self, queue):
+        self.queue = queue
+
+    def get(self):
+        return {'status': 0}
+
+    def post(self, op):
+        # {
+        #   "consumer_id": "who request",
+        #   "model_id": "",
+        #   "datasets": [{
+        #     "dataset_id": "uuid of dataset",
+        #     "resource_id": "specific computing infrastructure for this training",
+        #     "extract_response_id": "response id from data service (file data_response_v0.1.json)"
+        #   }],
+        # }
+        # get param from args here
+        msg = "starting" if op == 'start' else "stopping"
+        cmd = Protocol.START_CONTAINER_COMMAND if op == 'start' else Protocol.STOP_CONTAINER_COMMAND
+        if request.is_json:
+            json_msg = request.get_json(force=True)
+            orchestrator_command = {
+                "type": Protocol.MSG_REQUEST,
+                "requester": Protocol.ACTOR_TRAINING_SERVICE,
+                "command": cmd,
+                "content": json_msg}
+            self.queue.send(orchestrator_command)
+            return {'status': 0, "message": msg}
+        return {'status': 1, "message": 'request must enclose a json object'}, 400
+
+
+# in case of client want to stop the edges/datasets since expectation doesn't reach'
+# class StopEdge(Resource):
+#     def __init__(self, queue):
+#         self.queue = queue
+#
+#     def get(self):
+#         return {'status': 0}
+#
+#     def post(self, op):
+#         if request.is_json:
+#             json_msg = request.get_json(force=True)
+#             orchestrator_command = {
+#                 "type": Protocol.MSG_REQUEST,
+#                 "requester": Protocol.ACTOR_TRAINING_SERVICE,
+#                 "command": Protocol.STOP_CONTAINER_COMMAND,
+#                 "content": json_msg}
+#
+#             self.queue.send(orchestrator_command)
+#             return {'status': 0, "message": "stopping"}
+#         return {'status': 1, "message": 'request must enclose a json object'}, 400
+
+
 def required_auth():
     # verify correct user ==========
     token = request.headers.get('Authorization')
@@ -640,13 +716,22 @@ def required_auth():
     return None
 
 
-if __name__ == '__main__': 
-    # init_env_variables()
+class Queue(object):
+    def __init__(self, _config):
+        self.amqp_queue_out = Amqp_Connector(_config, self)
+
+    def send(self, msg):
+        self.amqp_queue_out.send_data(json.dumps(msg))
+
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Arguments for Management Service")
     parser.add_argument('--conf', help='configuration file', default="./conf/config.json")
     args = parser.parse_args()
     with open(args.conf) as f:
         config = json.loads(f.read())
+
+    queue = Queue(config['orchestrator'])
 
     mongo_client = pymongo.MongoClient(config['mongo_url'])
     db = mongo_client.get_database(config["authentication"]["db_name"]) \
@@ -655,18 +740,23 @@ if __name__ == '__main__':
     auth_collection = db[config["authentication"]["db_col"]]
 
     # queue to get health info from edge and federated server
-    queue = ResourceHealthReport(config)
+    ResourceHealthReport(config)
+
+    # two main services of eadran: data service, training service and control edges
+    api.add_resource(MainService, '/service/<string:op>', resource_class_args=(queue,))
+    api.add_resource(ControlEdge, '/control/edge/<string:op>', resource_class_args=(queue,))
+    # api.add_resource(StopEdge, '/edges/stop', resource_class_args=(queue,))
+    # api.add_resource(DataService, '/data-service', resource_class_args=(queue,))
 
     # service to check health of edge and federated server
     api.add_resource(ComputingResourceHealth, '/health', resource_class_kwargs=config)
-    # api.add_resource(FedServerHealth, '/serverhealth', resource_class_kwargs=config)
 
     # management service
-    api.add_resource(EdgeMgt, '/edge', resource_class_kwargs=config)
-    api.add_resource(MetadataMgt, '/metadata', resource_class_kwargs=config)
-    api.add_resource(ModelMgt, '/model', resource_class_kwargs=config)
-    api.add_resource(UserMgt, '/user', resource_class_kwargs=config)
+    api.add_resource(EdgeMgt, '/mgt/edge', resource_class_kwargs=config)
+    api.add_resource(MetadataMgt, '/mgt/metadata', resource_class_kwargs=config)
+    api.add_resource(ModelMgt, '/mgt/model', resource_class_kwargs=config)
+    api.add_resource(UserMgt, '/mgt/user', resource_class_kwargs=config)
     api.add_resource(Authentication, '/auth', resource_class_kwargs=config)
 
     # run service
-    app.run(host='0.0.0.0', debug=True, port=ServiceConfig.MGT_SERVICE_PORT)
+    app.run(host='0.0.0.0', debug=True, port=Service.SERVICE_PORT)

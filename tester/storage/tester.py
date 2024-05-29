@@ -1,4 +1,4 @@
-from cloud.storage_service.storage import MinioStorage
+from cloud.services.storage import MinioStorage
 
 conf = {
     "minio_server": "192.168.10.235:9000",
