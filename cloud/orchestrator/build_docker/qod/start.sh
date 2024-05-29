@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Federated Client with: --service=$1 --conf=$2"
+echo "QoD Evaluation Module with: --service=$1 --conf=$2"
 
 #get requirements file from storage
 #if [ ! -f "$2" ]; then
