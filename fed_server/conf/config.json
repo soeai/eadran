@@ -5,7 +5,7 @@
     "end_point":"192.168.10.235",
     "exchange_name": "fedmarketplace",
     "exchange_type": "topic",
-    "in_routing_key": "edge.fedserver001",
+    "in_routing_key": "edge.#",
     "in_queue": "queue_fedserver001"
   },
   "amqp_out": {

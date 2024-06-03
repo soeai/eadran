@@ -87,7 +87,7 @@ class FedServerOrchestrator(object):
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
             logging.info("Starting a new container...")
-            command = ["docker", "run", "-d", "--rm"]
+            command = ["docker", "run", "-d"]
             for (k, v) in config["options"].items():
                 if v is not None and len(v) > 0:
                     if k == "-p":
