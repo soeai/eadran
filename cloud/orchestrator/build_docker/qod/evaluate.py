@@ -177,7 +177,7 @@ def label_purity(X, y):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="QoD Evaluation Plugin")
     parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
-    parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
+    parser.add_argument('--conf', help='Client config file', default="./conf/qod.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
@@ -194,14 +194,14 @@ if __name__ == '__main__':
                 client_conf['data_conf']['module_name'] + ".py")
 
     # import custom code of market consumer
-    mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
+    dps_custom_reader_module = __import__(client_conf['model_conf']['module_name'])
 
-    logging.info("Load data reader module successfully -->: " + str(mcs_custom_module))
+    logging.info("Load data reader module successfully -->: " + str(dps_custom_reader_module))
     # import code of data provider to read data
-    dps_read_data_module = getattr(__import__(client_conf['data_conf']['module_name']),
-                                   client_conf['data_conf']["function_map"])
+    dps_read_data_function = getattr(__import__(client_conf['data_conf']['module_name']),
+                                     client_conf['data_conf']["function_map"])
 
-    X, y = dps_read_data_module("/data/" + client_conf['data_conf']['data_path'])
+    X, y = dps_read_data_function("/data/" + client_conf['data_conf']['data_path'])
 
     qod_metrics = {"class_overlap": class_overlap(X,y),
                    "class_parity": class_parity(y),

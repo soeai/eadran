@@ -9,7 +9,7 @@ echo "QoD Evaluation Module with: --service=$1 --conf=$2"
 
 #get config file from storage
 if [ ! -f "$2" ]; then
-  wget $1/storage/obj?id=$2 -O ./conf/client.json
+  wget $1/storage/obj?id=$2 -O ./conf/qod.json
 fi
 
 python3 evaluate.py --service=$1

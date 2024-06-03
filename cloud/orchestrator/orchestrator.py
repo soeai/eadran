@@ -9,7 +9,7 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import Protocol
 from cloud.orchestrator.commons.pipeline import Pipeline
-from cloud.orchestrator.commons.modules import Config4Edge, FedServerContainer, EdgeContainer
+from cloud.orchestrator.commons.modules import Config4Edge, FedServerContainer, EdgeContainer, QoDContainer
 
 import logging
 import requests
@@ -40,7 +40,8 @@ def stop_container_at_edge(params, request_id, _orchestrator=None):
 
 def start_qod_container_at_edge(params, request_id, _orchestrator=None):
     params['request_id'] = request_id
-    pass
+    pipeline = Pipeline([QoDContainer(_orchestrator)], params)
+    pipeline.exec()
 
 
 def data_extraction(params, request_id, _orchestrator=None):
