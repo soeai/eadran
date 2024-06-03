@@ -22,7 +22,7 @@ def start_training_process(params, request_id, _orchestrator=None):
     params['request_id'] = request_id
     pipeline = Pipeline(task_list=[FedServerContainer(_orchestrator),
                                    Config4Edge(_orchestrator),
-                                   EdgeContainer(_orchestrator)],
+                                   EdgeContainer(_orchestrator, config=_orchestrator.docker_image_conf)],
                         params=params)
     pipeline.exec()
 
@@ -65,13 +65,14 @@ def data_extraction(params, request_id, _orchestrator=None):
 
 
 class Orchestrator(object):
-    def __init__(self, config):
+    def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
         self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config['url_mgt_service']
         self.url_storage_service = self.config['url_storage_service']
+        self.docker_image_conf = docker_image_conf
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -108,8 +109,9 @@ class Orchestrator(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Orchestrator')
     parser.add_argument('--conf', type=str, default='conf/config.json')
+    parser.add_argument('--image', type=str, default='conf/image4edge.json')
     args = parser.parse_args()
 
-    orchestrator = Orchestrator(args.conf)
+    orchestrator = Orchestrator(args.conf, args.image)
     orchestrator.start()
 
