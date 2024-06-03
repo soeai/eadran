@@ -10,8 +10,8 @@
         "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_1.csv",
         "format": "",
         "params": "",
-        "module_conf": {
-          "storage_ref_id": "66417b52627af2fd8903d156",
+        "reader_module": {
+          "storage_ref_id": "665d497f52c81403417a6a4e",
           "module_name": "data_reader",
           "function_map": "read_data"
         }
@@ -25,8 +25,8 @@
         "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_2.csv",
         "format": "",
         "params": "",
-        "module_conf": {
-          "storage_ref_id": "66417b52627af2fd8903d156",
+        "reader_module": {
+          "storage_ref_id": "665d497f52c81403417a6a4e",
           "module_name": "data_reader",
           "function_map": "read_data"
         }
@@ -36,7 +36,7 @@
   "platform": "tensorflow_cpu",
   "requirement_libs": [],
   "model_conf": {
-    "storage_ref_id": "66417bef627af2fd8903d157",
+    "storage_ref_id": "665d494e52c81403417a6a4d",
     "module_name": "model_tf",
     "function_map": {
       "train": "fit",

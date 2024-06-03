@@ -82,15 +82,15 @@ class Orchestrator(object):
             # WILL DETAIL LATER
             request_id = str(uuid.uuid4())
             if req_msg['command'] == Protocol.TRAIN_MODEL_COMMAND:
-                start_training_process(req_msg['content'], self)
+                start_training_process(req_msg['content'], request_id, self)
             elif req_msg['command'] == Protocol.START_CONTAINER_COMMAND:
-                start_container_at_edge(req_msg['content'], self)
+                start_container_at_edge(req_msg['content'], request_id, self)
             elif req_msg['command'] == Protocol.STOP_CONTAINER_COMMAND:
-                stop_container_at_edge(req_msg['content'])
+                stop_container_at_edge(req_msg['content'], request_id, self)
             elif req_msg['command'] == Protocol.DATA_EXTRACTION_COMMAND:
                 data_extraction(req_msg['content'], request_id, self)
             elif req_msg['command'] == Protocol.DATA_QOD_COMMAND:
-                start_qod_container_at_edge(req_msg['content'], self)
+                start_qod_container_at_edge(req_msg['content'], request_id, self)
 
         elif msg_type == Protocol.MSG_RESPONSE:
             logging.info(
