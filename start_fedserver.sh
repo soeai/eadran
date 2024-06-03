@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Fed Server of EADRAN"
+echo "Starting Fed Server Orchestration Service of EADRAN"
 
 export PYTHONPATH="${PYTHONPATH}:$PWD"
 

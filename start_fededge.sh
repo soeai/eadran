@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Orchestrator of EADRAN"
+echo "Starting Edge Orchestration Service of EADRAN"
 
 export PYTHONPATH="${PYTHONPATH}:$PWD"
 
