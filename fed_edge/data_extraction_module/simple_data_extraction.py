@@ -19,12 +19,17 @@ class TabularHandle(ABCTabular):
             if _filters is not None:
                 df.query(build_filter_exp_pandas(_filters), inplace=True)
 
-            _features.sort(key=lambda x: x['index'])
-            columns = [x['name'] for x in _features]
-            # add label column
-            columns.append(_label['name'])
-            # get request columns
-            df = df[columns]
+            if len(_features) > 0:
+                _features.sort(key=lambda x: x['index'])
+                columns = [x['name'] for x in _features]
+                # add label column
+                columns.append(_label['name'])
+                # get request columns
+                df = df[columns]
+            else:
+                # get all features
+                pass
+
             row, col = df.shape
 
             if _sample_limit is not None:

@@ -52,6 +52,7 @@ def data_extraction(params, request_id, _orchestrator=None):
             if edge_check['status'] == 0:
                 routing = edge_check['status']['routing_key']
                 params['request_id'] = request_id
+                params['command'] = Protocol.DATA_EXTRACTION_COMMAND
                 logging.info("Sending a request [{}] to [{}]".format(request_id, params['edge_id']))
                 _orchestrator.send(params, routing_key=routing)
                 break

@@ -1,6 +1,5 @@
 {
     "edge_id": "edge001",
-    "command": "extract_data",
     "data_request":
       {
         "owner_id": "dc001",
@@ -49,6 +48,7 @@
         "sample_limit": {
           "number": 1000,
           "method": "random"
-        }
+        },
+        "qod": {"schema": "http://eadran.github.com/v1"}
       }
 }

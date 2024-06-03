@@ -4,14 +4,15 @@ note that other tasks have been done to prepare such a data for the training tas
 '''
 import argparse
 import logging
-import time
 from urllib.request import urlretrieve
+
+import numpy as np
 import pandas as pd
 import qoa4ml.qoaUtils as qoa_utils
-from imblearn.under_sampling import TomekLinks
-import numpy as np
 from cleanlab.filter import find_label_issues
-from sklearn.tree import DecisionTreeRegressor
+from imblearn.under_sampling import TomekLinks
+from sklearn.ensemble import RandomForestClassifier
+
 
 # def tomek_links(X,y):
 #     tomek_links = []
@@ -32,10 +33,36 @@ from sklearn.tree import DecisionTreeRegressor
 #     return tomek_links
 
 
+def predict_prob(X, y):
+    rf = RandomForestClassifier()
+    size = len(y)
+    idx = np.arange(size)
+    np.random.shuffle(idx)
+
+    step = size // 5
+    start = 0
+    end = step
+    repeat = size // step
+    probs = []
+    for i in range(repeat):
+        if i == repeat - 1:
+            end = size + 1
+        idx_val = idx[start:end]
+        X_val = X[idx_val]
+        idx_train = np.concatenate([idx[:start], idx[end:]])
+        y_train = y[idx_train]
+        X_train = X[idx_train]
+        rf.fit(X_train, y_train)
+        probs.append(rf.predict_proba(X_val))
+        start = end
+        end += step
+    return np.concatenate(probs, axis=0)
+
+
 def class_overlap(x, y, classify=True):
     if classify:
         tkl = TomekLinks()
-        rx,ry = tkl.fit_resample(x,y)
+        _, ry = tkl.fit_resample(x,y)
         return len(ry)/len(y)
     else:
         return 1
@@ -91,7 +118,7 @@ def feature_relevance(X, y, alpha=0.5):
     """
     # For simplicity, we'll use feature importance_scores from a decision tree
 
-    model = DecisionTreeRegressor()
+    model = RandomForestClassifier()
     model.fit(X, y)
     importance_scores = model.feature_importances_
     m = min(3, X.shape[1])
@@ -116,14 +143,13 @@ def completeness(X):
     return np.around(1 - null_count / total_count, 4)
 
 
-def label_purity(X, y, pred_probs):
+def label_purity(X, y):
     """
         Calculate the label purity metric for a given set of data points, true labels, and predicted probabilities.
 
         Args:
         - X (array-like): The input data points.
         - y (array-like): The true labels of the data points.
-        - pred_probs (array-like): The predicted probabilities for each data point.
 
         Returns:
         - float: The label purity value, computed as QoD_lp.
@@ -134,7 +160,7 @@ def label_purity(X, y, pred_probs):
 
     # Get indices of Tomek links
     tomek_indices = tl.sample_indices_
-
+    pred_probs = predict_prob(X, y)
     # Using find_label_issues from cleanlab
     label_issue_indices = find_label_issues(
         labels=y,
@@ -179,10 +205,11 @@ if __name__ == '__main__':
 
     qod_metrics = {"class_overlap": class_overlap(X,y),
                    "class_parity": class_parity(y),
-                   "label_purity": label_purity(X,y, None),
+                   "label_purity": label_purity(X,y),
                    "feature_correlation": feature_correlation(X),
                    "feature_relevance": feature_relevance(X, y, 0.9),
                    "completeness": completeness(X)}
 
     # report this metric to data service
+    print(qod_metrics)
 
