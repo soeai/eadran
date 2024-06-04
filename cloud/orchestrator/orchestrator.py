@@ -9,7 +9,12 @@ import qoa4ml.qoaUtils as utils
 from threading import Thread
 from cloud.commons.default import Protocol
 from cloud.orchestrator.commons.pipeline import Pipeline
-from cloud.orchestrator.commons.modules import Config4Edge, FedServerContainer, EdgeContainer, QoDContainer
+from cloud.orchestrator.commons.modules import (
+    Config4Edge,
+    FedServerContainer,
+    EdgeContainer,
+    QoDContainer,
+)
 
 import logging
 import requests
@@ -19,27 +24,31 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 
 def start_training_process(params, request_id, _orchestrator=None):
-    params['request_id'] = request_id
-    pipeline = Pipeline(task_list=[FedServerContainer(_orchestrator),
-                                   Config4Edge(_orchestrator),
-                                   EdgeContainer(_orchestrator, config=_orchestrator.docker_image_conf)],
-                        params=params)
+    params["request_id"] = request_id
+    pipeline = Pipeline(
+        task_list=[
+            FedServerContainer(_orchestrator),
+            Config4Edge(_orchestrator),
+            EdgeContainer(_orchestrator, config=_orchestrator.docker_image_conf),
+        ],
+        params=params,
+    )
     pipeline.exec()
 
 
 def start_container_at_edge(params, request_id, _orchestrator=None):
-    params['request_id'] = request_id
+    params["request_id"] = request_id
     pipeline = Pipeline([Config4Edge(_orchestrator)], params)
     pipeline.exec()
 
 
 def stop_container_at_edge(params, request_id, _orchestrator=None):
-    params['request_id'] = request_id
+    params["request_id"] = request_id
     pass
 
 
 def start_qod_container_at_edge(params, request_id, _orchestrator=None):
-    params['request_id'] = request_id
+    params["request_id"] = request_id
     pipeline = Pipeline([QoDContainer(_orchestrator)], params)
     pipeline.exec()
 
@@ -48,13 +57,19 @@ def data_extraction(params, request_id, _orchestrator=None):
     if _orchestrator is not None:
         count = 0
         while True:
-            url_mgt_service = _orchestrator.url_mgt_service + "/health?id=" + params['edge_id']
+            url_mgt_service = (
+                _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
+            )
             edge_check = requests.get(url_mgt_service).json()
-            if edge_check['status'] == 0:
-                routing = edge_check['status']['routing_key']
-                params['request_id'] = request_id
-                params['command'] = Protocol.DATA_EXTRACTION_COMMAND
-                logging.info("Sending a request [{}] to [{}]".format(request_id, params['edge_id']))
+            if edge_check["status"] == 0:
+                routing = edge_check["status"]["routing_key"]
+                params["request_id"] = request_id
+                params["command"] = Protocol.DATA_EXTRACTION_COMMAND
+                logging.info(
+                    "Sending a request [{}] to [{}]".format(
+                        request_id, params["edge_id"]
+                    )
+                )
                 _orchestrator.send(params, routing_key=routing)
                 break
             elif count < 5:
@@ -67,37 +82,48 @@ def data_extraction(params, request_id, _orchestrator=None):
 class Orchestrator(object):
     def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
-        self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
-        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
+        self.amqp_queue_in = Amqp_Collector(self.config["amqp_in"], self)
+        self.amqp_queue_out = Amqp_Connector(self.config["amqp_out"], self)
         self.thread = Thread(target=self.start_receive)
-        self.url_mgt_service = self.config['url_mgt_service']
-        self.url_storage_service = self.config['url_storage_service']
+        self.url_mgt_service = self.config["url_mgt_service"]
+        self.url_storage_service = self.config["url_storage_service"]
         self.docker_image_conf = docker_image_conf
         self.processing_tasks = {}
 
     def message_processing(self, ch, method, props, body):
-        req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
-        msg_type = req_msg['type']
+        req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
+        msg_type = req_msg["type"]
         if msg_type == Protocol.MSG_REQUEST:
-            logging.info("Received a message from [{}] for [{}]".format(req_msg['requester'], req_msg['command']))
+            logging.info(
+                "Received a message from [{}] for [{}]".format(
+                    req_msg["requester"], req_msg["command"]
+                )
+            )
             # WILL DETAIL LATER
             request_id = str(uuid.uuid4())
-            self.processing_tasks[request_id] = (time.time(), req_msg['requester'], req_msg['command'])
-            if req_msg['command'] == Protocol.TRAIN_MODEL_COMMAND:
-                start_training_process(req_msg['content'], request_id, self)
-            elif req_msg['command'] == Protocol.START_CONTAINER_COMMAND:
-                start_container_at_edge(req_msg['content'], request_id, self)
-            elif req_msg['command'] == Protocol.STOP_CONTAINER_COMMAND:
-                stop_container_at_edge(req_msg['content'], request_id, self)
-            elif req_msg['command'] == Protocol.DATA_EXTRACTION_COMMAND:
-                data_extraction(req_msg['content'], request_id, self)
-            elif req_msg['command'] == Protocol.DATA_QOD_COMMAND:
-                start_qod_container_at_edge(req_msg['content'], request_id, self)
+            self.processing_tasks[request_id] = (
+                time.time(),
+                req_msg["requester"],
+                req_msg["command"],
+            )
+            if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
+                start_training_process(req_msg["content"], request_id, self)
+            elif req_msg["command"] == Protocol.START_CONTAINER_COMMAND:
+                start_container_at_edge(req_msg["content"], request_id, self)
+            elif req_msg["command"] == Protocol.STOP_CONTAINER_COMMAND:
+                stop_container_at_edge(req_msg["content"], request_id, self)
+            elif req_msg["command"] == Protocol.DATA_EXTRACTION_COMMAND:
+                data_extraction(req_msg["content"], request_id, self)
+            elif req_msg["command"] == Protocol.DATA_QOD_COMMAND:
+                start_qod_container_at_edge(req_msg["content"], request_id, self)
 
         elif msg_type == Protocol.MSG_RESPONSE:
             logging.info(
-                "Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
-            self.processing_tasks.pop(req_msg['response_id'])
+                "Received a response of request: [{}] from [{}]".format(
+                    req_msg["response_id"], req_msg["responder"]
+                )
+            )
+            self.processing_tasks.pop(req_msg["response_id"])
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)
@@ -109,12 +135,11 @@ class Orchestrator(object):
         self.thread.start()
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Orchestrator')
-    parser.add_argument('--conf', type=str, default='conf/config.json')
-    parser.add_argument('--image', type=str, default='conf/image4edge.json')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Orchestrator")
+    parser.add_argument("--conf", type=str, default="conf/config.json")
+    parser.add_argument("--image", type=str, default="conf/image4edge.json")
     args = parser.parse_args()
 
     orchestrator = Orchestrator(args.conf, args.image)
     orchestrator.start()
-
