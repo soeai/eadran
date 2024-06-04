@@ -73,6 +73,7 @@ class Orchestrator(object):
         self.url_mgt_service = self.config['url_mgt_service']
         self.url_storage_service = self.config['url_storage_service']
         self.docker_image_conf = docker_image_conf
+        self.processing_tasks = {}
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
@@ -81,6 +82,7 @@ class Orchestrator(object):
             logging.info("Received a message from [{}] for [{}]".format(req_msg['requester'], req_msg['command']))
             # WILL DETAIL LATER
             request_id = str(uuid.uuid4())
+            self.processing_tasks[request_id] = (time.time(), req_msg['requester'], req_msg['command'])
             if req_msg['command'] == Protocol.TRAIN_MODEL_COMMAND:
                 start_training_process(req_msg['content'], request_id, self)
             elif req_msg['command'] == Protocol.START_CONTAINER_COMMAND:
@@ -95,6 +97,7 @@ class Orchestrator(object):
         elif msg_type == Protocol.MSG_RESPONSE:
             logging.info(
                 "Received a response of request: [{}] from [{}]".format(req_msg['response_id'], req_msg['responder']))
+            self.processing_tasks.pop(req_msg['response_id'])
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)
