@@ -35,7 +35,7 @@ for msg in consumer:
     json_obj = json.loads(msg.value)
     dt = datetime.fromisoformat(json_obj["timestamp"])
     p = Point(json_obj["model_id"]).time(dt) \
-        .tag("data_source_id", json_obj["data_source_id"]) \
+        .tag("dataset_id", json_obj["dataset_id"]) \
         .tag("run_id", json_obj["run_id"]) \
         .tag("task_id", "{:03}".format(json_obj["train_round"])) \
         .field("cost_resource", json_obj["cost_resource"]) \
