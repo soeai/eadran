@@ -288,7 +288,7 @@ class EdgeContainer(Generic):
 
 
 class QoDContainer(Generic):
-    def __init__(self, orchestrator, config="./conf/image4QoD.json"):
+    def __init__(self, orchestrator, config="./conf/image4qod.json"):
         self.config = utils.load_config(config)
 
         self.orchestrator = orchestrator
