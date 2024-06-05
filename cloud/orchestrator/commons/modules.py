@@ -224,7 +224,6 @@ class EdgeContainer(Generic):
                     "image": None,
                     "options": {
                         "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
-                        "--mount": "",
                     },
                     "arguments": [],
                 }
@@ -307,8 +306,7 @@ class QoDContainer(Generic):
                 {
                     "image": self.config["image_qod_default"],
                     "options": {
-                        "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
-                        "--mount": "",
+                        "--name": f"data_qod_container_{params['consumer_id']}",
                     },
                     "arguments": [self.orchestrator.url_storage_service, params[""]],
                 }

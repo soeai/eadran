@@ -49,6 +49,9 @@
           "number": 1000,
           "method": "random"
         },
-        "qod": {"schema": "http://eadran.github.com/v1"}
+        "qod": {
+          "evaluate": true,
+          "schema": "http://eadran.github.com/v1"
+        }
       }
 }

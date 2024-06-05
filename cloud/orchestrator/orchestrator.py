@@ -58,7 +58,7 @@ def data_extraction(params, request_id, _orchestrator=None):
         count = 0
         while True:
             url_mgt_service = (
-                _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
+                    _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
             )
             edge_check = requests.get(url_mgt_service).json()
             if edge_check["status"] == 0:
@@ -103,8 +103,7 @@ class Orchestrator(object):
             request_id = str(uuid.uuid4())
             self.processing_tasks[request_id] = (
                 time.time(),
-                req_msg["requester"],
-                req_msg["command"],
+                req_msg
             )
             if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
                 start_training_process(req_msg["content"], request_id, self)
@@ -123,7 +122,24 @@ class Orchestrator(object):
                     req_msg["response_id"], req_msg["responder"]
                 )
             )
-            self.processing_tasks.pop(req_msg["response_id"])
+            _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
+            if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
+                # if consumer as to evaluate qod while sending a data query, DO IT
+                if msg_task['content']['data_request']['qod']['evaluate']:
+                    # Build config for edge here from msg_task and res_msg (response from edge data extraction)
+                    # send command to QoD Evaluation
+                    resp_content = req_msg['content']
+                    params = {"edge_id": msg_task['edge_id'],
+                              "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
+                              "read_info": resp_content['read_info'],
+                              "...": "..."}
+
+                    request_id = str(uuid.uuid4())
+                    self.processing_tasks[request_id] = (
+                        time.time(),
+                        req_msg
+                    )
+                    start_qod_container_at_edge(params, request_id, self)
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)

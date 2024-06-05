@@ -14,4 +14,3 @@ class Protocol:
     ACTOR_TRAINING_SERVICE = "training_ws"
     ACTOR_DATA_SERVICE = "data_ws"
     ACTOR_ORCHESTRATOR = "orchestrator"
-    ACTOR_QUANLITY_OF_DATA = "qod_ws"

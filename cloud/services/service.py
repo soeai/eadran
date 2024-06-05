@@ -735,7 +735,7 @@ class MainService(Resource):
             elif op == "qod":
                 orchestrator_command = {
                     "type": Protocol.MSG_REQUEST,
-                    "requester": Protocol.ACTOR_QUANLITY_OF_DATA,
+                    "requester": Protocol.ACTOR_DATA_SERVICE,
                     "command": Protocol.DATA_QOD_COMMAND,
                     "content": json_msg,
                 }

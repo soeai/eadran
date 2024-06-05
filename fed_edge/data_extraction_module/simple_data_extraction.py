@@ -64,7 +64,7 @@ class TabularHandle(ABCTabular):
         #         "columns": 10,
         #         "rows": 1247
         #     },
-        #     "data": {
+        #     "read_info": {
         #         "method": "wget|s3|minio|local",
         #         "location": "path to read/download (i.e., https://s3.xyz.com?uuid=abc;encrypt_token=xyz)",
         #         "reader_module": {
