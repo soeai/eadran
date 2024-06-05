@@ -1,0 +1,15 @@
+{
+    "amqp_connector":{
+        "conf":{
+            "end_point": "XYZ_TOBE_FILLED",
+            "exchange_name": "fedmarketplace",
+            "exchange_type": "topic",
+            "in_routing_key": "fmml.client.report",
+            "in_queue": "frauddetection"
+        }
+    },
+    "kafka_connector": {
+        "bootstrap_servers": "XYZ_TOBE_FILLED",
+        "topic": "fedmarketplace-spark"
+    }
+}

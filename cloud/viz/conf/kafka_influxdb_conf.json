@@ -1,0 +1,12 @@
+{
+    "influxdb_connector":{
+        "token": "b4cHnmMZeUEs4SzPynFTYn_5LHzRORJ-5UEhE0dvruV32YBdjLO1b9AUp_jL78nTfkiAH2Z5SKX0EWFS1DIarw==",
+        "org": "ctdung258@gmail.com",
+        "url":"https://ap-southeast-2-1.aws.cloud2.influxdata.com",
+        "bucket":"fraud"
+    },
+    "kafka_connector": {
+        "bootstrap_servers": "192.168.90.54:9092",
+        "topic": "fedmarketplace-influxdb"
+    }
+}
