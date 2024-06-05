@@ -1,0 +1,21 @@
+d1 = from(bucket: "fraud")
+	|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "C001_M01_Fraud")
+  |> filter(fn: (r) => r["_field"] == "cost_resource")
+  |> cumulativeSum()
+
+d2 = from(bucket: "fraud")
+	|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "C001_M01_Fraud")
+  |> filter(fn: (r) => r["_field"] == "cost_qom")
+  |> cumulativeSum()
+
+d3 = from(bucket: "fraud")
+	|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "C001_M01_Fraud")
+  |> filter(fn: (r) => r["_field"] == "cost_qod" or r["_field"] == "cost_context")
+  
+union(tables: [d1,d2, d3])
+|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+|> map(fn: (r) => ({ r with total_cost: r.cost_context + r. cost_qod + r.cost_qom + r.cost_resource}))
+|> keep(columns: ["_time","data_source_id","total_cost"])
