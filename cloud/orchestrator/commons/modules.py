@@ -1,8 +1,12 @@
-import uuid
+# import uuid
 from abc import ABC, abstractmethod
 import qoa4ml.qoaUtils as utils
-import traceback, sys
-import requests, json, os, time
+import traceback
+import sys
+import requests
+import json
+import os
+import time
 import logging
 
 
@@ -23,6 +27,7 @@ class FedServerContainer(Generic):
         self.rabbit_image_port = orchestrator.config["rabbitmq_image_port"]
 
     def exec(self, params):
+        response = None  # Initialize response to a default value
         try:
             response = params
             if params is not None:  # check Param
@@ -31,6 +36,7 @@ class FedServerContainer(Generic):
                     self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                 )
                 server_check = requests.get(url_mgt_service).json()
+                fed_server_ip = None
                 if server_check["status"] == 0:
                     command = {
                         "edge_id": self.server_id,
@@ -84,11 +90,11 @@ class FedServerContainer(Generic):
                     except Exception as e:
                         logging.error(
                             "[ERROR] - Error {} while send start fed command: {}".format(
-                                type(e), e.__traceback__
+                                type(e), e
                             )
                         )
                         traceback.print_exception(*sys.exc_info())
-                        # response must be dictionary including IP of fed server
+                    # response must be dictionary including IP of fed server
                     response["start_fed_resp"] = {
                         "ip": fed_server_ip,
                         "fed_server_port": self.fed_server_image_port,
@@ -97,9 +103,7 @@ class FedServerContainer(Generic):
 
         except Exception as e:
             logging.error(
-                "[ERROR] - Error {} while start FedServer: {}".format(
-                    type(e), e.__traceback__
-                )
+                "[ERROR] - Error {} while start FedServer: {}".format(type(e), e)
             )
             traceback.print_exception(*sys.exc_info())
 
@@ -174,8 +178,14 @@ class EdgeContainer(Generic):
     def __init__(self, orchestrator, config="./conf/image4edge.json"):
         if config is not None:
             self.config = utils.load_config(config)
+            if self.config is None:
+                raise ValueError(
+                    "Configuration could not be loaded from the provided path."
+                )
         else:
-            self.config = None
+            raise ValueError("Configuration path must be provided.")
+        # else:
+        #    self.config = None
         self.orchestrator = orchestrator
 
     def is_edge_ready(self, edge_id):
@@ -184,7 +194,9 @@ class EdgeContainer(Generic):
                 self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             )
             edge_check = requests.get(url_mgt_service).json()
-            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
+            logging.info(
+                "Status of edge [{}]: {}".format(edge_id, edge_check["status"])
+            )
             return bool(edge_check["status"])
         except Exception as e:
             logging.error(
@@ -290,7 +302,14 @@ class EdgeContainer(Generic):
 
 class QoDContainer(Generic):
     def __init__(self, orchestrator, config="./conf/image4QoD.json"):
-        self.config = utils.load_config(config)
+        if config is not None:
+            self.config = utils.load_config(config)
+            if self.config is None:
+                raise ValueError(
+                    "Configuration could not be loaded from the provided path."
+                )
+        else:
+            raise ValueError("Configuration path must be provided.")
         self.orchestrator = orchestrator
 
     def send_command(self, edge_command):
