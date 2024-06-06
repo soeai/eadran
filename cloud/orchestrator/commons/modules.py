@@ -279,9 +279,7 @@ class EdgeContainer(Generic):
 
         # after edge show the result.
         if configs["create_qod"]:
-            qod_container = QoDContainer(
-                orchestrator=self.orchestrator, config="../conf/image4QoD.json"
-            )
+            qod_container = QoDContainer(orchestrator=self.orchestrator)
             qod_container.exec(params["config4edge_resp"])
         else:
             pass
@@ -304,15 +302,18 @@ class QoDContainer(Generic):
             "params": "start",
             "docker": [
                 {
-                    "image": self.orchestrator.config['eadran_qod_image_name'],
+                    "image": self.orchestrator.config["eadran_qod_image_name"],
                     "options": {
                         "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
                     },
-                    "arguments": [self.orchestrator.url_storage_service, storage_ref_id],
+                    "arguments": [
+                        self.orchestrator.url_storage_service,
+                        params["data_conf"]["reader_module"]["storage_ref_id"],
+                    ],
                 }
             ],
         }
-        if params["read_info"]["method"] == "local":
+        if params["data_conf"]["method"] == "local":
             fullpath = params["data_conf"]["location"]
             filename = fullpath.split("/")[-1]
             folder_path = fullpath[: fullpath.index(filename)]
