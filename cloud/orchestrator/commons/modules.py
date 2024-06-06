@@ -90,7 +90,7 @@ class FedServerContainer(Generic):
                     except Exception as e:
                         logging.error(
                             "[ERROR] - Error {} while send start fed command: {}".format(
-                                type(e), e
+                                type(e), e.__traceback__
                             )
                         )
                         traceback.print_exception(*sys.exc_info())
@@ -103,7 +103,9 @@ class FedServerContainer(Generic):
 
         except Exception as e:
             logging.error(
-                "[ERROR] - Error {} while start FedServer: {}".format(type(e), e)
+                "[ERROR] - Error {} while start FedServer: {}".format(
+                    type(e), e.__traceback__
+                )
             )
             traceback.print_exception(*sys.exc_info())
 
