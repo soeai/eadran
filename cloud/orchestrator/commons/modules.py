@@ -224,7 +224,6 @@ class EdgeContainer(Generic):
                     "image": None,
                     "options": {
                         "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
-                        "--mount": "",
                     },
                     "arguments": [],
                 }
@@ -289,7 +288,7 @@ class EdgeContainer(Generic):
 
 
 class QoDContainer(Generic):
-    def __init__(self, orchestrator, config="./conf/image4QoD.json"):
+    def __init__(self, orchestrator, config="./conf/image4qod.json"):
         self.config = utils.load_config(config)
 
         self.orchestrator = orchestrator
@@ -308,7 +307,6 @@ class QoDContainer(Generic):
                     "image": self.config["image_qod_default"],
                     "options": {
                         "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
-                        "--mount": "",
                     },
                     "arguments": [self.orchestrator.url_storage_service, params[""]],
                 }
