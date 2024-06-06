@@ -8,8 +8,6 @@
       "read_info": {
         "method": "local",
         "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_1.csv",
-        "format": "",
-        "params": "",
         "reader_module": {
           "storage_ref_id": "665d497f52c81403417a6a4e",
           "module_name": "data_reader",
@@ -23,8 +21,6 @@
       "read_info": {
         "method": "local",
         "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_2.csv",
-        "format": "",
-        "params": "",
         "reader_module": {
           "storage_ref_id": "665d497f52c81403417a6a4e",
           "module_name": "data_reader",

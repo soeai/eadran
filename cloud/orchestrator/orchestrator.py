@@ -131,7 +131,7 @@ class Orchestrator(object):
                     resp_content = req_msg['content']
                     params = {"edge_id": msg_task['edge_id'],
                               "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
-                              "read_info": resp_content['read_info'],
+                              "data_conf": resp_content['read_info'],
                               "...": "..."}
 
                     request_id = str(uuid.uuid4())

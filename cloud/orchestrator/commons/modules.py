@@ -138,11 +138,11 @@ class Config4Edge(Generic):
 
         for dataset in params["datasets"]:
             # Prepare data configuration
-            data_conf = dataset["read_info"]["reader_module"]
-            if dataset["read_info"]["method"] == "local":
-                data_conf["data_path"] = dataset["read_info"]["location"].split("/")[-1]
-            else:
-                data_conf["data_path"] = dataset["read_info"]["location"]
+            # data_conf = dataset["read_info"]["reader_module"]
+            # if dataset["read_info"]["method"] == "local":
+            #     data_conf["data_path"] = dataset["read_info"]["location"].split("/")[-1]
+            # else:
+            #     data_conf["data_path"] = dataset["read_info"]["location"]
 
             # Generate configuration
             generated_config = {
@@ -152,7 +152,7 @@ class Config4Edge(Generic):
                 "edge_id": dataset["edge_id"],
                 "monitor_interval": 10,
                 "fed_server": f"{params['start_fed_resp']['ip']}:{params['start_fed_resp']['fed_server_port']}",
-                "data_conf": data_conf,
+                "data_conf": dataset["read_info"],
                 "model_conf": params["model_conf"],
                 "requirement_libs": params["requirement_libs"],
                 "pre_train_model": params["pre_train_model"],
@@ -288,15 +288,15 @@ class EdgeContainer(Generic):
 
 
 class QoDContainer(Generic):
-    def __init__(self, orchestrator, config="./conf/image4qod.json"):
-        self.config = utils.load_config(config)
-
+    def __init__(self, orchestrator):
         self.orchestrator = orchestrator
 
     def send_command(self, edge_command):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
+        # generate config and post to storage service
+        storage_ref_id = None
         command = {
             "edge_id": params["edge_id"],
             "request_id": params["request_id"],
@@ -304,16 +304,16 @@ class QoDContainer(Generic):
             "params": "start",
             "docker": [
                 {
-                    "image": self.config["image_qod_default"],
+                    "image": self.orchestrator.config['eadran_qod_image_name'],
                     "options": {
                         "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
                     },
-                    "arguments": [self.orchestrator.url_storage_service, params[""]],
+                    "arguments": [self.orchestrator.url_storage_service, storage_ref_id],
                 }
             ],
         }
         if params["read_info"]["method"] == "local":
-            fullpath = params["read_info"]["location"]
+            fullpath = params["data_conf"]["location"]
             filename = fullpath.split("/")[-1]
             folder_path = fullpath[: fullpath.index(filename)]
             mount = "type=bind,source={},target={}".format(folder_path, "/data/")

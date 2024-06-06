@@ -17,11 +17,14 @@
             "get_weights": "get_weights"
         }
     },
-    "data_conf": {
-        "storage_ref_id": "6639e9b2871c7abc5338d72a",
-        "module_name": "data_reader",
-        "function_map": "read_data",
-        "data_path": "/data/fraudTrain_processed_SMOTE_1.csv"
+    "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/Dowloads/fraudTrain_processed_SMOTE_1.csv",
+        "reader_module": {
+            "storage_ref_id": "6639e9b2871c7abc5338d72a",
+            "module_name": "data_reader",
+            "function_map": "read_data"
+        }
     },
     "pre_train_model": {
       "storage_ref_id": "link to get pre-train model from storage service"

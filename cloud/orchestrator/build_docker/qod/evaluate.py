@@ -190,18 +190,19 @@ if __name__ == '__main__':
     print(client_conf)
 
     # download code of DPs to read data
-    urlretrieve(url_service + client_conf['data_conf']['storage_ref_id'],
-                client_conf['data_conf']['module_name'] + ".py")
+    urlretrieve(url_service + client_conf['data_conf']['reader_module']['storage_ref_id'],
+                client_conf['data_conf']['reader_module']['module_name'] + ".py")
 
     # import custom code of market consumer
     # dps_custom_reader_module = __import__(client_conf['model_conf']['module_name'])
 
     # logging.info("Load data reader module successfully -->: " + str(dps_custom_reader_module))
     # import code of data provider to read data
-    dps_read_data_function = getattr(__import__(client_conf['data_conf']['module_name']),
-                                     client_conf['data_conf']["function_map"])
+    dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
+                                   client_conf['data_conf']['reader_module']["function_map"])
 
-    X, y = dps_read_data_function("/data/" + client_conf['data_conf']['data_path'])
+    filename = client_conf['data_conf']['location'].split('/')[-1]
+    X, y = dps_read_data_module("/data/" + filename)
 
     qod_metrics = {"class_overlap": class_overlap(X,y),
                    "class_parity": class_parity(y),
