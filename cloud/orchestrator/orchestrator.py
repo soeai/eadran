@@ -58,7 +58,7 @@ def data_extraction(params, request_id, _orchestrator=None):
         count = 0
         while True:
             url_mgt_service = (
-                _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
+                    _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
             )
             edge_check = requests.get(url_mgt_service).json()
             if edge_check["status"] == 0:
@@ -136,6 +136,22 @@ class Orchestrator(HostObject):
                     request_id = str(uuid.uuid4())
                     self.processing_tasks[request_id] = (time.time(), req_msg)
                     start_qod_container_at_edge(params, request_id, self)
+        # testing for qod service
+        elif msg_type == Protocol.DATA_QOD_COMMAND:
+            logging.info(
+                "Received a response of request: [{}] from [{}]".format(
+                    req_msg["response_id"], req_msg["responder"]
+                )
+            )
+            params = {
+                "edge_id": req_msg["edge_id"],
+                "module_id": req_msg["module_id"],
+                "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
+                "data_conf": req_msg["read_info"],
+            }
+            request_id = str(uuid.uuid4())
+            self.processing_tasks[request_id] = (time.time(), req_msg)
+            start_qod_container_at_edge(params, request_id, self)
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)
