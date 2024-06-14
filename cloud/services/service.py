@@ -16,7 +16,7 @@ import pymongo
 from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
-from qoa4ml.collector.amqp_collector import Amqp_Collector
+from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import hashlib
 from cloud.commons.default import Service, Protocol
@@ -229,7 +229,7 @@ class ComputingResourceHealth(Resource):
         return {"status": 1, "message": "missing query: id=???"}, 404
 
 
-class ResourceHealthReport(object):
+class ResourceHealthReport(HostObject):
     def __init__(self, _config):
         self.amqp_collector = Amqp_Collector(_config["amqp_health_report"], self)
         Thread(target=self.start_amqp).start()
@@ -246,7 +246,7 @@ class ResourceHealthReport(object):
         self.collection.insert_one(req_msg)
 
     def start_amqp(self):
-        self.amqp_collector.start()
+        self.amqp_collector.start_collecting()
 
 
 class MetadataMgt(Resource):
@@ -554,7 +554,8 @@ class UserMgt(Resource):
                 else:
                     return {"status": 1, "message": "user does not exist."}, 404
 
-        return {"status": 0, "result": response}
+                return {"status": 0, "result": response}
+        return {"status": 1, "message": "query string must provided."}, 400
 
     def post(self):
         # check_login = required_auth()
@@ -580,7 +581,8 @@ class UserMgt(Resource):
 
             response = str(self.collection.insert_one(req_args).inserted_id)
 
-        return {"status": 0, "message": response}
+            return {"status": 0, "message": response}
+        return {"status": 1, "message": "content must be JSON."}, 400
 
     # def put(self):
     #     if request.is_json:
@@ -820,10 +822,10 @@ def required_auth():
 
 class Queue(object):
     def __init__(self, _config):
-        self.amqp_queue_out = Amqp_Connector(_config, self)
+        self.amqp_queue_out = Amqp_Connector(_config)
 
     def send(self, msg):
-        self.amqp_queue_out.send_data(json.dumps(msg))
+        self.amqp_queue_out.send_report(json.dumps(msg))
 
 
 if __name__ == "__main__":

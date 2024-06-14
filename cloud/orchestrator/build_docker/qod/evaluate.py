@@ -8,7 +8,7 @@ from urllib.request import urlretrieve
 
 import numpy as np
 import pandas as pd
-import qoa4ml.qoaUtils as qoa_utils
+import qoa4ml.utils.qoa_utils as qoa_utils
 from cleanlab.filter import find_label_issues
 from imblearn.under_sampling import TomekLinks
 from sklearn.ensemble import RandomForestClassifier

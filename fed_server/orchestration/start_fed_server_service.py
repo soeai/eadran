@@ -13,22 +13,22 @@ from cloud.commons.default import Protocol
 import docker
 import psutil
 import socket
-import qoa4ml.qoaUtils as utils
-from qoa4ml.collector.amqp_collector import Amqp_Collector
+import qoa4ml.utils.qoa_utils as utils
+from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
-class FedServerOrchestrator(object):
+class FedServerOrchestrator(HostObject):
     def __init__(self, config, ip=None):
         self.ip = ip
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
         self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
-        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'], self)
+        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'])
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
@@ -66,10 +66,10 @@ class FedServerOrchestrator(object):
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
-                self.amqp_queue_out.send_data(json.dumps(msg))
+                self.amqp_queue_out.send_report(json.dumps(msg))
 
     def start(self):
-        self.amqp_queue_in.start()
+        self.amqp_queue_in.start_collecting()
 
     def start_amqp(self):
         self.amqp_thread.start()
@@ -119,7 +119,7 @@ class FedServerOrchestrator(object):
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", container_name])
                 subprocess.run(["docker", "remove", container_name])
-                self.containers.pop(container_name, None)
+                self.containers.pop(container_name)
                 logging.info("The container [{}] has been stopped...".format(container_name))
         except Exception as e:
             logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
@@ -148,7 +148,7 @@ class FedServerOrchestrator(object):
 
         while True:
             # check how many container running
-            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
+            self.amqp_queue_out.send_report(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
 
             health_post['health']['mem'] = psutil.virtual_memory()[1]

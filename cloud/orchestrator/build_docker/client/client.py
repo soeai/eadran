@@ -6,7 +6,7 @@ import argparse
 import time
 from urllib.request import urlretrieve
 import flwr as fl
-import qoa4ml.qoaUtils as qoa_utils
+import qoa4ml.utils.qoa_utils as qoa_utils
 # from qoa4ml import QoaClient
 import numpy as np
 

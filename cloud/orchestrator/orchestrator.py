@@ -3,9 +3,9 @@ import json
 import time
 import uuid
 
-from qoa4ml.collector.amqp_collector import Amqp_Collector
+from qoa4ml.collector.amqp_collector import Amqp_Collector,HostObject
 from qoa4ml.connector.amqp_connector import Amqp_Connector
-import qoa4ml.qoaUtils as utils
+import qoa4ml.utils.qoa_utils as utils
 from threading import Thread
 from cloud.commons.default import Protocol
 from cloud.orchestrator.commons.pipeline import Pipeline
@@ -79,11 +79,11 @@ def data_extraction(params, request_id, _orchestrator=None):
                 break
 
 
-class Orchestrator(object):
+class Orchestrator(HostObject):
     def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
         self.amqp_queue_in = Amqp_Collector(self.config["amqp_in"], self)
-        self.amqp_queue_out = Amqp_Connector(self.config["amqp_out"], self)
+        self.amqp_queue_out = Amqp_Connector(self.config["amqp_out"])
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config["url_mgt_service"]
         self.url_storage_service = self.config["url_storage_service"]
@@ -138,10 +138,10 @@ class Orchestrator(object):
                     start_qod_container_at_edge(params, request_id, self)
 
     def send(self, msg, routing_key=None):
-        self.amqp_queue_out.send_data(json.dumps(msg), routing_key=routing_key)
+        self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)
 
     def start_receive(self):
-        self.amqp_queue_in.start()
+        self.amqp_queue_in.start_collecting()
 
     def start(self):
         self.thread.start()
