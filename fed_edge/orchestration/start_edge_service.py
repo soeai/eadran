@@ -16,21 +16,23 @@ import docker
 import psutil
 import qoa4ml.utils.qoa_utils as utils
 from cloud.commons.default import Protocol
-from qoa4ml.collector.amqp_collector import Amqp_Collector
-from qoa4ml.connector.amqp_connector import Amqp_Connector
+from qoa4ml.collector.amqp_collector import Amqp_Collector, AMQPCollectorConfig, HostObject
+from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
-class EdgeOrchestrator(object):
+class EdgeOrchestrator(HostObject):
     def __init__(self, config, ):
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
-        self.amqp_queue_in = Amqp_Collector(self.config['amqp_in'], self)
-        self.amqp_queue_out = Amqp_Connector(self.config['amqp_out'])
+        self.amqp_collector_config = AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf'])
+        self.amqp_queue_in = Amqp_Collector(self.amqp_collector_config, self)
+        self.amqp_connector_config = AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf'])
+        self.amqp_queue_out = Amqp_Connector(self.amqp_connector_config)
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
@@ -165,7 +167,7 @@ class EdgeOrchestrator(object):
 
         health_post = {
             "edge_id": self.edge_id,
-            "routing_key": self.config['amqp_in']['in_routing_key'],
+            "routing_key": self.config['amqp_in']['amqp_collector']['conf']['in_routing_key'],
             "health": {
                 "mem": psutil.virtual_memory()[1],
                 "cpu": psutil.cpu_count(),
@@ -175,7 +177,7 @@ class EdgeOrchestrator(object):
         }
 
         while True:
-            self.amqp_queue_out.send_data(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
+            self.amqp_queue_out.send_report(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
             time.sleep(self.config['report_delay_time'])
 
             health_post['health']['mem'] = psutil.virtual_memory()[1]

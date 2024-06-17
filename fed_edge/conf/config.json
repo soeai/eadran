@@ -1,17 +1,27 @@
 {
   "edge_id": "edge001",
   "amqp_in": {
-    "end_point":"192.168.10.235",
-    "exchange_name": "fedmarketplace",
-    "exchange_type": "topic",
-    "in_routing_key": "edge.#",
-    "in_queue": "queue_edge001"
+    "amqp_collector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "192.168.10.235",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "in_routing_key": "edge.#",
+        "in_queue": "queue_edge001"
+      }
+    }
   },
   "amqp_out": {
-    "end_point":"192.168.10.235",
-    "exchange_name": "fedmarketplace",
-    "exchange_type": "topic",
-    "out_routing_key": "orchestrator.edge001"
+    "amqp_connector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "192.168.10.235",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "out_routing_key": "orchestrator.edge001"
+      }
+    }
   },
   "data":{
     "owner_id": "dc001",

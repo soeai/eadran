@@ -3,8 +3,8 @@ import json
 import time
 import uuid
 
-from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject
-from qoa4ml.connector.amqp_connector import Amqp_Connector
+from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject, AMQPCollectorConfig
+from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
 import qoa4ml.utils.qoa_utils as utils
 from threading import Thread
 from cloud.commons.default import Protocol
@@ -82,8 +82,10 @@ def data_extraction(params, request_id, _orchestrator=None):
 class Orchestrator(HostObject):
     def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
-        self.amqp_queue_in = Amqp_Collector(self.config["amqp_in"], self)
-        self.amqp_queue_out = Amqp_Connector(self.config["amqp_out"])
+        self.amqp_collector_config = AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf'])
+        self.amqp_queue_in = Amqp_Collector(self.amqp_collector_config, self)
+        self.amqp_connector_config = AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf'])
+        self.amqp_queue_out = Amqp_Connector(self.amqp_connector_config)
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config["url_mgt_service"]
         self.url_storage_service = self.config["url_storage_service"]
