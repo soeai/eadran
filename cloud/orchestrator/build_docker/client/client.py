@@ -7,7 +7,10 @@ import time
 from urllib.request import urlretrieve
 import flwr as fl
 import qoa4ml.utils.qoa_utils as qoa_utils
-# from qoa4ml import QoaClient
+from qoa4ml.qoa_client import QoaClient
+from qoa4ml.reports.ml_report_model import MlQualityReport
+from qoa4ml.reports.resources_report_model import ResourceReport
+from qoa4ml.config.configs import ClientInfo, ClientConfig
 import numpy as np
 
 
@@ -67,7 +70,7 @@ class FedMarkClient(fl.client.NumPyClient):
     def fit(self, parameters, config):  # type: ignore
         if self.qoa_monitor is not None:
             # System monitoring
-            self.qoa_monitor.get()['train_round'] = config['fit_round']
+            # self.qoa_monitor.get()['train_round'] = config['fit_round']
             qoa_utils.procMonitorFlag = True
             qoa_utils.docker_monitor(self.qoa_monitor, self.monitor_interval, self.metrics)
 
@@ -84,14 +87,13 @@ class FedMarkClient(fl.client.NumPyClient):
 
         if self.qoa_monitor is not None:
             self.total_time += end_time - start_time
-
             # Report metric via QoA4ML
-            self.metrics['train_performance_after'].set(self.train_performance)
-            self.metrics['train_performance_before'].set(self.test_performance)
-            self.metrics['loss_value_before'].set(self.test_loss)
-            self.metrics['loss_value_after'].set(self.train_loss)
-
-            self.metrics['duration'].set(np.round(self.total_time, 0))
+            self.qoa_monitor.observe_metric('train_performance_after',self.train_performance)
+            self.qoa_monitor.observe_metric('train_performance_before',self.test_performance)
+            self.qoa_monitor.observe_metric('loss_value_before',self.test_loss)
+            self.qoa_monitor.observe_metric('loss_value_after',self.train_loss)
+            self.qoa_monitor.observe_metric('train_round', config['fit_round'])
+            self.qoa_monitor.observe_metric('duration',np.round(self.total_time, 0))
             # Stop monitoring
             qoa_utils.proc_monitor_flag = False
 
@@ -141,6 +143,18 @@ if __name__ == '__main__':
     X, y = dps_read_data_module("/data/" + filename)
 
     # Create monitor
+    client_info = ClientInfo()
+    client_info.user_id = client_conf['consumer_id']
+    client_info.application_name = client_conf['model_id']
+    client_info.id = client_conf['edge_id']
+    client_info.functionality = client_conf['dataset_id']
+    client_info.stage_id = 1
+    client_info.run_id = client_conf['run_id']
+    client_info.role = 'fml'
+    cconfig = ClientConfig()
+    cconfig.client = client_info
+    qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
+
     # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
     #                                      "model_id":client_conf['model_id'],
     #                                      "run_id": client_conf['run_id'],
@@ -155,9 +169,8 @@ if __name__ == '__main__':
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
                                x_train=X,
-                               y_train=y)
-    # ,
-    # qoa_monitor=qoa_client,
-    # monitor_interval=int(client_conf['monitor_interval']))
+                               y_train=y,
+                               qoa_monitor=qoa_client,
+                               monitor_interval=int(client_conf['monitor_interval']))
 
     fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
