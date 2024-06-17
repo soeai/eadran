@@ -2,17 +2,27 @@
   "edge_id": "fedserver001",
   "ip": "192.168.80.65",
   "amqp_in": {
-    "end_point":"192.168.10.235",
-    "exchange_name": "fedmarketplace",
-    "exchange_type": "topic",
-    "in_routing_key": "edge.#",
-    "in_queue": "queue_fedserver001"
+    "amqp_collector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "192.168.10.235",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "in_routing_key": "edge.#",
+        "in_queue": "queue_fedserver001"
+      }
+    }
   },
   "amqp_out": {
-    "end_point":"192.168.10.235",
-    "exchange_name": "fedmarketplace",
-    "exchange_type": "topic",
-    "out_routing_key": "orchestrator.fedserver001"
+    "amqp_connector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "192.168.10.235",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "out_routing_key": "orchestrator.fedserver001"
+      }
+    }
   },
   "docker": {
     "conf_path": "",
