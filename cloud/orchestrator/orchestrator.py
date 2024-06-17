@@ -3,7 +3,7 @@ import json
 import time
 import uuid
 
-from qoa4ml.collector.amqp_collector import Amqp_Collector,HostObject
+from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject
 from qoa4ml.connector.amqp_connector import Amqp_Connector
 import qoa4ml.utils.qoa_utils as utils
 from threading import Thread
