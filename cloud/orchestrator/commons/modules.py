@@ -1,6 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
-import qoa4ml.qoaUtils as utils
+import qoa4ml.utils.qoa_utils as utils
 import traceback, sys
 import requests, json, os, time
 import logging
