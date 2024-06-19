@@ -59,7 +59,20 @@ class EdgeMgt(Resource):
                     response = result[0]
                     response.pop("_id", None)
                     return {"status": 0, "result": response}
-
+                else:
+                    return {"status": 1, "message": "your edge does not exist."}, 404
+            if query[0] == "owner":
+                result = list(
+                    self.collection.find({"owner": query[1]}).sort(
+                        [("timestamp", pymongo.DESCENDING)]
+                    )
+                )
+                if len(result) > 0:
+                    for r in result:
+                        r.pop("_id", None)
+                    return {"status": 0, "result": result}
+                else:
+                    return {"status": 0, "result": []}
         return {"status": 1, "message": "missing query: id=???"}, 404
 
     def post(self):
