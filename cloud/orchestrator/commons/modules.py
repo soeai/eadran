@@ -4,7 +4,7 @@ import qoa4ml.utils.qoa_utils as utils
 import traceback, sys
 import requests, json, os, time
 import logging
-
+logging.basicConfig(level=logging.INFO)
 
 class Generic(ABC):
     @abstractmethod
@@ -214,6 +214,7 @@ class EdgeContainer(Generic):
     def exec(self, params):
         configs = params["config4edge_resp"]
         temps = configs.copy()
+        logging.info(f"Edge id: template id  =>   {temps}")
         command_template = {
             "edge_id": "",
             "request_id": params["request_id"],
@@ -267,22 +268,20 @@ class EdgeContainer(Generic):
                     # remove edge_id
                     temps.pop(edge_id, None)
 
-                    # print('Popped, temps:', temps)   #test
             if len(temps) == 0:
-                # print('Breaking...')
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
             logging.info("Waiting to start {} more edge(s)".format(len(temps)))
-        time.sleep(5 * 60)
+            time.sleep(5 * 60)
 
         logging.info("Sent command to all edges.")
 
-        # after edge show the result.
-        if configs["create_qod"]:
-            qod_container = QoDContainer(orchestrator=self.orchestrator)
-            qod_container.exec(params["config4edge_resp"])
-        else:
-            pass
+        # # after edge show the result.
+        # if configs["create_qod"]:
+        #     qod_container = QoDContainer(orchestrator=self.orchestrator)
+        #     qod_container.exec(params["config4edge_resp"])
+        # else:
+        #     pass
 
 
 class QoDContainer(Generic):
