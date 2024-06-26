@@ -29,7 +29,7 @@
              "amqp_collector": {
                  "class": "amqp",
                  "conf": {
-                     "end_point": "192.168.10.235",
+                     "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
                      "exchange_name": "fedmarketplace",
                      "exchange_type": "topic",
                      "in_routing_key": "healthreport.#",
@@ -43,7 +43,7 @@
             "amqp_connector": {
                 "class": "amqp",
                 "conf": {
-                    "end_point": "192.168.10.235",
+                    "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
                     "exchange_name": "fedmarketplace",
                     "exchange_type": "topic",
                     "out_routing_key": "orchestrator.service"
