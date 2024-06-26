@@ -385,9 +385,7 @@ class MetadataMgt(Resource):
             return check_login
 
         req_args = request.query_string.decode("utf-8").split("&")
-        # get param from args here
         if len(req_args) > 0:
-            # get param from args here
             query = req_args[0].split("=")
             if query[0] == "id":
                 r = self.collection.find_one_and_delete({"dataset_id": query[1]})
@@ -395,9 +393,14 @@ class MetadataMgt(Resource):
                     "status": 0,
                     "message": "deleted '{}'".format(r.get("dataset_id")),
                 }
+            elif query[0] == "owner":
+                result = self.collection.delete_many({"owner": query[1]})
+                return {
+                    "status": 0,
+                    "message": "deleted {} records for owner '{}'".format(result.deleted_count, query[1]),
+                }
 
-        return {"status": 1, "message": "missing query: id=???"}, 404
-
+        return {"status": 1, "message": "missing query: id=??? or owner=???"}, 404
 
 class ModelMgt(Resource):
     def __init__(self, **kwargs) -> None:
