@@ -3,7 +3,7 @@
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "192.168.10.235",
+        "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_queue": "orchestrator.queue.in",
@@ -15,7 +15,7 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point":"192.168.10.235",
+        "end_point":"amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "out_routing_key": "edge"
@@ -32,8 +32,8 @@
   "sample_rate": 50,
   "timer": 10,
 
-  "url_mgt_service": "http://192.168.80.194:8080",
-  "url_storage_service": "http://192.168.80.194:8081",
+  "url_mgt_service": "http://192.168.80.57:8080",
+  "url_storage_service": "http://192.168.80.57:8081",
   "server_id": "fedserver001",
   "fed_server_image_name": "trungdonggg/training-server",
   "fed_server_image_port": 8080,

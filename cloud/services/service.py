@@ -839,8 +839,7 @@ def required_auth():
 
 class Queue(object):
     def __init__(self, _config):
-        self.amqp_connector_config = AMQPConnectorConfig(**_config['amqp_out']['amqp_connector']['conf'])
-        self.amqp_queue_out = Amqp_Connector(self.amqp_connector_config)
+        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**_config['amqp_out']['amqp_connector']['conf']))
 
     def send(self, msg):
         self.amqp_queue_out.send_report(json.dumps(msg))

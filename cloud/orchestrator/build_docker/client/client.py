@@ -142,35 +142,47 @@ if __name__ == '__main__':
     filename = client_conf['data_conf']['location'].split('/')[-1]
     X, y = dps_read_data_module("/data/" + filename)
 
-    # Create monitor
-    client_info = ClientInfo()
-    client_info.user_id = client_conf['consumer_id']
-    client_info.application_name = client_conf['model_id']
-    client_info.id = client_conf['edge_id']
-    client_info.functionality = client_conf['dataset_id']
-    client_info.stage_id = 1
-    client_info.run_id = client_conf['run_id']
-    client_info.role = 'fml'
-    cconfig = ClientConfig()
-    cconfig.client = client_info
-    qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
 
-    # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
-    #                                      "model_id":client_conf['model_id'],
-    #                                      "run_id": client_conf['run_id'],
-    #                                      "dataset_id": client_conf['dataset_id'],
-    #                                      "edge_id": client_conf['edge_id'],
-    #                                      "train_round": 1},
-    #                                      connector_conf=connector_conf)
-    # qoa_client.add_metric(metric_conf['quality_of_model'], category='quality_of_model')
-    # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
 
-    # temporary does not monitor and report to assessment service
+
+
+    # # Create monitor
+    # client_info = ClientInfo()
+    # client_info.user_id = client_conf['consumer_id']
+    # client_info.application_name = client_conf['model_id']
+    # client_info.id = client_conf['edge_id']
+    # client_info.functionality = client_conf['dataset_id']
+    # client_info.stage_id = 1
+    # # client_info.run_id = client_conf['run_id']
+    # client_info.run_id = 1
+    # client_info.role = 'fml'
+    # cconfig = ClientConfig()
+    # cconfig.client = client_info
+    # qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
+    #
+    # # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
+    # #                                      "model_id":client_conf['model_id'],
+    # #                                      "run_id": client_conf['run_id'],
+    # #                                      "dataset_id": client_conf['dataset_id'],
+    # #                                      "edge_id": client_conf['edge_id'],
+    # #                                      "train_round": 1},
+    # #                                      connector_conf=connector_conf)
+    # # qoa_client.add_metric(metric_conf['quality_of_model'], category='quality_of_model')
+    # # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
+    #
+    # # temporary does not monitor and report to assessment service
+
+
+
+
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
                                x_train=X,
                                y_train=y,
-                               qoa_monitor=qoa_client,
+                               # qoa_monitor=qoa_client,
                                monitor_interval=int(client_conf['monitor_interval']))
+
+
+
 
     fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
