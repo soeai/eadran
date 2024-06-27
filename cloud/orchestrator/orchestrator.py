@@ -121,23 +121,24 @@ class Orchestrator(HostObject):
                     req_msg["response_id"], req_msg["responder"]
                 )
             )
-            _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
-            if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
-                # if consumer as to evaluate qod while sending a data query, DO IT
-                if msg_task["content"]["data_request"]["qod"]["evaluate"]:
-                    # Build config for edge here from msg_task and res_msg (response from edge data extraction)
-                    # send command to QoD Evaluation
-                    resp_content = req_msg["content"]
-                    params = {
-                        "edge_id": msg_task["edge_id"],
-                        "module_id": msg_task["module_id"],
-                        "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
-                        "data_conf": resp_content["read_info"],
-                    }
+            if req_msg["response_id"] in self.processing_tasks.keys():
+                _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
+                if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
+                    # if consumer as to evaluate qod while sending a data query, DO IT
+                    if msg_task["content"]["data_request"]["qod"]["evaluate"]:
+                        # Build config for edge here from msg_task and res_msg (response from edge data extraction)
+                        # send command to QoD Evaluation
+                        resp_content = req_msg["content"]
+                        params = {
+                            "edge_id": msg_task["edge_id"],
+                            "module_id": msg_task["module_id"],
+                            "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
+                            "data_conf": resp_content["read_info"],
+                        }
 
-                    request_id = str(uuid.uuid4())
-                    self.processing_tasks[request_id] = (time.time(), req_msg)
-                    start_qod_container_at_edge(params, request_id, self)
+                        request_id = str(uuid.uuid4())
+                        self.processing_tasks[request_id] = (time.time(), req_msg)
+                        start_qod_container_at_edge(params, request_id, self)
         # testing for qod service
         elif msg_type == Protocol.DATA_QOD_COMMAND:
             logging.info(

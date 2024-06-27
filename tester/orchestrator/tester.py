@@ -6,12 +6,17 @@ import json
 with open("../../cloud/orchestrator/conf/config.json") as config_file:
     conf = json.load(config_file)
 
-with open("train_request.json") as train_request_file:
+with open("../../cloud/orchestrator/conf/image4edge.json") as config_file:
+    conf4e = json.load(config_file)
+
+
+with open("req.json") as train_request_file:
     params = json.load(train_request_file)
 
-orchestrator = Orchestrator("../../cloud/orchestrator/conf/config.json")
+orchestrator = Orchestrator(conf, conf4e)
 orchestrator.start()
 
 pipeline = Pipeline(task_list=[Config4Edge(orchestrator)],
                     params=params)
 pipeline.exec()
+
