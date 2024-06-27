@@ -385,9 +385,7 @@ class MetadataMgt(Resource):
             return check_login
 
         req_args = request.query_string.decode("utf-8").split("&")
-        # get param from args here
         if len(req_args) > 0:
-            # get param from args here
             query = req_args[0].split("=")
             if query[0] == "id":
                 r = self.collection.find_one_and_delete({"dataset_id": query[1]})
@@ -395,9 +393,14 @@ class MetadataMgt(Resource):
                     "status": 0,
                     "message": "deleted '{}'".format(r.get("dataset_id")),
                 }
+            elif query[0] == "owner":
+                result = self.collection.delete_many({"owner": query[1]})
+                return {
+                    "status": 0,
+                    "message": "deleted {} records for owner '{}'".format(result.deleted_count, query[1]),
+                }
 
-        return {"status": 1, "message": "missing query: id=???"}, 404
-
+        return {"status": 1, "message": "missing query: id=??? or owner=???"}, 404
 
 class ModelMgt(Resource):
     def __init__(self, **kwargs) -> None:
@@ -598,12 +601,36 @@ class UserMgt(Resource):
             return {"status": 0, "message": response}
         return {"status": 1, "message": "content must be JSON."}, 400
 
-    # def put(self):
-    #     if request.is_json:
-    #         args = request.get_json(force=True)
-    #     # get param from args here
-    #     return jsonify({'status': True})
-    #
+    def put(self):
+        if request.is_json:
+            req_args = request.get_json(force=True)
+            if "username" in req_args:
+                update_fields = {}
+                if "email" in req_args:
+                    update_fields["email"] = req_args["email"]
+                if "fullname" in req_args:
+                    update_fields["fullname"] = req_args["fullname"]
+                if "role" in req_args:
+                    update_fields["role"] = req_args["role"]
+
+                if update_fields:
+                    updated_user = self.collection.find_one_and_update(
+                        {"username": req_args["username"]},
+                        {"$set": update_fields},
+                        return_document=pymongo.ReturnDocument.AFTER,
+                    )
+                    if updated_user:
+                        updated_user.pop("_id", None)
+                        updated_user.pop("password", None)
+                        return {"status": 0, "result": updated_user}
+                    else:
+                        return {"status": 1, "message": "User not found."}, 404
+                else:
+                    return {"status": 1, "message": "No fields to update."}, 400
+            else:
+                return {"status": 1, "message": "Missing username in request."}, 400
+
+        return {"status": 1, "message": "Invalid JSON payload."}
     def delete(self):
         # check_login = required_auth()
         # if check_login is not None:
