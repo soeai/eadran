@@ -213,8 +213,8 @@ class EdgeContainer(Generic):
 
     def exec(self, params):
         configs = params["config4edge_resp"]
-        temps = configs.copy()
-        logging.info(f"Edge id: template id  =>   {temps}")
+        # temps = configs.copy()
+        logging.info(f"Edge id: template id  =>   {configs}")
         command_template = {
             "edge_id": "",
             "request_id": params["request_id"],
@@ -231,6 +231,7 @@ class EdgeContainer(Generic):
             ],
         }
 
+        self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
         while True:
             for edge_id in configs.keys():
                 logging.info("Starting Edge [{}]: ".format(edge_id))
@@ -244,7 +245,7 @@ class EdgeContainer(Generic):
                     command["docker"][0]["image"] = self.get_image(params["platform"])
                     command["docker"][0]["arguments"] = [
                         self.orchestrator.url_storage_service,
-                        temps[edge_id],
+                        configs[edge_id],
                     ]
 
                     for d in params["datasets"]:
@@ -266,12 +267,12 @@ class EdgeContainer(Generic):
 
                     logging.info("Sent command: {} to {}".format(command, edge_id))
                     # remove edge_id
-                    temps.pop(edge_id, None)
+                    # temps.pop(edge_id, None)
 
-            if len(temps) == 0:
+            if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
-            logging.info("Waiting to start {} more edge(s)".format(len(temps)))
+            logging.info("Waiting to start {} more edge(s)".format(len(self.orchestrator.handling_edges[params["request_id"]])))
             time.sleep(5 * 60)
 
         logging.info("Sent command to all edges.")

@@ -91,6 +91,7 @@ class Orchestrator(HostObject):
         self.url_storage_service = self.config["url_storage_service"]
         self.docker_image_conf = docker_image_conf
         self.processing_tasks = {}
+        self.handling_edges = {}
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
@@ -121,6 +122,7 @@ class Orchestrator(HostObject):
                     req_msg["response_id"], req_msg["responder"]
                 )
             )
+            self.handling_edges[req_msg["response_id"]].pop(req_msg["responder"], None)
             if req_msg["response_id"] in self.processing_tasks.keys():
                 _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
                 if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
