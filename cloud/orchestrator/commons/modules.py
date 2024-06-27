@@ -233,7 +233,7 @@ class EdgeContainer(Generic):
 
         self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
         while True:
-            for edge_id in configs.keys():
+            for edge_id in self.orchestrator.handling_edges[params["request_id"]]:
                 logging.info("Starting Edge [{}]: ".format(edge_id))
                 if not self.is_edge_ready(edge_id):
                     # SEND COMMAND TO START EDGE ---> json
@@ -272,8 +272,8 @@ class EdgeContainer(Generic):
             if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
-            logging.info("Waiting to start {} more edge(s)".format(len(self.orchestrator.handling_edges[params["request_id"]])))
-            time.sleep(5 * 60)
+            logging.info("Waiting to receive {} response(s) from edges".format(len(self.orchestrator.handling_edges[params["request_id"]])))
+            time.sleep(60)
 
         logging.info("Sent command to all edges.")
 
