@@ -23,50 +23,51 @@ class FedServerContainer(Generic):
         self.rabbit_image_port = orchestrator.config["rabbitmq_image_port"]
 
     def exec(self, params):
-        try:
-            response = params
-            if params is not None:  # check Param
-                # check service to make sure server is running well
-                url_mgt_service = (
-                    self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
-                )
-                server_check = requests.get(url_mgt_service).json()
-                if server_check["status"] == 0:
-                    command = {
-                        "edge_id": self.server_id,
-                        "request_id": params["request_id"],
-                        "command": "docker",
-                        "params": "start",
-                        "docker": [
-                            {
-                                "image": self.fed_server_image_name,
-                                "options": {
-                                    "--name": f"fed_server_container_{params['consumer_id']}",
-                                    "-p": [
-                                        f"{self.fed_server_image_port}:{self.fed_server_image_port}"
+        response = params
+        if params is not None:  # check Param
+            # check service to make sure server is running well
+            while True:
+                try:
+                    url_mgt_service = (
+                        self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
+                    )
+                    server_check = requests.get(url_mgt_service).json()
+                    if server_check["status"] == 0:
+                        command = {
+                            "edge_id": self.server_id,
+                            "request_id": params["request_id"],
+                            "command": "docker",
+                            "params": "start",
+                            "docker": [
+                                {
+                                    "image": self.fed_server_image_name,
+                                    "options": {
+                                        "--name": f"fed_server_container_{params['consumer_id']}",
+                                        "-p": [
+                                            f"{self.fed_server_image_port}:{self.fed_server_image_port}"
+                                        ],
+                                    },
+                                    "arguments": [
+                                        str(self.fed_server_image_port),
+                                        str(
+                                            params["model_conf"]["train_hyper_param"][
+                                                "epochs"
+                                            ]
+                                        ),
                                     ],
                                 },
-                                "arguments": [
-                                    str(self.fed_server_image_port),
-                                    str(
-                                        params["model_conf"]["train_hyper_param"][
-                                            "epochs"
-                                        ]
-                                    ),
-                                ],
-                            },
-                            {
-                                "image": self.rabbit_image_name,
-                                "options": {
-                                    "--name": f"rabbit_container_{params['consumer_id']}",
-                                    "-p": [
-                                        f"{self.rabbit_image_port}:{self.rabbit_image_port}"
-                                    ],
+                                {
+                                    "image": self.rabbit_image_name,
+                                    "options": {
+                                        "--name": f"rabbit_container_{params['consumer_id']}",
+                                        "-p": [
+                                            f"{self.rabbit_image_port}:{self.rabbit_image_port}"
+                                        ],
+                                    },
                                 },
-                            },
-                        ],
-                    }
-                    try:
+                            ],
+                        }
+                        # try:
                         logging.info(
                             "Sending command to server {}\n{}".format(
                                 self.server_id, command
@@ -80,28 +81,31 @@ class FedServerContainer(Generic):
                                 fed_server_ip, self.fed_server_image_port
                             )
                         )
-
-                    except Exception as e:
-                        logging.error(
-                            "[ERROR] - Error {} while send start fed command: {}".format(
-                                type(e), e.__traceback__
-                            )
+                        response["start_fed_resp"] = {
+                            "ip": fed_server_ip,
+                            "fed_server_port": self.fed_server_image_port,
+                            "rabbit_port": self.rabbit_image_port,
+                        }
+                        # except Exception as e:
+                        #     logging.error(
+                        #         "[ERROR] - Error {} while send start fed command: {}".format(
+                        #             type(e), e.__traceback__
+                        #         )
+                        #     )
+                        #     traceback.print_exception(*sys.exc_info())
+                        #     # response must be dictionary including IP of fed server
+                        break
+                    else:
+                        logging.info("Waiting Cloud Server for starting...")
+                        time.sleep(60)
+                except Exception as e:
+                    logging.error(
+                        "[ERROR] - Error {} while start FedServer: {}".format(
+                            type(e), e.__traceback__
                         )
-                        traceback.print_exception(*sys.exc_info())
-                        # response must be dictionary including IP of fed server
-                    response["start_fed_resp"] = {
-                        "ip": fed_server_ip,
-                        "fed_server_port": self.fed_server_image_port,
-                        "rabbit_port": self.rabbit_image_port,
-                    }
-
-        except Exception as e:
-            logging.error(
-                "[ERROR] - Error {} while start FedServer: {}".format(
-                    type(e), e.__traceback__
-                )
-            )
-            traceback.print_exception(*sys.exc_info())
+                    )
+                    traceback.print_exception(*sys.exc_info())
+                    break
 
         # need to return more info here to build docker
         return response
