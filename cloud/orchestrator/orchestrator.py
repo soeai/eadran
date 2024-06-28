@@ -82,10 +82,8 @@ def data_extraction(params, request_id, _orchestrator=None):
 class Orchestrator(HostObject):
     def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
-        self.amqp_collector_config = AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf'])
-        self.amqp_queue_in = Amqp_Collector(self.amqp_collector_config, self)
-        self.amqp_connector_config = AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf'])
-        self.amqp_queue_out = Amqp_Connector(self.amqp_connector_config)
+        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
+        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config["url_mgt_service"]
         self.url_storage_service = self.config["url_storage_service"]
@@ -95,6 +93,7 @@ class Orchestrator(HostObject):
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
+        # print(req_msg)
         msg_type = req_msg["type"]
         if msg_type == Protocol.MSG_REQUEST:
             logging.info(

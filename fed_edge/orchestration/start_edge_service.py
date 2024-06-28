@@ -29,10 +29,8 @@ class EdgeOrchestrator(HostObject):
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
-        self.amqp_collector_config = AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf'])
-        self.amqp_queue_in = Amqp_Collector(self.amqp_collector_config, self)
-        self.amqp_connector_config = AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf'])
-        self.amqp_queue_out = Amqp_Connector(self.amqp_connector_config)
+        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
+        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
@@ -40,19 +38,18 @@ class EdgeOrchestrator(HostObject):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
         # check if server sends command to this edge
         if req_msg['edge_id'] == self.edge_id or req_msg['edge_id'] == '*':
-            logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
             response = None
+            logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
             if req_msg['command'].lower() == 'docker':
-                if req_msg['command'].lower() == 'docker':
-                    if req_msg['params'].lower() == 'start':
-                        status = []
-                        for config in req_msg["docker"]:
-                            status.append(self.start_container(config))
-                        response = {
-                            "edge_id": self.edge_id,
-                            "status": int(sum(status)),
-                            "detail": status
-                        }
+                if req_msg['params'].lower() == 'start':
+                    status = []
+                    for config in req_msg["docker"]:
+                        status.append(self.start_container(config))
+                    response = {
+                        "edge_id": self.edge_id,
+                        "status": int(sum(status)),
+                        "detail": status
+                    }
                 elif req_msg['params'].lower() == 'stop':
                     status = []
                     for container in req_msg["containers"]:
@@ -65,6 +62,8 @@ class EdgeOrchestrator(HostObject):
             elif req_msg['command'].lower() == Protocol.DATA_EXTRACTION_COMMAND:
                 response = self.extract_data(req_msg)
 
+            logging.info(f"Response: {response}")
+
             # send response back to server
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
@@ -73,7 +72,9 @@ class EdgeOrchestrator(HostObject):
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
+                logging.info(f"Response message: {msg}")
                 self.amqp_queue_out.send_report(json.dumps(msg))
+            logging.info("Response message is None")
 
     def start(self):
         self.amqp_queue_in.start_collecting()
@@ -113,12 +114,12 @@ class EdgeOrchestrator(HostObject):
             logging.info("Start container result: {}".format(res))
 
             self.containers.append(config["options"]["--name"])
-            return res.returncode
+            return int(res.returncode)
 
         except Exception as e:
             logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
-        return 1
+            return 1
 
     def stop_container(self, container_name):
         try:
