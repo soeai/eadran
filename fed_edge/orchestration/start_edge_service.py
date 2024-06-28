@@ -74,7 +74,8 @@ class EdgeOrchestrator(HostObject):
                        "content": response}
                 logging.info(f"Response message: {msg}")
                 self.amqp_queue_out.send_report(json.dumps(msg))
-            logging.info("Response message is None")
+            else:
+                logging.info("Response message is None")
 
     def start(self):
         self.amqp_queue_in.start_collecting()
