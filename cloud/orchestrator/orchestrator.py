@@ -105,23 +105,38 @@ class Orchestrator(HostObject):
             request_id = str(uuid.uuid4())
             self.processing_tasks[request_id] = (time.time(), req_msg)
             if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
-                start_training_process(req_msg["content"], request_id, self)
+                Thread(target=start_training_process, args=(req_msg["content"], request_id, self)).start()
+                # start_training_process(req_msg["content"], request_id, self)
             elif req_msg["command"] == Protocol.START_CONTAINER_COMMAND:
-                start_container_at_edge(req_msg["content"], request_id, self)
+                Thread(target=start_container_at_edge, args=(req_msg["content"], request_id, self)).start()
+                # start_container_at_edge(req_msg["content"], request_id, self)
             elif req_msg["command"] == Protocol.STOP_CONTAINER_COMMAND:
-                stop_container_at_edge(req_msg["content"], request_id, self)
+                Thread(target=stop_container_at_edge, args=(req_msg["content"], request_id, self)).start()
+                # stop_container_at_edge(req_msg["content"], request_id, self)
             elif req_msg["command"] == Protocol.DATA_EXTRACTION_COMMAND:
-                data_extraction(req_msg["content"], request_id, self)
+                Thread(target=data_extraction, args=(req_msg["content"], request_id, self)).start()
+                # data_extraction(req_msg["content"], request_id, self)
             elif req_msg["command"] == Protocol.DATA_QOD_COMMAND:
-                start_qod_container_at_edge(req_msg["content"], request_id, self)
+                Thread(target=start_qod_container_at_edge, args=(req_msg["content"], request_id, self)).start()
+                # start_qod_container_at_edge(req_msg["content"], request_id, self)
 
+        # {'type': 'response',
+        #  'response_id': '54b8ed47-82e9-4e78-9efc-610728484dfa',
+        #  'responder': 'edge002',
+        #  'content':
+        #      {'edge_id': 'edge002',
+        #       'status': 0,
+        #       'detail': [0]}
+        #  }
         elif msg_type == Protocol.MSG_RESPONSE:
             logging.info(
                 "Received a response of request: [{}] from [{}]".format(
                     req_msg["response_id"], req_msg["responder"]
                 )
             )
-            self.handling_edges[req_msg["response_id"]].pop(req_msg["responder"], None)
+            if req_msg["responder"] in self.handling_edges[req_msg["response_id"]]:
+                self.handling_edges[req_msg["response_id"]].remove(req_msg["responder"])
+
             if req_msg["response_id"] in self.processing_tasks.keys():
                 _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
                 if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:

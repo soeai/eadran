@@ -1,6 +1,6 @@
 {
   "consumer_id": "dungcao",
-  "model_id": "tensorflow001",
+  "model_id": "tensorflow002",
   "datasets": [
     {
       "dataset_id": "fraud001",
@@ -8,8 +8,10 @@
       "read_info": {
         "method": "local",
         "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_1.csv",
+        "format": "",
+        "params": "",
         "reader_module": {
-          "storage_ref_id": "665d497f52c81403417a6a4e",
+          "storage_ref_id": "667a5a612ecb26801d0f3b31",
           "module_name": "data_reader",
           "function_map": "read_data"
         }
@@ -20,9 +22,26 @@
       "edge_id": "edge002",
       "read_info": {
         "method": "local",
-        "location": "/home/labsoe/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_2.csv",
+        "location": "/home/vy/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_2.csv",
+        "format": "",
+        "params": "",
         "reader_module": {
-          "storage_ref_id": "665d497f52c81403417a6a4e",
+          "storage_ref_id": "667a5a612ecb26801d0f3b31",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "fraud003",
+      "edge_id": "edge003",
+      "read_info": {
+        "method": "local",
+        "location": "/home/longnguyen/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_3.csv",
+        "format": "",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "667a5a612ecb26801d0f3b31",
           "module_name": "data_reader",
           "function_map": "read_data"
         }
@@ -32,7 +51,7 @@
   "platform": "tensorflow_cpu",
   "requirement_libs": [],
   "model_conf": {
-    "storage_ref_id": "665d494e52c81403417a6a4d",
+    "storage_ref_id": "667a5ab82ecb26801d0f3b32",
     "module_name": "model_tf",
     "function_map": {
       "train": "fit",
@@ -41,7 +60,7 @@
       "get_weights": "get_weights"
     },
     "train_hyper_param": {
-      "epochs": 10
+      "epochs": 100
     }
   },
   "pre_train_model": {

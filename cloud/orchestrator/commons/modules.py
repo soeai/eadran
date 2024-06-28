@@ -217,9 +217,6 @@ class EdgeContainer(Generic):
         return self.config["image_default"]
 
     def exec(self, params):
-        threading.Thread(target=self.exec_thread, args=(params,)).start()
-
-    def exec_thread(self, params):
         configs = params["config4edge_resp"]
         # temps = configs.copy()
         logging.info(f"Edge id: template id  =>   {configs}")
@@ -278,10 +275,11 @@ class EdgeContainer(Generic):
                     # temps.pop(edge_id, None)
 
             if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
+                self.orchestrator.handling_edges.pop(params["request_id"])
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
             logging.info("Waiting to receive {} response(s) from edges".format(len(self.orchestrator.handling_edges[params["request_id"]])))
-            time.sleep(5 * 60)
+            time.sleep(1 * 60)
 
         logging.info("Sent command to all edges.")
 
