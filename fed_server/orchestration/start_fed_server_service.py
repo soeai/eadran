@@ -61,6 +61,8 @@ class FedServerOrchestrator(HostObject):
                         "detail": status
                     }
 
+            logging.info(f"Response: {response}")
+
             if response is not None:
                 logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
                 # add header of message before responding
@@ -68,7 +70,10 @@ class FedServerOrchestrator(HostObject):
                        "response_id": req_msg['request_id'],
                        "responder": self.edge_id,
                        "content": response}
+                logging.info(f"Response message: {msg}")
                 self.amqp_queue_out.send_report(json.dumps(msg))
+            else:
+                logging.info("Response is None")
 
     def start(self):
         self.amqp_queue_in.start_collecting()

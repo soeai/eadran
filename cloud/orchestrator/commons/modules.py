@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import qoa4ml.utils.qoa_utils as utils
 import traceback, sys
 import requests, json, os, time
+import threading
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -216,6 +217,9 @@ class EdgeContainer(Generic):
         return self.config["image_default"]
 
     def exec(self, params):
+        threading.Thread(target=self.exec_thread, args=(params,)).start()
+
+    def exec_thread(self, params):
         configs = params["config4edge_resp"]
         # temps = configs.copy()
         logging.info(f"Edge id: template id  =>   {configs}")
@@ -287,7 +291,6 @@ class EdgeContainer(Generic):
         #     qod_container.exec(params["config4edge_resp"])
         # else:
         #     pass
-
 
 class QoDContainer(Generic):
     def __init__(self, orchestrator):
