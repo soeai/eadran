@@ -147,8 +147,8 @@ if __name__ == '__main__':
     client_info.id = client_conf['edge_id']
     client_info.name = client_conf['dataset_id']
     client_info.stage_id = 1
-    # client_info.run_id = client_conf['run_id']
-    client_info.run_id = 1
+    client_info.run_id = client_conf['run_id']
+    # client_info.run_id = 1
     client_info.role = 'fml'
     cconfig = ClientConfig()
     cconfig.client = client_info
