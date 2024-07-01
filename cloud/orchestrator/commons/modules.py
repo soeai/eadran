@@ -161,7 +161,17 @@ class Config4Edge(Generic):
                 "model_conf": params["model_conf"],
                 "requirement_libs": params["requirement_libs"],
                 "pre_train_model": params["pre_train_model"],
-            }
+                "amqp_connector": {
+                    "name": "amqp_connector",
+                    "connector_class": "AMQP",
+                    "config": {
+                        "end_point": params['start_fed_resp']['ip'],
+                        "exchange_name": "fml_model_report",
+                        "exchange_type": "topic",
+                        "out_routing_key": "service." + params["model_id"] + "_" + dataset["edge_id"]
+                        }
+                    }
+                }
 
             if dataset.get("create_qod"):
                 generated_config["create_qod"] = dataset["create_qod"]

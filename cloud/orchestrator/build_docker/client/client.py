@@ -9,13 +9,10 @@ import flwr as fl
 import qoa4ml.utils.qoa_utils as qoa_utils
 from qoa4ml.qoa_client import QoaClient
 from qoa4ml.reports.ml_report_model import MlQualityReport
-from qoa4ml.reports.resources_report_model import ResourceReport
+# from qoa4ml.reports.resources_report_model import ResourceReport
+# from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
 from qoa4ml.config.configs import ClientInfo, ClientConfig
 import numpy as np
-
-
-# quality_of_model_conf = {}
-# resource_monitor_conf = {}
 
 
 class FedMarkClient(fl.client.NumPyClient):
@@ -28,9 +25,10 @@ class FedMarkClient(fl.client.NumPyClient):
     #       get/set_weights
     #
 
-    def __init__(self, client_profile, custom_module, x_train, y_train,
-                 qoa_monitor=None,
-                 monitor_interval=1):
+    def __init__(self, client_profile, custom_module,
+                 x_train, y_train,
+                 x_eval=None, y_eval=None,
+                 qoa_monitor=None):
 
         self.model_train = getattr(custom_module, client_profile['model_conf']['function_map']['train'])
         self.model_evaluate = getattr(custom_module, client_profile['model_conf']['function_map']['evaluate'])
@@ -40,16 +38,16 @@ class FedMarkClient(fl.client.NumPyClient):
         self.client_profile = client_profile
         self.x_train = x_train
         self.y_train = y_train
+        self.x_eval = x_eval
+        self.y_eval = y_eval
         self.qoa_monitor = qoa_monitor
-        self.train_performance = 0
-        self.train_loss = 0
+        self.post_train_performance = 0
+        self.post_train_loss = 0
+        self.pre_train_performance = 0
+        self.pre_train_loss = 0
         self.test_performance = 0
         self.test_loss = 0
-        self.monitor_interval = monitor_interval
         self.total_time = 0
-
-        if qoa_monitor is not None:
-            self.metrics = self.qoa_monitor.get_metric()
 
     def get_parameters(self, config):
 
@@ -68,19 +66,19 @@ class FedMarkClient(fl.client.NumPyClient):
         pass
 
     def fit(self, parameters, config):  # type: ignore
-        if self.qoa_monitor is not None:
-            # System monitoring
-            # self.qoa_monitor.get()['train_round'] = config['fit_round']
-            qoa_utils.procMonitorFlag = True
-            qoa_utils.docker_monitor(self.qoa_monitor, self.monitor_interval, self.metrics)
+        # if self.qoa_monitor is not None:
+        #     # System monitoring
+        #     # self.qoa_monitor.get()['train_round'] = config['fit_round']
+        #     qoa_utils.procMonitorFlag = True
+        #     qoa_utils.docker_monitor(self.qoa_monitor, self.monitor_interval, self.metrics)
 
         start_time = time.time()
         # train
         self.model_set_weights(parameters)
         # get performance of first time
-        if self.test_performance == 0:
-            self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
-        self.train_performance, self.train_loss = self.model_train(self.x_train, self.y_train)
+        if self.pre_train_performance == 0:
+            self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
+        self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
 
         weight = self.model_get_weights()
         end_time = time.time()
@@ -88,36 +86,36 @@ class FedMarkClient(fl.client.NumPyClient):
         if self.qoa_monitor is not None:
             self.total_time += end_time - start_time
             # Report metric via QoA4ML
-            self.qoa_monitor.observe_metric('train_performance_after',self.train_performance)
-            self.qoa_monitor.observe_metric('train_performance_before',self.test_performance)
-            self.qoa_monitor.observe_metric('loss_value_before',self.test_loss)
-            self.qoa_monitor.observe_metric('loss_value_after',self.train_loss)
+            self.qoa_monitor.observe_metric('post_train_performance', self.post_train_performance)
+            self.qoa_monitor.observe_metric('pre_train_performance',self.pre_train_performance)
+            self.qoa_monitor.observe_metric('pre_loss_value',self.pre_train_loss)
+            self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
             self.qoa_monitor.observe_metric('train_round', config['fit_round'])
-            self.qoa_monitor.observe_metric('duration',np.round(self.total_time, 0))
-            # Stop monitoring
-            qoa_utils.proc_monitor_flag = False
+            self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
+            self.qoa_monitor.report()
 
-        return weight, len(self.x_train), {"performance": self.train_performance}
+        return weight, len(self.x_train), {"performance": self.post_train_performance}
 
     def evaluate(self, parameters, config):  # type: ignore
+        datasize = len(self.x_train)
         start_time = time.time()
         self.model_set_weights(parameters)
-        self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
+        if self.x_eval is not None:
+            self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
+            datasize = len(self.x_eval)
+        else:
+            self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
         end_time = time.time()
         self.total_time = end_time - start_time
-        return self.test_loss, len(self.x_train), {"performance": self.test_performance}
+        return self.test_loss, datasize, {"performance": self.test_performance}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
     parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
     parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
-    # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
-    # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
 
     args = parser.parse_args()
-    # print(args.)
-    # print(args.conf)
     url_service = args.service + "/storage/obj?id="
     client_conf = qoa_utils.load_config(args.conf)
 
@@ -142,24 +140,21 @@ if __name__ == '__main__':
     filename = client_conf['data_conf']['location'].split('/')[-1]
     X, y = dps_read_data_module("/data/" + filename)
 
-
-
-
-
-    # # Create monitor
-    # client_info = ClientInfo()
-    # client_info.user_id = client_conf['consumer_id']
-    # client_info.application_name = client_conf['model_id']
-    # client_info.id = client_conf['edge_id']
-    # client_info.functionality = client_conf['dataset_id']
-    # client_info.stage_id = 1
-    # # client_info.run_id = client_conf['run_id']
+    # # Create reporter
+    client_info = ClientInfo()
+    client_info.user_id = client_conf['consumer_id']
+    client_info.application_name = client_conf['model_id']
+    client_info.id = client_conf['edge_id']
+    client_info.name = client_conf['dataset_id']
+    client_info.stage_id = 1
+    client_info.run_id = client_conf['run_id']
     # client_info.run_id = 1
-    # client_info.role = 'fml'
-    # cconfig = ClientConfig()
-    # cconfig.client = client_info
-    # qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
-    #
+    client_info.role = 'fml'
+    cconfig = ClientConfig()
+    cconfig.client = client_info
+    cconfig.connector = client_conf['amqp_connector']
+    qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
+
     # # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
     # #                                      "model_id":client_conf['model_id'],
     # #                                      "run_id": client_conf['run_id'],
@@ -172,17 +167,10 @@ if __name__ == '__main__':
     #
     # # temporary does not monitor and report to assessment service
 
-
-
-
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
                                x_train=X,
                                y_train=y,
-                               # qoa_monitor=qoa_client,
-                               monitor_interval=int(client_conf['monitor_interval']))
-
-
-
+                               qoa_monitor=qoa_client)
 
     fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
