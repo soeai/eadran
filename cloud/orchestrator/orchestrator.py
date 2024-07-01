@@ -154,7 +154,7 @@ class Orchestrator(HostObject):
 
                         request_id = str(uuid.uuid4())
                         self.processing_tasks[request_id] = (time.time(), req_msg)
-                        start_qod_container_at_edge(params, request_id, self)
+                        Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
         # testing for qod service
         elif msg_type == Protocol.DATA_QOD_COMMAND:
             logging.info(
@@ -170,7 +170,7 @@ class Orchestrator(HostObject):
             }
             request_id = str(uuid.uuid4())
             self.processing_tasks[request_id] = (time.time(), req_msg)
-            start_qod_container_at_edge(params, request_id, self)
+            Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)
