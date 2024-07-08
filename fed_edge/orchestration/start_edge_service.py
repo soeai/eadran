@@ -29,7 +29,8 @@ class EdgeOrchestrator(HostObject):
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
-        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
+        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
+                                            self)
         self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
@@ -185,6 +186,12 @@ class EdgeOrchestrator(HostObject):
             health_post['health']['mem'] = psutil.virtual_memory()[1]
             health_post['health']['cpu'] = psutil.cpu_count()
 
+
+def container_monitor(amqp_connector, container_name):
+    connector = Amqp_Connector(AMQPConnectorConfig(amqp_connector))
+    dockerClient = docker.DockerClient()
+    containers = dockerClient.containers.list(all=True)
+    # for container in containers:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")

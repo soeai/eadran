@@ -5,7 +5,9 @@ import traceback, sys
 import requests, json, os, time
 import threading
 import logging
+
 logging.basicConfig(level=logging.INFO)
+
 
 class Generic(ABC):
     @abstractmethod
@@ -30,7 +32,7 @@ class FedServerContainer(Generic):
             while True:
                 try:
                     url_mgt_service = (
-                        self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
+                            self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                     )
                     server_check = requests.get(url_mgt_service).json()
                     if server_check["status"] == 0:
@@ -169,10 +171,10 @@ class Config4Edge(Generic):
                         "end_point": params['start_fed_resp']['ip'],
                         "exchange_name": "fml_model_report",
                         "exchange_type": "topic",
-                        "out_routing_key": "service." + params["model_id"] + "_" + dataset["edge_id"]
-                        }
+                        "out_routing_key": "service." + params["model_id"] + "." + dataset["edge_id"]
                     }
                 }
+            }
 
             if dataset.get("create_qod"):
                 generated_config["create_qod"] = dataset["create_qod"]
@@ -183,6 +185,7 @@ class Config4Edge(Generic):
             )
 
         params["config4edge_resp"] = config_id
+        params["amqp_connector"] = generated_config['amqp_connector']
         return params
 
 
@@ -197,7 +200,7 @@ class EdgeContainer(Generic):
     def is_edge_ready(self, edge_id):
         try:
             url_mgt_service = (
-                self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
+                    self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             )
             edge_check = requests.get(url_mgt_service).json()
             logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
@@ -230,7 +233,7 @@ class EdgeContainer(Generic):
     def exec(self, params):
         configs = params["config4edge_resp"]
         # temps = configs.copy()
-        logging.info(f"Edge id: template id  =>   {configs}")
+        logging.info(f"Edge id: template id  =>  {configs}")
         command_template = {
             "edge_id": "",
             "request_id": params["request_id"],
@@ -245,6 +248,7 @@ class EdgeContainer(Generic):
                     "arguments": [],
                 }
             ],
+            "amqp_connector": params["amqp_connector"]
         }
 
         self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
@@ -267,8 +271,8 @@ class EdgeContainer(Generic):
                     for d in params["datasets"]:
                         # if dataset on edge is local, we mount it into container
                         if (
-                            d["edge_id"] == edge_id
-                            and d["read_info"]["method"] == "local"
+                                d["edge_id"] == edge_id
+                                and d["read_info"]["method"] == "local"
                         ):
                             fullpath = d["read_info"]["location"]
                             filename = fullpath.split("/")[-1]
@@ -289,7 +293,8 @@ class EdgeContainer(Generic):
                 self.orchestrator.handling_edges.pop(params["request_id"])
                 break
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
-            logging.info("Waiting to receive {} response(s) from edges".format(len(self.orchestrator.handling_edges[params["request_id"]])))
+            logging.info("Waiting to receive {} response(s) from edges".format(
+                len(self.orchestrator.handling_edges[params["request_id"]])))
             time.sleep(1 * 60)
 
         logging.info("Sent command to all edges.")
@@ -300,6 +305,7 @@ class EdgeContainer(Generic):
         #     qod_container.exec(params["config4edge_resp"])
         # else:
         #     pass
+
 
 class QoDContainer(Generic):
     def __init__(self, orchestrator):
