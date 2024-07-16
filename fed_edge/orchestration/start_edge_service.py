@@ -45,7 +45,11 @@ class EdgeOrchestrator(HostObject):
                 if req_msg['params'].lower() == 'start':
                     status = []
                     for config in req_msg["docker"]:
-                        status.append(self.start_container(config))
+                        status.append(self.start_container(config, req_msg['request_id']))
+                        # start monitor
+                        Thread(target=container_monitor, args=(req_msg['amqp_connector'],
+                                                               config["options"]["--name"],
+                                                               req_msg['request_id'])).start()
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),
@@ -84,7 +88,7 @@ class EdgeOrchestrator(HostObject):
     def start_amqp(self):
         self.amqp_thread.start()
 
-    def start_container(self, config):
+    def start_container(self, config, request_id):
         try:
             # check container is running with the same name, stop it
             logging.info('Checking if a running container with the same name exists ...')
@@ -112,10 +116,13 @@ class EdgeOrchestrator(HostObject):
             if 'arguments' in config.keys():
                 command.extend(config['arguments'])
 
+            command.append(request_id) # will be attached in report model performance
+
             res = subprocess.run(command, capture_output=True)
             logging.info("Start container result: {}".format(res))
 
             self.containers.append(config["options"]["--name"])
+
             return int(res.returncode)
 
         except Exception as e:
@@ -187,11 +194,30 @@ class EdgeOrchestrator(HostObject):
             health_post['health']['cpu'] = psutil.cpu_count()
 
 
-def container_monitor(amqp_connector, container_name):
+def container_monitor(amqp_connector, container_name, request_id):
     connector = Amqp_Connector(AMQPConnectorConfig(amqp_connector))
-    dockerClient = docker.DockerClient()
-    containers = dockerClient.containers.list(all=True)
-    # for container in containers:
+    docker_client = docker.from_env()
+    # Or give configuration
+    # docker_socket = "unix://var/run/docker.sock"
+    # docker_client = docker.DockerClient(docker_socket)
+    while True:
+        RUNNING = "running"
+        try:
+            container = docker_client.containers.get(container_name)
+        except docker.errors.NotFound as exc:
+            print(f"Check container name!\n{exc.explanation}")
+            break
+        else:
+            container_state = container.attrs["State"]
+            if container_state["Status"] == RUNNING:
+                con_stats = container.stats(stream=False)
+                # use request_id to correlate the message of container with model performance
+                msg = {"request_id": request_id}
+                connector.send_report(msg)
+            else:
+                break
+        time.sleep(10)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
