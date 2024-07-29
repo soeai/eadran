@@ -13,7 +13,8 @@ from qoa4ml.reports.ml_report_model import MlQualityReport
 # from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
 from qoa4ml.config.configs import ClientInfo, ClientConfig
 import numpy as np
-
+from qoa4ml.reports.rohe_reports import RoheReport
+from qoa4ml.config.configs import MetricConfig
 
 class FedMarkClient(fl.client.NumPyClient):
     ########
@@ -154,7 +155,8 @@ if __name__ == '__main__':
     cconfig = ClientConfig()
     cconfig.client = client_info
     cconfig.connector = client_conf['amqp_connector']
-    qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
+    # qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
+    qoa_client = QoaClient(config_dict=cconfig)
 
     # # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
     # #                                      "model_id":client_conf['model_id'],
@@ -167,6 +169,11 @@ if __name__ == '__main__':
     # # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
     #
     # # temporary does not monitor and report to assessment service
+    # quality_of_model = MetricConfig()
+    #
+    # edge_monitor = MetricConfig()
+    #
+    # qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
 
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
