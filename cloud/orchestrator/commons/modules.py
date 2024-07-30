@@ -114,31 +114,32 @@ class FedServerContainer(Generic):
         return response
 
 
+def upload_config(config, username, url_storage_service):
+    # Specify the file path
+    json_file_path = f"{username}_config_{config['edge_id']}.json"
+
+    # Write the config dictionary to the JSON file
+    with open(json_file_path, "w") as json_file:
+        json.dump(config, json_file)
+
+    uri = f"{url_storage_service}/storage/obj"
+    files = {
+        "file": (json_file_path, open(json_file_path, "rb"), "application/json")
+    }
+    data = {"user": username}
+
+    response = requests.post(uri, files=files, data=data)
+    response.raise_for_status()  # Ensure the request was successful
+
+    storage_id = response.json()["storage_id"]
+    os.remove(json_file_path)
+
+    return storage_id
+
+
 class Config4Edge(Generic):
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
-
-    def upload_config(self, config, username):
-        # Specify the file path
-        json_file_path = f"{username}_config_{config['edge_id']}.json"
-
-        # Write the config dictionary to the JSON file
-        with open(json_file_path, "w") as json_file:
-            json.dump(config, json_file)
-
-        uri = f"{self.orchestrator.url_storage_service}/storage/obj"
-        files = {
-            "file": (json_file_path, open(json_file_path, "rb"), "application/json")
-        }
-        data = {"user": username}
-
-        response = requests.post(uri, files=files, data=data)
-        response.raise_for_status()  # Ensure the request was successful
-
-        storage_id = response.json()["storage_id"]
-        os.remove(json_file_path)
-
-        return storage_id
 
     def exec(self, params):
         config_id = {}
@@ -172,8 +173,8 @@ class Config4Edge(Generic):
                 generated_config["create_qod"] = dataset["create_qod"]
 
             # Upload generated config to storage
-            config_id[dataset["edge_id"]] = self.upload_config(
-                generated_config, params["consumer_id"]
+            config_id[dataset["edge_id"]] = upload_config(
+                generated_config, params["consumer_id"], self.orchestrator.url_storage_service
             )
 
         params["config4edge_resp"] = config_id
@@ -307,8 +308,10 @@ class QoDContainer(Generic):
         self.orchestrator.send(edge_command)
 
     def exec(self, params):
-        # generate config and post to storage service
-        storage_ref_id = None
+        config_id = upload_config(
+            params, params["consumer_id"], self.orchestrator.url_storage_service
+
+        )
         command = {
             "edge_id": params["edge_id"],
             "request_id": params["request_id"],
@@ -322,7 +325,8 @@ class QoDContainer(Generic):
                     },
                     "arguments": [
                         self.orchestrator.url_storage_service,
-                        params["read_info"]["reader_module"]["storage_ref_id"],
+                        # params["read_info"]["reader_module"]["storage_ref_id"],
+                        config_id,
                     ],
                 }
             ],
@@ -334,6 +338,7 @@ class QoDContainer(Generic):
             folder_path = fullpath[: fullpath.index(filename)]
             mount = "type=bind,source={},target={}".format(folder_path, "/data/")
             command["docker"][0]["options"]["--mount"] = mount
+
 
         # send command to edge
         self.send_command(command)
