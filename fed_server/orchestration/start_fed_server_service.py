@@ -111,7 +111,7 @@ class FedServerOrchestrator(HostObject):
             logging.info("Start container result: {}".format(res))
             self.containers.append(config["options"]["--name"])
 
-            if asyncio.run(self.check_docker_running(config["options"]["--name"]))==True:
+            if asyncio.run(self.check_docker_running(config["options"]["--name"])):
                 return 0
 
         except Exception as e:

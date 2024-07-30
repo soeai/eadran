@@ -8,7 +8,7 @@ from urllib.request import urlretrieve
 
 import numpy as np
 import pandas as pd
-import qoa4ml.utils.qoa_utils as qoa_utils
+import qoa4ml.utils.qoa_utils as utils
 from cleanlab.filter import find_label_issues
 from imblearn.under_sampling import TomekLinks
 from sklearn.ensemble import RandomForestClassifier
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     # print(args.)
     # print(args.conf)
     url_service = args.service + "/storage/obj?id="
-    client_conf = qoa_utils.load_config(args.conf)
+    client_conf = utils.load_config(args.conf)
 
     print(client_conf)
 
