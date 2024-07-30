@@ -195,7 +195,7 @@ class EdgeOrchestrator(HostObject):
 
 
 def container_monitor(amqp_connector, container_name, request_id):
-    connector = Amqp_Connector(AMQPConnectorConfig(amqp_connector))
+    connector = Amqp_Connector(AMQPConnectorConfig(**amqp_connector))
     docker_client = docker.from_env()
     # Or give configuration
     # docker_socket = "unix://var/run/docker.sock"

@@ -16,6 +16,7 @@ import numpy as np
 from qoa4ml.reports.rohe_reports import RoheReport
 from qoa4ml.config.configs import MetricConfig
 
+
 class FedMarkClient(fl.client.NumPyClient):
     ########
     # Model:
@@ -88,8 +89,8 @@ class FedMarkClient(fl.client.NumPyClient):
             self.total_time += end_time - start_time
             # Report metric via QoA4ML
             self.qoa_monitor.observe_metric('post_train_performance', self.post_train_performance)
-            self.qoa_monitor.observe_metric('pre_train_performance',self.pre_train_performance)
-            self.qoa_monitor.observe_metric('pre_loss_value',self.pre_train_loss)
+            self.qoa_monitor.observe_metric('pre_train_performance', self.pre_train_performance)
+            self.qoa_monitor.observe_metric('pre_loss_value', self.pre_train_loss)
             self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
             self.qoa_monitor.observe_metric('train_round', config['fit_round'])
             self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
@@ -118,6 +119,7 @@ if __name__ == '__main__':
     parser.add_argument('--sessionid', help='The request Id from orchestrator')
 
     args = parser.parse_args()
+
     url_service = args.service + "/storage/obj?id="
     client_conf = qoa_utils.load_config(args.conf)
 
@@ -143,37 +145,39 @@ if __name__ == '__main__':
     X, y = dps_read_data_module("/data/" + filename)
 
     # # Create reporter
-    client_info = ClientInfo()
-    client_info.user_id = client_conf['consumer_id']
-    client_info.application_name = client_conf['model_id']
-    client_info.id = client_conf['edge_id']
-    client_info.name = client_conf['dataset_id']
-    client_info.stage_id = 1
-    client_info.run_id = client_conf['run_id']
-    client_info.instance_id = args.sessionid
-    client_info.role = 'fml'
-    cconfig = ClientConfig()
-    cconfig.client = client_info
-    cconfig.connector = client_conf['amqp_connector']
-    # qoa_client = QoaClient(report_cls=MlQualityReport, config_dict=cconfig.dict())
-    qoa_client = QoaClient(config_dict=cconfig)
 
-    # # qoa_client = QoaClient(client_conf={"consumer_id":client_conf['consumer_id']
-    # #                                      "model_id":client_conf['model_id'],
-    # #                                      "run_id": client_conf['run_id'],
-    # #                                      "dataset_id": client_conf['dataset_id'],
-    # #                                      "edge_id": client_conf['edge_id'],
-    # #                                      "train_round": 1},
-    # #                                      connector_conf=connector_conf)
-    # # qoa_client.add_metric(metric_conf['quality_of_model'], category='quality_of_model')
-    # # qoa_client.add_metric(metric_conf['edge_monitor'], category='edge_monitor')
-    #
-    # # temporary does not monitor and report to assessment service
-    # quality_of_model = MetricConfig()
-    #
-    # edge_monitor = MetricConfig()
-    #
-    # qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
+    client_info = ClientInfo(
+        id=client_conf['edge_id'],
+        name=client_conf['dataset_id'],
+        user_id=client_conf['consumer_id'],
+        instance_id=args.sessionid,
+        stage_id=1,
+        functionality="",
+        application_name=client_conf['model_id'],
+        role='fml',
+        run_id=client_conf['run_id'],
+    )
+
+    cconfig = ClientConfig(
+        client=client_info,
+        connector=client_conf['amqp_connector']
+        )
+
+    qoa_client = QoaClient(
+        # report_cls=RoheReport(clientConfig=client_info),
+        config_dict=cconfig
+    )
+
+    quality_of_model = MetricConfig(
+        # name: MetricNameEnum
+        # metric_class: MetricClassEnum
+        # description: Optional[str] = None
+        # default_value: int
+        # category: int
+    )
+    edge_monitor = MetricConfig()
+
+    qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
 
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,

@@ -180,7 +180,6 @@ if __name__ == '__main__':
     parser.add_argument('--conf', help='Client config file', default="./conf/qod.json")
     # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
     # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
-
     args = parser.parse_args()
     # print(args.)
     # print(args.conf)

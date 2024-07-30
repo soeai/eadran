@@ -144,18 +144,10 @@ class Config4Edge(Generic):
         config_id = {}
 
         for dataset in params["datasets"]:
-            # Prepare data configuration
-            # data_conf = dataset["read_info"]["reader_module"]
-            # if dataset["read_info"]["method"] == "local":
-            #     data_conf["data_path"] = dataset["read_info"]["location"].split("/")[-1]
-            # else:
-            #     data_conf["data_path"] = dataset["read_info"]["location"]
-
-            # Generate configuration
             generated_config = {
                 "consumer_id": params["consumer_id"],
                 "model_id": params["model_id"],
-                "run_id": params["run_id"],
+                # "run_id": params["run_id"],
                 "dataset_id": dataset["dataset_id"],
                 "edge_id": dataset["edge_id"],
                 "monitor_interval": 10,
@@ -185,7 +177,7 @@ class Config4Edge(Generic):
             )
 
         params["config4edge_resp"] = config_id
-        params["amqp_connector"] = generated_config['amqp_connector']
+        # params["amqp_connector"] = generated_config['amqp_connector']
         return params
 
 
@@ -295,7 +287,7 @@ class EdgeContainer(Generic):
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
             logging.info("Waiting to receive {} response(s) from edges".format(
                 len(self.orchestrator.handling_edges[params["request_id"]])))
-            time.sleep(1 * 60)
+            time.sleep(5 * 60)
 
         logging.info("Sent command to all edges.")
 
@@ -330,13 +322,14 @@ class QoDContainer(Generic):
                     },
                     "arguments": [
                         self.orchestrator.url_storage_service,
-                        params["data_conf"]["reader_module"]["storage_ref_id"],
+                        params["read_info"]["reader_module"]["storage_ref_id"],
                     ],
                 }
             ],
+            "amqp_connector": self.orchestrator.config['amqp_out']['amqp_connector']['conf']
         }
-        if params["data_conf"]["method"] == "local":
-            fullpath = params["data_conf"]["location"]
+        if params["read_info"]["method"] == "local":
+            fullpath = params["read_info"]["location"]
             filename = fullpath.split("/")[-1]
             folder_path = fullpath[: fullpath.index(filename)]
             mount = "type=bind,source={},target={}".format(folder_path, "/data/")
