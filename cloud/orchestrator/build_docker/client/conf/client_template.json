@@ -1,14 +1,14 @@
 { 
-    "consumer_id": "mcs_tester_001",
-    "dataset_id": "ds_001",
-    "model_id": "C001_M01_Fraud",
-    "edge_id": "edge_001",
+    "consumer_id": "dungcao",
+    "dataset_id": "fraud001",
+    "model_id": "tensorflow002",
+    "edge_id": "edge_003",
     "monitor_interval": 10,
-    "fed_server": "192.168.80.87:8080",
+    "fed_server": "192.168.80.90:8080",
     "run_id": 1,
     "model_conf":{
-        "storage_ref_id":"6639e972871c7abc5338d729",
-        "module_name": "ml_model",
+        "storage_ref_id":"66a87ee14f516b0e20b92d4d",
+        "module_name": "model_tf",
         "model_var": "model",
         "function_map":{
             "train": "fit",
@@ -19,9 +19,9 @@
     },
     "read_info": {
         "method": "local",
-        "location": "/home/labsoe/Dowloads/fraudTrain_processed_SMOTE_1.csv",
+        "location": "/home/longnguyen/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_3.csv",
         "reader_module": {
-            "storage_ref_id": "6639e9b2871c7abc5338d72a",
+            "storage_ref_id": "66a87f464f516b0e20b92d4e",
             "module_name": "data_reader",
             "function_map": "read_data"
         }
