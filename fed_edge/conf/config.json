@@ -1,14 +1,14 @@
 {
-  "edge_id": "edge001",
+  "edge_id": "edge003",
   "amqp_in": {
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
+        "end_point": "128.214.255.226",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_routing_key": "edge.#",
-        "in_queue": "queue_edge001"
+        "in_queue": "queue_edge003"
       }
     }
   },
@@ -16,16 +16,16 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
+        "end_point": "128.214.255.226",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "orchestrator.edge001"
+        "out_routing_key": "orchestrator.edge003"
       }
     }
   },
   "data":{
-    "owner_id": "dc001",
-    "dataset_id": "fraud001",
+    "owner_id": "dc003",
+    "dataset_id": "fraud003",
     "dest_path": "../../data_samples",
     "method": "local",
     "reader_module": {
@@ -39,6 +39,6 @@
       "module_name": "../data_extraction_module/simple_data_extraction.py",
       "params": "--request"
   },
-  "amqp_health_report": "healthreport.edge001",
+  "amqp_health_report": "healthreport.edge003",
   "report_delay_time": 300
 }

@@ -1,0 +1,51 @@
+{ 
+    "consumer_id": "dungcao",
+    "dataset_id": "fraud001",
+    "model_id": "tensorflow002",
+    "edge_id": "edge_003",
+    "monitor_interval": 10,
+    "fed_server": "192.168.80.79:8080",
+    "run_id": 1,
+    "model_conf":{
+        "storage_ref_id":"66a87ee14f516b0e20b92d4d",
+        "module_name": "model_tf",
+        "model_var": "model",
+        "function_map":{
+            "train": "fit",
+            "evaluate": "evaluate",
+            "set_weights": "set_weights",
+            "get_weights": "get_weights"
+        }
+    },
+    "read_info": {
+        "method": "local",
+        "location": "/home/longnguyen/Downloads/Fraud_Data/fraudTrain_processed_SMOTE_3.csv",
+        "reader_module": {
+            "storage_ref_id": "66a87f464f516b0e20b92d4e",
+            "module_name": "data_reader",
+            "function_map": "read_data"
+        }
+    },
+    "pre_train_model": {
+      "storage_ref_id": "link to get pre-train model from storage service"
+    },
+    "amqp_collector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "128.214.225.226",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "in_queue": "orchestrator.queue",
+        "in_routing_key": "orchestrator.#"
+      }
+    },
+    "amqp_connector": {
+      "class": "amqp",
+      "conf": {
+        "end_point":"128.214.255.226",
+        "exchange_name": "fml_model_report",
+        "exchange_type": "topic",
+        "out_routing_key": "receiver.edge03"
+      }
+    }
+}
