@@ -169,21 +169,21 @@ if __name__ == '__main__':
         connector=[connector_config]
     )
     # print(cconfig)
-    qoa_client = QoaClient(MLReport,
+    qoa_client = QoaClient(
                            config_dict=cconfig
                            )
 
-    # qoa_client.observe_metric('post_train_performance', 0.9)
-    # qoa_client.observe_metric('pre_train_performance', 0.9)
-    # qoa_client.observe_metric('pre_loss_value', 2)
-    # qoa_client.observe_metric('post_loss_value', 4)
-    # qoa_client.observe_metric('train_round', 13)
-    # qoa_client.observe_metric('duration', 34.8)
+    qoa_client.observe_metric('post_train_performance', 0.9)
+    qoa_client.observe_metric('pre_train_performance', 0.9)
+    qoa_client.observe_metric('pre_loss_value', 2)
+    qoa_client.observe_metric('post_loss_value', 4)
+    qoa_client.observe_metric('train_round', 13)
+    qoa_client.observe_metric('duration', 34.8)
 
-    qoa_client.qoa_report.report.metadata = {"client_config": client_info}
-    qoa_client.inference_flag = True
-    qoa_client.observe_inference_metric("accuracy", 1)
-    qoa_client.timer()
+    # qoa_client.qoa_report.report.metadata = {"client_config": client_info}
+    # qoa_client.inference_flag = True
+    # qoa_client.observe_inference_metric("accuracy", 1)
+    # qoa_client.timer()
     # print(qoa_client.qoa_report.report)
-    print(qoa_client.report())
+    print(qoa_client.report(submit=True))
     # print(qoa_client.qoa_report.report)

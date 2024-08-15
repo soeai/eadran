@@ -8,7 +8,6 @@ from urllib.request import urlretrieve
 import flwr as fl
 import qoa4ml.utils.qoa_utils as utils
 from qoa4ml.qoa_client import QoaClient
-from qoa4ml.reports.ml_report_model import MlQualityReport
 from qoa4ml.config.configs import ClientInfo, ClientConfig
 import numpy as np
 from qoa4ml.reports.rohe_reports import RoheReport
@@ -92,7 +91,7 @@ class FedMarkClient(fl.client.NumPyClient):
             self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
             self.qoa_monitor.observe_metric('train_round', config['fit_round'])
             self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
-            self.qoa_monitor.report()
+            self.qoa_monitor.report(submit=True)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
