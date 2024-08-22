@@ -4,16 +4,12 @@ note that other tasks have been done to prepare such a data for the training tas
 '''
 import argparse
 import time
-from urllib.request import urlretrieve
+
 import flwr as fl
-import qoa4ml.utils.qoa_utils as utils
-from qoa4ml.qoa_client import QoaClient
-from qoa4ml.reports.ml_report_model import MlQualityReport
-from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
 import numpy as np
-from qoa4ml.reports.ml_reports import MLReport
-from qoa4ml.reports.rohe_reports import RoheReport
-from qoa4ml.config.configs import MetricConfig
+import qoa4ml.utils.qoa_utils as utils
+from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
+from qoa4ml.qoa_client import QoaClient
 
 
 class FedMarkClient(fl.client.NumPyClient):
@@ -147,15 +143,16 @@ if __name__ == '__main__':
     # X, y = dps_read_data_module("/home/longnguyen/Downloads/Fraud_Data/" + filename)
 
     client_info = ClientInfo(
-        id=client_conf['edge_id'],
-        name=client_conf['dataset_id'],
+        name=client_conf['edge_id'],
         user_id=client_conf['consumer_id'],
-        instance_id='session_001',
+        username=client_conf['dataset_id'],
+        instance_name='session_001',
         stage_id="1",
         functionality="test",
         application_name=client_conf['model_id'],
-        role='fml',
+        role='fml:eadran',
         run_id=str(client_conf['run_id']),
+        custom_info = ""
     )
 
     connector_config = ConnectorConfig(

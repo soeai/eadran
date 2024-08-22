@@ -16,8 +16,8 @@ import pymongo
 from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
-from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject, AMQPCollectorConfig
-from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
+from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject, AMQPCollectorConfig
+from qoa4ml.connector.amqp_connector import AmqpConnector, AMQPConnectorConfig
 import hashlib
 from cloud.commons.default import Service, Protocol
 
@@ -245,7 +245,7 @@ class ComputingResourceHealth(Resource):
 class ResourceHealthReport(HostObject):
     def __init__(self, _config):
         self.amqp_collector_config = AMQPCollectorConfig(**_config["amqp_health_report"]['amqp_in']['amqp_collector']['conf'])
-        self.amqp_collector = Amqp_Collector(self.amqp_collector_config, self)
+        self.amqp_collector = AmqpCollector(self.amqp_collector_config, self)
         Thread(target=self.start_amqp).start()
         self.db = (
             mongo_client.get_database(_config["health_log"]["db_name"])
@@ -863,7 +863,7 @@ def required_auth():
 
 class Queue(object):
     def __init__(self, _config):
-        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**_config['amqp_out']['amqp_connector']['conf']))
+        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**_config['amqp_out']['amqp_connector']['conf']))
 
     def send(self, msg):
         self.amqp_queue_out.send_report(json.dumps(msg))

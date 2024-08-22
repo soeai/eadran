@@ -1,7 +1,8 @@
-from cloud.orchestrator.commons.modules import FedServerContainer, Config4Edge
+import json
+
+from cloud.orchestrator.commons.modules import Config4Edge
 from cloud.orchestrator.commons.pipeline import Pipeline
 from cloud.orchestrator.orchestrator import Orchestrator
-import json
 
 with open("../../cloud/orchestrator/conf/config.json") as config_file:
     conf = json.load(config_file)

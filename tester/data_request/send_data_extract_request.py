@@ -1,7 +1,7 @@
 import pika
 import json
-from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject
-from qoa4ml.connector.amqp_connector import Amqp_Connector
+# from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject
+from qoa4ml.connector.amqp_connector import AmqpConnector
 import qoa4ml.utils.qoa_utils as utils
 from threading import Thread
 from cloud.commons.default import Protocol
@@ -11,7 +11,7 @@ class DataService_Simulation(object):
     def __init__(self):
         self.config = utils.load_config('../../fed_edge/conf/config.json')
         # self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
-        self.amqp_connector = Amqp_Connector(self.config['amqp_out'])
+        self.amqp_connector = AmqpConnector(self.config['amqp_out'])
         # self.thread = Thread(target=self.start_receive)
         # self.thread.start()
 

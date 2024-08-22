@@ -2,10 +2,11 @@ import uuid
 
 import pika
 import json
-from qoa4ml.collector.amqp_collector import Amqp_Collector
-from qoa4ml.connector.amqp_connector import Amqp_Connector
-import qoa4ml.qoaUtils as utils
+from qoa4ml.collector.amqp_collector import AmqpCollector
+from qoa4ml.connector.amqp_connector import AmqpConnector
+import qoa4ml.utils as utils
 from threading import Thread
+
 
 class Simulation(object):
     def __init__(self):
@@ -20,7 +21,7 @@ class Simulation(object):
                 "exchange_type": "topic",
                 "out_routing_key": "edge.fedserver001"
               }
-        self.amqp_connector = Amqp_Connector(self.config, self)
+        self.amqp_connector = AmqpConnector(self.config, self)
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))

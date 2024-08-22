@@ -32,8 +32,8 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 class EdgeOrchestrator(HostObject):
     def __init__(
-        self,
-        config,
+            self,
+            config,
     ):
         self.config = utils.load_config(config)
         self.edge_id = self.config["edge_id"]
@@ -72,6 +72,7 @@ class EdgeOrchestrator(HostObject):
                                 req_msg["amqp_connector"],
                                 config["options"]["--name"],
                                 req_msg["request_id"],
+                                self.config["qoa_client"]
                             ),
                         ).start()
                     response = {
@@ -282,7 +283,7 @@ class EdgeOrchestrator(HostObject):
 
 
 def container_monitor(
-    amqp_connector: dict, container_name, request_id, qoa_client_config
+        amqp_connector: dict, container_name, request_id, qoa_client_config
 ):
     print(amqp_connector)
     qoa_client_config["connector"] = [amqp_connector]

@@ -14,8 +14,8 @@ import docker
 import psutil
 import socket
 import qoa4ml.utils.qoa_utils as utils
-from qoa4ml.collector.amqp_collector import Amqp_Collector, HostObject, AMQPCollectorConfig
-from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
+from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject, AMQPCollectorConfig
+from qoa4ml.connector.amqp_connector import AmqpConnector, AMQPConnectorConfig
 import asyncio
 
 logging.basicConfig(level=logging.INFO)
@@ -28,8 +28,8 @@ class FedServerOrchestrator(HostObject):
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
-        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
-        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
+        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
+        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 

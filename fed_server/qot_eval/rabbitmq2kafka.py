@@ -1,5 +1,5 @@
 import json
-from qoa4ml.collector.amqp_collector import Amqp_Collector
+from qoa4ml.collector.amqp_collector import AmqpCollector
 from kafka import KafkaProducer
 import logging
 
@@ -29,5 +29,5 @@ producer = KafkaProducer(bootstrap_servers=connector_conf['kafka_connector']['bo
                          value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
 client = MessageProxy(producer, connector_conf['kafka_connector']['topic'])
-collector = Amqp_Collector(connector_conf['amqp_connector']['conf'], host_object=client)
+collector = AmqpCollector(connector_conf['amqp_connector']['conf'], host_object=client)
 collector.start()
