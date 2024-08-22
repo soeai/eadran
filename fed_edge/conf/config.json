@@ -23,22 +23,56 @@
       }
     }
   },
-  "data":{
+  "data": {
     "owner_id": "dc003",
     "dataset_id": "fraud003",
     "dest_path": "../../data_samples",
     "method": "local",
     "reader_module": {
-        "storage_ref_id": "storage id of module",
-        "module_name": "data_reader",
-        "function_map": "read_data"
+      "storage_ref_id": "storage id of module",
+      "module_name": "data_reader",
+      "function_map": "read_data"
     }
   },
   "extract_data_module": {
-      "command": "python3",
-      "module_name": "../data_extraction_module/simple_data_extraction.py",
-      "params": "--request"
+    "command": "python3",
+    "module_name": "../data_extraction_module/simple_data_extraction.py",
+    "params": "--request"
   },
   "amqp_health_report": "healthreport.edge003",
-  "report_delay_time": 300
+  "report_delay_time": 300,
+  "qoa_client": {
+    "client": {
+      "username": "test",
+      "instance_name": "test_instance_name",
+      "stage_id": "test_stage",
+      "functionality": "REST",
+      "application_name": "test",
+      "role": "ml",
+      "custom_info": ""
+    },
+    "connector": [
+      {
+        "name": "amqp_connector",
+        "connector_class": "AMQP",
+        "config": {
+          "end_point": "localhost",
+          "exchange_name": "test_qoa4ml",
+          "exchange_type": "topic",
+          "out_routing_key": "test.client1"
+        }
+      }
+    ],
+    "probes": [
+      {
+        "probe_type": "docker",
+        "frequency": 9999999,
+        "require_register": false,
+        "log_latency_flag": false,
+        "environment": "Edge",
+        "container_name": ""
+      }
+    ]
+  }
 }
+

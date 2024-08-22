@@ -16,8 +16,13 @@ import docker
 import psutil
 import qoa4ml.utils.qoa_utils as utils
 from cloud.commons.default import Protocol
-from qoa4ml.collector.amqp_collector import Amqp_Collector, AMQPCollectorConfig, HostObject
-from qoa4ml.connector.amqp_connector import Amqp_Connector, AMQPConnectorConfig
+from qoa4ml.collector.amqp_collector import (
+    AmqpCollector,
+    AMQPCollectorConfig,
+    HostObject,
+)
+from qoa4ml.qoa_client import QoaClient
+from qoa4ml.connector.amqp_connector import AmqpConnector, AMQPConnectorConfig
 import asyncio
 import logging
 
@@ -26,58 +31,80 @@ logging.getLogger("pika").setLevel(logging.WARNING)
 
 
 class EdgeOrchestrator(HostObject):
-    def __init__(self, config, ):
+    def __init__(
+        self,
+        config,
+    ):
         self.config = utils.load_config(config)
-        self.edge_id = self.config['edge_id']
+        self.edge_id = self.config["edge_id"]
         self.containers = []
-        self.amqp_queue_in = Amqp_Collector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
-                                            self)
-        self.amqp_queue_out = Amqp_Connector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
+        self.amqp_queue_in = AmqpCollector(
+            AMQPCollectorConfig(**self.config["amqp_in"]["amqp_collector"]["conf"]),
+            self,
+        )
+        self.amqp_queue_out = AmqpConnector(
+            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"])
+        )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
     def message_processing(self, ch, method, props, body):
-        req_msg = json.loads(str(body.decode("utf-8")).replace("\'", "\""))
+        req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
         # check if server sends command to this edge
-        if req_msg['edge_id'] == self.edge_id or req_msg['edge_id'] == '*':
+        if req_msg["edge_id"] == self.edge_id or req_msg["edge_id"] == "*":
             response = None
-            logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
-            if req_msg['command'].lower() == 'docker':
-                if req_msg['params'].lower() == 'start':
+            logging.info(
+                "Received a request [{}] for [{}]".format(
+                    req_msg["request_id"], req_msg["command"]
+                )
+            )
+            if req_msg["command"].lower() == "docker":
+                if req_msg["params"].lower() == "start":
                     status = []
                     for config in req_msg["docker"]:
-                        status.append(self.start_container(config, req_msg['request_id']))
+                        status.append(
+                            self.start_container(config, req_msg["request_id"])
+                        )
                         # start monitor
-                        Thread(target=container_monitor, args=(req_msg['amqp_connector'],
-                                                               config["options"]["--name"],
-                                                               req_msg['request_id'])).start()
+                        Thread(
+                            target=container_monitor,
+                            args=(
+                                req_msg["amqp_connector"],
+                                config["options"]["--name"],
+                                req_msg["request_id"],
+                            ),
+                        ).start()
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),
-                        "detail": status
+                        "detail": status,
                     }
-                elif req_msg['params'].lower() == 'stop':
+                elif req_msg["params"].lower() == "stop":
                     status = []
                     for container in req_msg["containers"]:
                         self.stop_container(container)
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),
-                        "detail": status
+                        "detail": status,
                     }
-            elif req_msg['command'].lower() == Protocol.DATA_EXTRACTION_COMMAND:
+            elif req_msg["command"].lower() == Protocol.DATA_EXTRACTION_COMMAND:
                 response = self.extract_data(req_msg)
 
             logging.info(f"Response: {response}")
 
             # send response back to server
             if response is not None:
-                logging.info("Sending a response for request [{}]".format(req_msg['request_id']))
+                logging.info(
+                    "Sending a response for request [{}]".format(req_msg["request_id"])
+                )
                 # add header of message before responding
-                msg = {"type": Protocol.MSG_RESPONSE,
-                       "response_id": req_msg['request_id'],
-                       "responder": self.edge_id,
-                       "content": response}
+                msg = {
+                    "type": Protocol.MSG_RESPONSE,
+                    "response_id": req_msg["request_id"],
+                    "responder": self.edge_id,
+                    "content": response,
+                }
                 logging.info(f"Response message: {msg}")
                 self.amqp_queue_out.send_report(json.dumps(msg))
             else:
@@ -92,18 +119,28 @@ class EdgeOrchestrator(HostObject):
     def start_container(self, config, request_id):
         try:
             # check container is running with the same name, stop it
-            logging.info('Checking if a running container with the same name exists ...')
-            res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
-                                 capture_output=True)
+            logging.info(
+                "Checking if a running container with the same name exists ..."
+            )
+            res = subprocess.run(
+                [
+                    "docker",
+                    "ps",
+                    "-a",
+                    "--filter",
+                    "name=" + config["options"]["--name"],
+                ],
+                capture_output=True,
+            )
 
-            if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
+            if res.returncode == 0 and config["options"]["--name"] in str(res.stdout):
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", config["options"]["--name"]])
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
             logging.info("Starting a new container...")
             command = ["docker", "run", "-d"]
-            for (k, v) in config["options"].items():
+            for k, v in config["options"].items():
                 if v is not None and len(v) > 0:
                     if k == "-p":
                         for port in v:
@@ -114,10 +151,10 @@ class EdgeOrchestrator(HostObject):
                     command.append(k)
             command.append(config["image"])
 
-            if 'arguments' in config.keys():
-                command.extend(config['arguments'])
+            if "arguments" in config.keys():
+                command.extend(config["arguments"])
 
-            command.append(request_id) # will be attached in report model performance
+            command.append(request_id)  # will be attached in report model performance
 
             res = subprocess.run(command, capture_output=True)
             logging.info("Start container result: {}".format(res))
@@ -128,7 +165,11 @@ class EdgeOrchestrator(HostObject):
                 return 0
 
         except Exception as e:
-            logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
+            logging.error(
+                "[ERROR] - Error {} while estimating contribution: {}".format(
+                    type(e), e.__traceback__
+                )
+            )
             traceback.print_exception(*sys.exc_info())
             return 1
 
@@ -161,17 +202,27 @@ class EdgeOrchestrator(HostObject):
     def stop_container(self, container_name):
         try:
             # if container_name in self.containers:
-            logging.info('Checking if the container [{}] is running ...'.format(container_name))
-            res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + container_name],
-                                 capture_output=True)
+            logging.info(
+                "Checking if the container [{}] is running ...".format(container_name)
+            )
+            res = subprocess.run(
+                ["docker", "ps", "-a", "--filter", "name=" + container_name],
+                capture_output=True,
+            )
             if res.returncode == 0 and str(res.stdout).find(container_name) >= 0:
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", container_name])
                 subprocess.run(["docker", "remove", container_name])
                 self.containers.pop(container_name)
-                logging.info("The container [{}] has been stopped...".format(container_name))
+                logging.info(
+                    "The container [{}] has been stopped...".format(container_name)
+                )
         except Exception as e:
-            logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
+            logging.error(
+                "[ERROR] - Error {} while estimating contribution: {}".format(
+                    type(e), e.__traceback__
+                )
+            )
             traceback.print_exception(*sys.exc_info())
             return 1
         return 0
@@ -179,16 +230,18 @@ class EdgeOrchestrator(HostObject):
     # this module is implemented by DP and install on edge
     def extract_data(self, req_msg):
         if not os.path.isdir("temp"):
-            os.mkdir('temp')
+            os.mkdir("temp")
         filename = "temp/request_{}.json".format(uuid.uuid4())
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             # save data request to file
-            json.dump(req_msg['data_request'], f)
+            json.dump(req_msg["data_request"], f)
             # execute data extraction module
-        command = self.config['modules']['extract_data']['command']
-        module_name = self.config['modules']['extract_data']['module_name']
-        params = self.config['modules']['extract_data']['params']
-        rep_msg = subprocess.run([command, module_name, params, filename], capture_output=True)
+        command = self.config["modules"]["extract_data"]["command"]
+        module_name = self.config["modules"]["extract_data"]["module_name"]
+        params = self.config["modules"]["extract_data"]["params"]
+        rep_msg = subprocess.run(
+            [command, module_name, params, filename], capture_output=True
+        )
         logging.info(rep_msg.stdout)
         response = json.loads(rep_msg.stdout)
         # cleanup
@@ -200,56 +253,72 @@ class EdgeOrchestrator(HostObject):
             docker_res = docker.from_env().version()
 
         except:
-            logging.warning("Docker is not installed. Thus service cannot serve fully function!")
+            logging.warning(
+                "Docker is not installed. Thus service cannot serve fully function!"
+            )
             docker_res = {}
 
         health_post = {
             "edge_id": self.edge_id,
-            "routing_key": self.config['amqp_in']['amqp_collector']['conf']['in_routing_key'],
+            "routing_key": self.config["amqp_in"]["amqp_collector"]["conf"][
+                "in_routing_key"
+            ],
             "health": {
                 "mem": psutil.virtual_memory()[1],
                 "cpu": psutil.cpu_count(),
-                "gpu": -1  # code to get GPU device here
+                "gpu": -1,  # code to get GPU device here
             },
-            "docker_available": docker_res  # code to check docker available or not
+            "docker_available": docker_res,  # code to check docker available or not
         }
 
         while True:
-            self.amqp_queue_out.send_report(json.dumps(health_post), routing_key=self.config['amqp_health_report'])
-            time.sleep(self.config['report_delay_time'])
+            self.amqp_queue_out.send_report(
+                json.dumps(health_post), routing_key=self.config["amqp_health_report"]
+            )
+            time.sleep(self.config["report_delay_time"])
 
-            health_post['health']['mem'] = psutil.virtual_memory()[1]
-            health_post['health']['cpu'] = psutil.cpu_count()
-
-
-def container_monitor(amqp_connector, container_name, request_id):
-    connector = Amqp_Connector(AMQPConnectorConfig(**amqp_connector))
-    docker_client = docker.from_env()
-    # Or give configuration
-    # docker_socket = "unix://var/run/docker.sock"
-    # docker_client = docker.DockerClient(docker_socket)
-    while True:
-        RUNNING = "running"
-        try:
-            container = docker_client.containers.get(container_name)
-        except docker.errors.NotFound as exc:
-            print(f"Check container name!\n{exc.explanation}")
-            break
-        else:
-            container_state = container.attrs["State"]
-            if container_state["Status"] == RUNNING:
-                con_stats = container.stats(stream=False)
-                # use request_id to correlate the message of container with model performance
-                msg = {"request_id": request_id}
-                connector.send_report(msg)
-            else:
-                break
-        time.sleep(10)
+            health_post["health"]["mem"] = psutil.virtual_memory()[1]
+            health_post["health"]["cpu"] = psutil.cpu_count()
 
 
-if __name__ == '__main__':
+def container_monitor(
+    amqp_connector: dict, container_name, request_id, qoa_client_config
+):
+    print(amqp_connector)
+    qoa_client_config["connector"] = [amqp_connector]
+    qoa_client_config["client"]["custom_info"] = request_id
+    for probe_config in qoa_client_config["probes"]:
+        if probe_config["probe_type"] == "docker":
+            probe_config["container_name"] = [container_name]
+    client = QoaClient(config_dict=qoa_client_config)
+    client.start_all_probes()
+    # connector = Amqp_Connector(AMQPConnectorConfig(**amqp_connector))
+    # docker_client = docker.from_env()
+    # # Or give configuration
+    # # docker_socket = "unix://var/run/docker.sock"
+    # # docker_client = docker.DockerClient(docker_socket)
+    # while True:
+    #     RUNNING = "running"
+    #     try:
+    #         container = docker_client.containers.get(container_name)
+    #     except docker.errors.NotFound as exc:
+    #         print(f"Check container name!\n{exc.explanation}")
+    #         break
+    #     else:
+    #         container_state = container.attrs["State"]
+    #         if container_state["Status"] == RUNNING:
+    #             con_stats = container.stats(stream=False)
+    #             # use request_id to correlate the message of container with model performance
+    #             msg = {"request_id": request_id}
+    #             connector.send_report(msg)
+    #         else:
+    #             break
+    #     time.sleep(10)
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
-    parser.add_argument('--conf', help='config file', default="../conf/config.json")
+    parser.add_argument("--conf", help="config file", default="../conf/config.json")
     args = parser.parse_args()
 
     orchestrator = EdgeOrchestrator(args.conf)
