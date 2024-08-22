@@ -1,12 +1,12 @@
 {
-  "mongo_url": "mongodb://192.168.10.235:27017/",
+  "mongo_url": "mongodb://127.0.0.1:27017/",
   "storage":{
         "db_name": "storage_db_name",
         "db_col": "storage_db_collection"
     },
   "minio_conf": {
-    "minio_server": "192.168.10.235:9000",
-    "minio_access": "rofavfHE2cXiAmpnYRVm",
-    "minio_secret": "Foj8xObF2k1OQHDQ2qkB6tqEjQFJJyFqYgA8kMv9"
+    "minio_server": "127.0.0.1:9000",
+    "minio_access": "GHKpMNsmztidgOX2iei6",
+    "minio_secret": "hifSlnKB4ukGMVn1K1an3V0VrpJ0lWVqG7wrqdza"
   }
 }

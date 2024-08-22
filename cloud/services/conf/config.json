@@ -1,5 +1,5 @@
 {
-    "mongo_url": "mongodb://192.168.10.235:27017/",
+    "mongo_url": "mongodb://127.0.0.1:27017/",
     "metadata":{
         "db_name": "db_metadata",
         "db_col": "col_metadata"
