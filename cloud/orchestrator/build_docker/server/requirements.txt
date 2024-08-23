@@ -1,2 +1,2 @@
-flwr==1.9
+flwr==1.10.0
 pandas

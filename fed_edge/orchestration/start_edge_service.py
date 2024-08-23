@@ -287,7 +287,7 @@ def container_monitor(
 ):
     print(amqp_connector)
     qoa_client_config["connector"] = [amqp_connector]
-    qoa_client_config["client"]["custom_info"] = request_id
+    qoa_client_config["client"]["instance_name"] = request_id
     for probe_config in qoa_client_config["probes"]:
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]

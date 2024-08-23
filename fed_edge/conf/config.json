@@ -43,12 +43,12 @@
   "report_delay_time": 300,
   "qoa_client": {
     "client": {
-      "username": "test",
-      "instance_name": "test_instance_name",
-      "stage_id": "test_stage",
-      "functionality": "REST",
-      "application_name": "test",
-      "role": "ml",
+      "username": "edge_orchestration",
+      "instance_name": "",
+      "stage_id": "container_monitor",
+      "functionality": "",
+      "application_name": "",
+      "role": "",
       "custom_info": ""
     },
     "connector": [

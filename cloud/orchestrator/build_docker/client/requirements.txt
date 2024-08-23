@@ -1,5 +1,5 @@
-flwr==1.8.0
+flwr==1.10.0
 psutil
 paho-mqtt==1.6.1
-qoa4ml
+qoa4ml==0.2.12
 pandas

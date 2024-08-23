@@ -147,7 +147,7 @@ if __name__ == '__main__':
         user_id=client_conf['consumer_id'],
         username=client_conf['dataset_id'],
         instance_name='session_001',
-        stage_id="1",
+        stage_id="stage_1",
         functionality="test",
         application_name=client_conf['model_id'],
         role='fml:eadran',
@@ -170,17 +170,24 @@ if __name__ == '__main__':
                            config_dict=cconfig
                            )
 
-    qoa_client.observe_metric('post_train_performance', 0.9)
-    qoa_client.observe_metric('pre_train_performance', 0.9)
-    qoa_client.observe_metric('pre_loss_value', 2)
-    qoa_client.observe_metric('post_loss_value', 4)
-    qoa_client.observe_metric('train_round', 13)
-    qoa_client.observe_metric('duration', 34.8)
+    # qoa_client.observe_metric('post_train_performance', 0.9)
+    # qoa_client.observe_metric('pre_train_performance', 0.9)
+    # qoa_client.observe_metric('pre_loss_value', 2)
+    # qoa_client.observe_metric('post_loss_value', 4)
+    # qoa_client.observe_metric('train_round', 13)
+    # qoa_client.observe_metric('duration', 34.8)
 
     # qoa_client.qoa_report.report.metadata = {"client_config": client_info}
     # qoa_client.inference_flag = True
     # qoa_client.observe_inference_metric("accuracy", 1)
     # qoa_client.timer()
     # print(qoa_client.qoa_report.report)
-    print(qoa_client.report(submit=True))
+    for i in range(5):
+        print(qoa_client.report(report={'post_train_performance': 0.9,
+                                        'pre_train_performance': 0.91,
+                                        'pre_loss_value': 2,
+                                        'post_loss_value': 4,
+                                        'train_round': (i+1),
+                                        'duration': 34.8},submit=True))
+        time.sleep(5)
     # print(qoa_client.qoa_report.report)

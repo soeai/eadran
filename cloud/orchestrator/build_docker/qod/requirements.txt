@@ -1,4 +1,5 @@
-qoa4ml==0.2.5
+qoa4ml==0.2.12
 pandas
 cleanlab
 imblearn
+scikit-learn

@@ -10,8 +10,8 @@ import qoa4ml.utils.qoa_utils as utils
 from qoa4ml.qoa_client import QoaClient
 from qoa4ml.config.configs import ClientInfo, ClientConfig
 import numpy as np
-from qoa4ml.reports.rohe_reports import RoheReport
-from qoa4ml.config.configs import MetricConfig
+# from qoa4ml.reports.rohe_reports import RoheReport
+# from qoa4ml.config.configs import MetricConfig
 
 
 class FedMarkClient(fl.client.NumPyClient):
@@ -85,13 +85,19 @@ class FedMarkClient(fl.client.NumPyClient):
         if self.qoa_monitor is not None:
             self.total_time += end_time - start_time
             # Report metric via QoA4ML
-            self.qoa_monitor.observe_metric('post_train_performance', self.post_train_performance)
-            self.qoa_monitor.observe_metric('pre_train_performance', self.pre_train_performance)
-            self.qoa_monitor.observe_metric('pre_loss_value', self.pre_train_loss)
-            self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
-            self.qoa_monitor.observe_metric('train_round', config['fit_round'])
-            self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
-            self.qoa_monitor.report(submit=True)
+            # self.qoa_monitor.observe_metric('post_train_performance', self.post_train_performance)
+            # self.qoa_monitor.observe_metric('pre_train_performance', self.pre_train_performance)
+            # self.qoa_monitor.observe_metric('pre_loss_value', self.pre_train_loss)
+            # self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
+            # self.qoa_monitor.observe_metric('train_round', config['fit_round'])
+            # self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
+            report = {'post_train_performance': self.post_train_performance,
+                      'pre_train_performance': self.pre_train_performance,
+                      'pre_loss_value': self.pre_train_loss,
+                      'post_loss_value': self.post_train_loss,
+                      'train_round': config['fit_round'],
+                      'duration': np.round(self.total_time, 0)}
+            self.qoa_monitor.report(report=report,submit=True)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
@@ -146,15 +152,16 @@ if __name__ == '__main__':
     # # Create reporter
 
     client_info = ClientInfo(
-        id=client_conf['edge_id'],
-        name=client_conf['dataset_id'],
+        name=client_conf['edge_id'],
         user_id=client_conf['consumer_id'],
-        instance_id=args.sessionid,
-        stage_id=1,
-        functionality="",
+        username="train_container",
+        instance_name=args.sessionid,
+        stage_id="model_trainer",
+        functionality=client_conf['dataset_id'],
         application_name=client_conf['model_id'],
-        role='fml',
+        role='eadran:role',
         run_id=client_conf['run_id'],
+        custom_info=""
     )
 
     cconfig = ClientConfig(
@@ -167,16 +174,16 @@ if __name__ == '__main__':
         config_dict=cconfig
     )
 
-    quality_of_model = MetricConfig(
-        # name: MetricNameEnum
-        # metric_class: MetricClassEnum
-        # description: Optional[str] = None
-        # default_value: int
-        # category: int
-    )
-    edge_monitor = MetricConfig()
-
-    qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
+    # quality_of_model = MetricConfig(
+    #     # name: MetricNameEnum
+    #     # metric_class: MetricClassEnum
+    #     # description: Optional[str] = None
+    #     # default_value: int
+    #     # category: int
+    # )
+    # edge_monitor = MetricConfig()
+    #
+    # qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
 
     fed_client = FedMarkClient(custom_module=mcs_custom_module,
                                client_profile=client_conf,
