@@ -5,10 +5,11 @@ note that other tasks have been done to prepare such a data for the training tas
 import argparse
 import time
 
+import docker
 import flwr as fl
 import numpy as np
 import qoa4ml.utils.qoa_utils as utils
-from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
+from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig, ProbeConfig
 from qoa4ml.qoa_client import QoaClient
 
 
@@ -142,10 +143,14 @@ if __name__ == '__main__':
     # # X, y = dps_read_data_module("/data/" + filename)
     # X, y = dps_read_data_module("/home/longnguyen/Downloads/Fraud_Data/" + filename)
 
+    # docker_res = docker.from_env().version()
+    # print(docker_res)
+
     client_info = ClientInfo(
         name=client_conf['edge_id'],
         user_id=client_conf['consumer_id'],
         username=client_conf['dataset_id'],
+        # instance_id="instance_id",
         instance_name='session_001',
         stage_id="stage_1",
         functionality="test",
@@ -159,11 +164,20 @@ if __name__ == '__main__':
         name=client_conf['consumer_id'],
         connector_class="AMQP",
         config=AMQPConnectorConfig(**client_conf['amqp_connector']['conf'])
+    )
 
+    probe_config = ProbeConfig(
+        probe_type="docker",
+        frequency= 10,
+        require_register=False,
+        log_latency_flag=False,
+        environment="Edge",
+        container_name="practical_moore"
     )
     cconfig = ClientConfig(
         client=client_info,
-        connector=[connector_config]
+        connector=[connector_config],
+        probes=[probe_config]
     )
     # print(cconfig)
     qoa_client = QoaClient(
@@ -182,12 +196,22 @@ if __name__ == '__main__':
     # qoa_client.observe_inference_metric("accuracy", 1)
     # qoa_client.timer()
     # print(qoa_client.qoa_report.report)
-    for i in range(5):
-        print(qoa_client.report(report={'post_train_performance': 0.9,
-                                        'pre_train_performance': 0.91,
-                                        'pre_loss_value': 2,
-                                        'post_loss_value': 4,
-                                        'train_round': (i+1),
-                                        'duration': 34.8},submit=True))
-        time.sleep(5)
+    # for i in range(5):
+    #     print(qoa_client.report(report={'post_train_performance': 0.9,
+    #                                     'pre_train_performance': 0.91,
+    #                                     'pre_loss_value': 2,
+    #                                     'post_loss_value': 4,
+    #                                     'train_round': (i+1),
+    #                                     'duration': 34.8},submit=True))
+    #     time.sleep(5)
     # print(qoa_client.qoa_report.report)
+
+    # print(amqp_connector)
+    # qoa_client_config["connector"] = [amqp_connector]
+    # qoa_client_config["client"]["instance_name"] = request_id
+    # for probe_config in qoa_client_config["probes"]:
+    #     if probe_config["probe_type"] == "docker":
+    #         probe_config["container_name"] = [container_name]
+    print(qoa_client)
+    client = QoaClient(config_dict=qoa_client)
+    client.start_all_probes()
