@@ -4,6 +4,7 @@ note that other tasks have been done to prepare such a data for the training tas
 '''
 import argparse
 import time
+import uuid
 
 import docker
 import flwr as fl
@@ -150,14 +151,14 @@ if __name__ == '__main__':
         name=client_conf['edge_id'],
         user_id=client_conf['consumer_id'],
         username=client_conf['dataset_id'],
-        # instance_id="instance_id",
+        instance_id=str(uuid.uuid4()),
         instance_name='session_001',
-        stage_id="stage_1",
+        stage_id="version:1",
         functionality="test",
         application_name=client_conf['model_id'],
         role='fml:eadran',
         run_id=str(client_conf['run_id']),
-        custom_info = ""
+        custom_info=""
     )
 
     connector_config = ConnectorConfig(
@@ -166,23 +167,28 @@ if __name__ == '__main__':
         config=AMQPConnectorConfig(**client_conf['amqp_connector']['conf'])
     )
 
-    probe_config = ProbeConfig(
-        probe_type="docker",
-        frequency= 10,
-        require_register=False,
-        log_latency_flag=False,
-        environment="Edge",
-        container_name="practical_moore"
-    )
+    # probe_config = ProbeConfig(
+    #     probe_type="docker",
+    #     frequency=10,
+    #     require_register=False,
+    #     log_latency_flag=False,
+    #     environment="Edge",
+    #     container_name="recursing_curie"
+    # )
     cconfig = ClientConfig(
         client=client_info,
         connector=[connector_config],
-        probes=[probe_config]
+        probes=[{"probe_type": "docker",
+                 "frequency": 10,
+                 "require_register": False,
+                 "log_latency_flag": False,
+                 "environment": "Edge",
+                 "container_name": "recursing_curie"}]
     )
     # print(cconfig)
     qoa_client = QoaClient(
-                           config_dict=cconfig
-                           )
+        config_dict=cconfig
+    )
 
     # qoa_client.observe_metric('post_train_performance', 0.9)
     # qoa_client.observe_metric('pre_train_performance', 0.9)
@@ -213,5 +219,5 @@ if __name__ == '__main__':
     #     if probe_config["probe_type"] == "docker":
     #         probe_config["container_name"] = [container_name]
     print(qoa_client)
-    client = QoaClient(config_dict=qoa_client)
-    client.start_all_probes()
+    # client = QoaClient(config_dict=qoa_client)
+    qoa_client.start_all_probes()
