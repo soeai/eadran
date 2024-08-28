@@ -65,12 +65,6 @@ class FedMarkClient(fl.client.NumPyClient):
         pass
 
     def fit(self, parameters, config):  # type: ignore
-        # if self.qoa_monitor is not None:
-        #     # System monitoring
-        #     # self.qoa_monitor.get()['train_round'] = config['fit_round']
-        #     qoa_utils.procMonitorFlag = True
-        #     qoa_utils.docker_monitor(self.qoa_monitor, self.monitor_interval, self.metrics)
-
         start_time = time.time()
         # train
         self.model_set_weights(parameters)
@@ -84,19 +78,12 @@ class FedMarkClient(fl.client.NumPyClient):
 
         if self.qoa_monitor is not None:
             self.total_time += end_time - start_time
-            # Report metric via QoA4ML
-            # self.qoa_monitor.observe_metric('post_train_performance', self.post_train_performance)
-            # self.qoa_monitor.observe_metric('pre_train_performance', self.pre_train_performance)
-            # self.qoa_monitor.observe_metric('pre_loss_value', self.pre_train_loss)
-            # self.qoa_monitor.observe_metric('post_loss_value', self.post_train_loss)
-            # self.qoa_monitor.observe_metric('train_round', config['fit_round'])
-            # self.qoa_monitor.observe_metric('duration', np.round(self.total_time, 0))
             report = {'post_train_performance': self.post_train_performance,
                       'pre_train_performance': self.pre_train_performance,
                       'pre_loss_value': self.pre_train_loss,
                       'post_loss_value': self.post_train_loss,
                       'train_round': config['fit_round'],
-                      'duration': np.round(self.total_time, 0)}
+                      'train_duration': np.round(self.total_time, 0)}
             self.qoa_monitor.report(report=report,submit=True)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
@@ -118,9 +105,7 @@ class FedMarkClient(fl.client.NumPyClient):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
     parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
-    # parser.add_argument('--conf', help='Client config file', default="./conf/client_template.json")
     parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
-
     parser.add_argument('--sessionid', help='The request Id from orchestrator')
 
     args = parser.parse_args()
@@ -156,11 +141,11 @@ if __name__ == '__main__':
         user_id=client_conf['consumer_id'],
         username="train_container",
         instance_name=args.sessionid,
-        stage_id="model_trainer",
+        stage_id="version:1",
         functionality=client_conf['dataset_id'],
         application_name=client_conf['model_id'],
-        role='eadran:role',
-        run_id=client_conf['run_id'],
+        role='eadran:edge',
+        run_id=str(client_conf['run_id']),
         custom_info=""
     )
 
@@ -170,23 +155,11 @@ if __name__ == '__main__':
         )
 
     qoa_client = QoaClient(
-        # report_cls=RoheReport(clientConfig=client_info),
         config_dict=cconfig
     )
 
-    # quality_of_model = MetricConfig(
-    #     # name: MetricNameEnum
-    #     # metric_class: MetricClassEnum
-    #     # description: Optional[str] = None
-    #     # default_value: int
-    #     # category: int
-    # )
-    # edge_monitor = MetricConfig()
-    #
-    # qoa_client.add_metric(metric_configs=[quality_of_model, edge_monitor])
-
-    fed_client = FedMarkClient(custom_module=mcs_custom_module,
-                               client_profile=client_conf,
+    fed_client = FedMarkClient(client_profile=client_conf,
+                               custom_module=mcs_custom_module,
                                x_train=X,
                                y_train=y,
                                qoa_monitor=qoa_client)

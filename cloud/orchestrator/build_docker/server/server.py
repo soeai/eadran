@@ -36,10 +36,6 @@ if __name__ == "__main__":
 
     params = parser.parse_args()
 
-    # test_file = args.data
-    # with open(args.config) as f:
-    #     params = json.load(f)
-
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
         on_fit_config_fn=fit_config,

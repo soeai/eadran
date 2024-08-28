@@ -179,7 +179,7 @@ if __name__ == '__main__':
         client=client_info,
         connector=[connector_config],
         probes=[{"probe_type": "docker",
-                 "frequency": 10,
+                 "frequency": 60,
                  "require_register": False,
                  "log_latency_flag": False,
                  "environment": "Edge",
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     #                                     'pre_loss_value': 2,
     #                                     'post_loss_value': 4,
     #                                     'train_round': (i+1),
-    #                                     'duration': 34.8},submit=True))
+    #                                     'duration': 34},submit=True))
     #     time.sleep(5)
     # print(qoa_client.qoa_report.report)
 
@@ -221,3 +221,6 @@ if __name__ == '__main__':
     print(qoa_client)
     # client = QoaClient(config_dict=qoa_client)
     qoa_client.start_all_probes()
+    while True:
+        pass
+
