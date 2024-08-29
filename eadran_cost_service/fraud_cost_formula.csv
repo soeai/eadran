@@ -1,0 +1,11 @@
+model_id_,data_source_id_,qom_function,resource_function,cost_qod,cost_context
+C001_M01_Fraud,ds001,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),130.94,2.45
+C001_M01_Fraud,ds002,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),100.28,1.86
+C001_M01_Fraud,ds003,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),103.81,2.05
+C001_M01_Fraud,ds004,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),90.95,1.78
+C001_M01_Fraud,ds005,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),86.54,1.75
+C001_M01_Fraud,ds006,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),484.17,10.0
+C001_M01_Fraud,ds007,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),130.01,2.6
+C001_M01_Fraud,ds008,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),267.6,5.51
+C001_M01_Fraud,ds009,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),193.11,3.65
+C001_M01_Fraud,ds010,100 * ($train_performance_after - $train_performance_before) * $train_performance_before,$duration * (0.1 * $cpu + 0.15 * $memory),229.95,4.28

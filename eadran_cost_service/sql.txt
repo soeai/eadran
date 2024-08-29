@@ -1,0 +1,68 @@
+# Cassandra
+CREATE KEYSPACE fedmarket WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+
+USE fedmarket;
+
+CREATE TABLE tbl_cost_formula_streaming (
+model_id_ text,
+data_source_id_ text,
+qom_function text,
+resource_function text,
+cost_qod double,
+cost_context double,
+PRIMARY KEY (model_id_, data_source_id_)
+);
+
+CREATE TABLE tbl_cost_streaming (
+model_id text,
+data_source_id text,
+train_round int,
+timestamp timestamp,
+cost_qom double,
+cost_resource double,
+cost_qod double,
+cost_context double,
+machine_profile_ref text,
+PRIMARY KEY (model_id, data_source_id, train_round)
+);
+
+# cost based on QoD
+# unit = 0.5/1K sample
+# cost = unit * datasize * sum(qod)
+# [130.94, 100.28, 103.81, 90.95, 86.54, 484.17, 130.01, 267.6, 193.11, 229.95]
+
+# cost based on context
+# unit = 10
+# context_metric = data/max of data source
+# cost = unit * context_metric
+# [2.45, 1.86, 2.05, 1.78, 1.75, 10.0, 2.6, 5.51, 3.65, 4.28]
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds001','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',130.94, 2.45);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds002','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',100.28, 1.86);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds003','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',103.81, 2.05);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds004','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',90.95, 1.78);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds005','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',86.54, 1.75);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds006','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',484.17, 10.0);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds007','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',130.01, 2.6);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds008','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)', 267.6, 5.51);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds009','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)', 193.11, 3.65);
+
+insert into tbl_cost_formula_streaming(model_id_,data_source_id_, qom_function, resource_function, cost_qod, cost_context)
+values('C001_M01_Fraud','ds010','100 * ($train_performance_after - $train_performance_before) * ($train_performance_before)','$duration * (0.001 * $cpu + 0.0005 * $memory/1024)',229.95, 4.28);

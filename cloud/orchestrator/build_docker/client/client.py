@@ -139,9 +139,9 @@ if __name__ == '__main__':
     client_info = ClientInfo(
         name=client_conf['edge_id'],
         user_id=client_conf['consumer_id'],
-        username="train_container",
+        username="edge_container",
         instance_name=args.sessionid,
-        stage_id="version:1",
+        stage_id="eadran:" + client_conf['edge_id'],
         functionality=client_conf['dataset_id'],
         application_name=client_conf['model_id'],
         role='eadran:edge',

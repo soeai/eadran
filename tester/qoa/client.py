@@ -179,7 +179,7 @@ if __name__ == '__main__':
         client=client_info,
         connector=[connector_config],
         probes=[{"probe_type": "docker",
-                 "frequency": 60,
+                 "frequency": 300,
                  "require_register": False,
                  "log_latency_flag": False,
                  "environment": "Edge",
@@ -202,14 +202,14 @@ if __name__ == '__main__':
     # qoa_client.observe_inference_metric("accuracy", 1)
     # qoa_client.timer()
     # print(qoa_client.qoa_report.report)
-    # for i in range(5):
-    #     print(qoa_client.report(report={'post_train_performance': 0.9,
-    #                                     'pre_train_performance': 0.91,
-    #                                     'pre_loss_value': 2,
-    #                                     'post_loss_value': 4,
-    #                                     'train_round': (i+1),
-    #                                     'duration': 34},submit=True))
-    #     time.sleep(5)
+    for i in range(5):
+        print(qoa_client.report(report={'post_train_performance': 0.9,
+                                        'pre_train_performance': 0.91,
+                                        'pre_loss_value': 2,
+                                        'post_loss_value': 4,
+                                        'train_round': (i+1),
+                                        'train_duration': 34},submit=True))
+        time.sleep(5)
     # print(qoa_client.qoa_report.report)
 
     # print(amqp_connector)
