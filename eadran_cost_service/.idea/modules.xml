@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Eadran.iml" filepath="$PROJECT_DIR$/.idea/Eadran.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eadran_cost_service.iml" filepath="$PROJECT_DIR$/eadran_cost_service.iml" />
     </modules>
   </component>
 </project>

@@ -2,7 +2,7 @@
   <artifact type="jar" name="Eadran:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Eadran_jar</output-path>
     <root id="archive" name="Eadran.jar">
-      <element id="module-output" name="Eadran" />
+      <element id="module-output" name="eadran_cost_service" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/io/github/java-diff-utils/java-diff-utils/4.12/java-diff-utils-4.12.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jline/jline/3.25.1/jline-3.25.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/luben/zstd-jni/1.5.5-4/zstd-jni-1.5.5-4.jar" path-in-jar="/" />
