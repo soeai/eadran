@@ -111,39 +111,13 @@ class FedServerOrchestrator(HostObject):
             logging.info("Start container result: {}".format(res))
             self.containers.append(config["options"]["--name"])
 
-            if asyncio.run(self.check_docker_running(config["options"]["--name"])):
+            if asyncio.run(check_docker_running(config["options"]["--name"])):
                 return 0
 
         except Exception as e:
             logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
             traceback.print_exception(*sys.exc_info())
         return 1
-
-    async def check_docker_running(self, container_name: str):
-        """Verify the status of a container by its name
-
-        :param container_name: the name of the container
-        :return: boolean or None
-        """
-        RUNNING = "running"
-        # Connect to Docker using the default socket or the configuration
-        # in your environment
-        docker_client = docker.from_env()
-
-        await asyncio.sleep(2)
-
-        try:
-            container = docker_client.containers.get(container_name)
-            container_state = container.attrs["State"]
-            return container_state["Status"] == RUNNING
-        except docker.errors.NotFound:
-            logging.info(f"Container '{container_name}' not found.")
-            return False
-        except docker.errors.APIError as e:
-            logging.info(f"Error communicating with Docker API: {e}")
-            return False
-        finally:
-            docker_client.close()
 
     def stop_container(self, container_name):
         try:
@@ -188,6 +162,33 @@ class FedServerOrchestrator(HostObject):
 
             health_post['health']['mem'] = psutil.virtual_memory()[1]
             health_post['health']['cpu'] = psutil.cpu_count()
+
+
+async def check_docker_running(container_name: str):
+    """Verify the status of a container by its name
+
+    :param container_name: the name of the container
+    :return: boolean or None
+    """
+    RUNNING = "running"
+    # Connect to Docker using the default socket or the configuration
+    # in your environment
+    docker_client = docker.from_env()
+
+    await asyncio.sleep(2)
+
+    try:
+        container = docker_client.containers.get(container_name)
+        container_state = container.attrs["State"]
+        return container_state["Status"] == RUNNING
+    except docker.errors.NotFound:
+        logging.info(f"Container '{container_name}' not found.")
+        return False
+    except docker.errors.APIError as e:
+        logging.info(f"Error communicating with Docker API: {e}")
+        return False
+    finally:
+        docker_client.close()
 
 
 if __name__ == '__main__':
