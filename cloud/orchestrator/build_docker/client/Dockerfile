@@ -9,7 +9,7 @@
 #FROM tensorflow/serving:latest-devel as build_image
 #FROM tensorflow/tensorflow-cpu:latest      image doesnot exist
 #FROM ubuntu:20.04
-FROM tensorflow/build
+FROM tensorflow/tensorflow
 # Prevents Python from writing pyc files.
 #ENV PYTHONDONTWRITEBYTECODE=1
 
