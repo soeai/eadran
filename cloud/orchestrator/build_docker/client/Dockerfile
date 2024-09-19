@@ -40,4 +40,4 @@ RUN chmod 755 ./start.sh
 # Run the application.
 ENTRYPOINT ["./start.sh"]
 
-CMD ["http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
+CMD ["storage_service", "config_file_id", "session_id"]
