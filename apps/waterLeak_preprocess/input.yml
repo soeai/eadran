@@ -1,0 +1,8 @@
+dataPath: ../dataLeak/originData/
+outputPath: ../dataLeak/output-test/
+sampling_second: 5 # chunk size
+sampling_size: 10 # number of features in the chunk_size
+overlap: 0.2 # 20 percent
+topology: BR
+leakType:
+condition: BC1

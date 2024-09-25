@@ -1,0 +1,7 @@
+[project]
+name = "analyzedata"
+version = "0.1.0"
+description = "Add your description here"
+authors = [{ name = "hong3nguyen", email = "tringuyennht@gmail.com" }]
+dependencies = ["pandas>=2.2.3", "soundfile>=0.12.1"]
+requires-python = ">= 3.8"
