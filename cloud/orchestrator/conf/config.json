@@ -3,7 +3,7 @@
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
+        "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_queue": "orchestrator.queue",
@@ -15,7 +15,7 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point":"amqps://hnmtgjpq:qdLfsRIeayDlGlQov5UTL_xl_SptAADz@armadillo.rmq.cloudamqp.com/hnmtgjpq",
+        "end_point":"128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "out_routing_key": "edge"
@@ -25,15 +25,15 @@
   "database": {
     "collection": "registration",
     "db_name": "rohe_observation",
-    "url": "mongodb://195.148.22.62:27017/"
+    "url": "mongodb://128.214.254.113:27017/"
   },
   "false_rate": 3,
   "output_folder": "/results/",
   "sample_rate": 50,
   "timer": 10,
 
-  "url_mgt_service": "http://192.168.80.87:8080",
-  "url_storage_service": "http://192.168.80.87:8081",
+  "url_mgt_service": "http://192.168.80.68:8080",
+  "url_storage_service": "http://192.168.80.68:8081",
   "server_id": "fedserver001",
   "fed_server_image_name": "trungdonggg/training-server",
   "fed_server_image_port": 8080,
