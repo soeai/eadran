@@ -82,6 +82,7 @@ def data_extraction(params, request_id, _orchestrator=None):
 class Orchestrator(HostObject):
     def __init__(self, config, docker_image_conf):
         self.config = utils.load_config(config)
+        print(self.config)
         self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
         self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.thread = Thread(target=self.start_receive)
