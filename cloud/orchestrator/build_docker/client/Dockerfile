@@ -38,6 +38,8 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 RUN chmod 755 ./start.sh
 
 # Run the application.
-ENTRYPOINT ["./start.sh"]
+#ENTRYPOINT ["./start.sh"]
 
-CMD ["storage_service", "config_file_id", "session_id"]
+# ENTRYPOINT ["tail", "-f", "/dev/null"]  # DEUBUG MODE
+
+ENTRYPOINT ["./start.sh", "storage_service", "config_file_id", "session_id"]
