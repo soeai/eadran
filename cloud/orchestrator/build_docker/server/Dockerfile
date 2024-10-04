@@ -48,7 +48,7 @@ COPY . .
 RUN apt update
 
 
-RUN apt install -y git wget make build-essential manpages-dev python3-pip
+RUN apt install -y git wget make build-essential manpages-dev python-pip
 
 RUN pip3 install --upgrade pip setuptools wheel
 
@@ -67,7 +67,7 @@ RUN chmod 755 ./start.sh
 
 
 # Run the application.
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["./start.sh", "8081", "5"]
 
-CMD ["8081", "5"]
+#CMD ["8081", "5"]
 

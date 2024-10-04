@@ -13,4 +13,4 @@ if [ ! -f "$2" ]; then
 fi
 
 # check python3 vs current environment from the docker instance
-python3 client.py --service=$1 --sessionid=$3
+python client.py --service=$1 --sessionid=$3

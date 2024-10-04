@@ -29,7 +29,7 @@ WORKDIR /app
 COPY . .
 
 RUN apt update
-RUN apt install -y git wget make build-essential manpages-dev python3-pip
+RUN apt install -y git wget make build-essential manpages-dev python-pip
 
 RUN pip3 install --upgrade pip setuptools wheel
 
