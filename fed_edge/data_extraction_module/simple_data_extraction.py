@@ -12,10 +12,19 @@ class TabularHandle(ABCTabular):
     def extract(self, _features, _label, _filters, _sample_limit):
         dest_path = os.path.abspath(self.reader_module['dest_path'])
         method = self.reader_module['method']
+        df = None
         if self.type == 'file':
             # current support csv file
             df = pd.read_csv(self.location)
-            # apply filter
+        elif self.type == 'database':
+            # not support now
+            pass
+        elif self.type == 'cloud':
+            # not support now
+            pass
+
+        # apply filter
+        if df is not None:
             if _filters is not None:
                 df.query(build_filter_exp_pandas(_filters), inplace=True)
 
@@ -50,12 +59,6 @@ class TabularHandle(ABCTabular):
             elif method == 's3':
                 pass
             return json.dumps(self.__build_response(full_path, row, col, method))
-        elif self.type == 'database':
-            # not support now
-            pass
-        elif self.type == 'cloud':
-            # not support now
-            pass
 
     def __build_response(self, filename_url, row, col, method):
         # {

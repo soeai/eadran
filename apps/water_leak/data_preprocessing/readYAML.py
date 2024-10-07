@@ -1,8 +1,6 @@
-from os.path import split
-import yaml, sys, os, glob
+import yaml, os, glob
 
 import waterLeak_preprocessData
-import numpy as np
 import shutil
 import argparse
 

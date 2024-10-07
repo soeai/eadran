@@ -61,7 +61,7 @@ def rename_file(dirpath):
         if os.path.isfile(os.path.join(dirpath, filename)) and re.search(
             "0\.\d+", filename
         ):  # replace first occurrence of '.' with '-'
-            new_filename = re.sub("\.", "-", filename, count=1)
+            new_filename = re.sub("..", "-", filename, count=1)
             if new_filename != filename:
                 os.rename(
                     os.path.join(dirpath, filename), os.path.join(dirpath, new_filename)

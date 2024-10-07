@@ -1,14 +1,14 @@
 {
-  "edge_id": "edge003",
+  "edge_id": "edge01",
   "amqp_in": {
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "128.214.255.226",
+        "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_routing_key": "edge.#",
-        "in_queue": "queue_edge003"
+        "in_queue": "queue_edge01"
       }
     }
   },
@@ -16,16 +16,16 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point": "128.214.255.226",
+        "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "orchestrator.edge003"
+        "out_routing_key": "orchestrator.edge01"
       }
     }
   },
   "data": {
-    "owner_id": "dc003",
-    "dataset_id": "fraud003",
+    "owner_id": "dp001",
+    "dataset_id": "leak-base-case",
     "dest_path": "../../data_samples",
     "method": "local",
     "reader_module": {
@@ -39,7 +39,7 @@
     "module_name": "../data_extraction_module/simple_data_extraction.py",
     "params": "--request"
   },
-  "amqp_health_report": "healthreport.edge003",
+  "amqp_health_report": "healthreport.edge01",
   "report_delay_time": 300,
   "qoa_client": {
     "client": {
