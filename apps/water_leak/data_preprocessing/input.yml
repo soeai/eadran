@@ -1,8 +1,11 @@
 dataPath: ../dataLeak/originData/
 outputPath: ../dataLeak/output-test/
 sampling_second: 5 # chunk size
-sampling_size: 10 # number of features in the chunk_size
-overlap: 0.2 # 20 percent
-topology: BR
-leakType:
-condition: BC1
+sampling_size: 2 # number of features in the chunk_size
+overlap: 0.5 # 20 percent
+topology:   # [0 (L0), 1 (BR)]
+leakType: 
+condition: 
+number_provider: 8 # 2 topology and 4 leaking types 
+test_fraction: 0.2 # 20% percent for testing
+
