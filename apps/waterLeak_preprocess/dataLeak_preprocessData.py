@@ -173,7 +173,6 @@ def split_data_condition(directory_path, output_path):
 
         # Split the filename by underscore
         name_parts = csv_filename.split("_")
-
         # flowcondition Check the parts of the name
         for part in name_parts:
             if len(name_parts) == 2:
@@ -235,24 +234,60 @@ def possible_csv(data):
         for sensor in set_sensorDic:
             set_dic.append(os.path.join(data["dataPath"], sensor, "BR"))
             set_dic.append(os.path.join(data["dataPath"], sensor, "LO"))
-
     else:
         for sensor in set_sensorDic:
             set_dic.append(os.path.join(data["dataPath"], sensor, data["topology"]))
 
-    # add data['dataPath'] with leak types
-    if data["leakType"] == None:
-        for dic in set_dic[:]:
+    final_set_dic = []
+    if data["leakType"] is None:
+        for dic in set_dic:
             for leak in set_leak:
-                set_dic.append(os.path.join(dic, leak))
-            set_dic.remove(dic)
+                final_set_dic.append(os.path.join(dic, leak))
     else:
         for dic in set_dic:
-            set_dic.append(os.path.join(dic, data["leakType"]))
-            set_dic.remove(dic)
-    set_dic.append(os.path.join(data["dataPath"], "H12", "N"))
+            final_set_dic.append(os.path.join(dic, data["leakType"]))
 
+    set_dic.append(os.path.join(data["dataPath"], "H12", "N"))
     return set_dic
+
+
+"""
+    Group in Backgound Condition
+"""
+
+
+def pattern_for_BC(directory):
+    topo_set = ["BR", "LO"]
+    leak_set = ["CC", "GL", "LC", "NL", "OL"]
+    condition_set = ["0-18 LPS", "0-47 LPS", "ND", "Transient"]
+
+    patterns = []
+    folder_name_set = []
+
+    for topo in topo_set:
+        for leak in leak_set:
+            for condition in condition_set:
+                pattern = f"{topo}_{leak}_{condition}*.csv"
+                patterns.append(pattern)
+
+    for pattern in patterns:
+        # Find all files matching the pattern
+        matching_files = glob.glob(os.path.join(directory, pattern))
+
+        if matching_files:
+            # Create a folder for the pattern
+            folder_name = pattern.replace("*", "").replace(".csv", "")
+
+            folder_name_set.append(folder_name)
+
+            folder_path = os.path.join(directory, folder_name)
+            os.makedirs(folder_path, exist_ok=True)
+
+            # Move matching files to the folder
+            for file in matching_files:
+                shutil.move(file, folder_path)
+
+    return folder_name_set
 
 
 """
@@ -261,24 +296,53 @@ def possible_csv(data):
 
 
 def generate_feature_sampling_overlap(
-    directory, second, number_features, overlapping_size
+    directory, folder, second, number_features, overlapping_size
 ):
     sensor_1 = ["A1.csv", "A2.csv", "P1.csv", "P2.csv"]
     sensor_2 = ["H1.csv", "H2.csv"]
+    # target to numeric
+    target_num = {"NL": 0, "CC": 1, "GL": 2, "LC": 3, "OL": 4}
 
-    all_files = glob.glob(directory + "/*.csv")
+    # print("directory: ", directory)
+    # print ("pattern: ", pattern)
+
+    # fodler_name = pattern.replace('*', '').replace('.csv', '')
+    all_files = glob.glob(os.path.join(directory, folder, folder) + "*.csv")
+
+    print("pattern: ", os.path.join(directory, folder, folder) + "*.csv")
+
+    print("all files: ", all_files)
 
     df_ = pd.DataFrame()
 
-    df_topology = None
-    df_target = None
-    df_condition = None
+    # df_target = None
+    # df_topology = None
+    # df_condition = None
+
     # add features from the consider file
     for filename in all_files:
         df_temp = pd.DataFrame()
+
         # splitting file name
         splitted_filename = filename.split("_")
-        print(filename)
+
+        # print(filename)
+
+        if os.path.basename(splitted_filename[0]) == "BR":
+            df_["topology"] = 1
+        else:
+            df_["topology"] = 0
+
+        # print('test target: ', splitted_filename[1] )
+        df_["target"] = target_num[splitted_filename[1]]
+
+        # print('test target22: ', target_num[splitted_filename[1]] )
+
+        for i in range(1, 7):
+            if f"BC{i}" in splitted_filename[0]:
+                df_[f"BC{i}"] = 1
+            else:
+                df_[f"BC{i}"] = 0
 
         # A12 or P12 - return dictionary
         if splitted_filename[-1] in sensor_1:
@@ -290,11 +354,17 @@ def generate_feature_sampling_overlap(
                 overlapping_size,
             )
 
-            df_topology = os.path.basename(splitted_filename[0])
-            df_target = splitted_filename[1]
-            df_condition = splitted_filename[2]
+            # df_topology = os.path.basename(splitted_filename[0])
+            # df_target = splitted_filename[1]
+            # df_condition = splitted_filename[2]
 
+            #
+            # print("topology: ", df_topology)
+            #
+            # print("target: ", df_target)
+            # print("condition: ", df_condition)
         # H12 - return dictionary
+        # print(splitted_filename)
         if splitted_filename[-1] in sensor_2 and len(splitted_filename) > 2:
             df_temp = generate_features_H12(
                 filename,
@@ -304,13 +374,31 @@ def generate_feature_sampling_overlap(
                 overlapping_size,
             )
 
-        print("split_filename: ", splitted_filename)
+            # df_topology = os.path.basename(splitted_filename[0])
+            # df_target = splitted_filename[1]
+            # df_condition = splitted_filename[2]
+            # print("topology: ", df_topology)
+            #
+            # print("target: ", df_target)
+            # print("condition: ", df_condition)
+        # final data frame
+        # df = pd.concat([df_AP_temp, df_H_temp])
+        # print(df_temp.head())
+
+        # df_ = df_.append(df_temp, ignore_index=True)
+        # df_ = pd.concat([df_, df_temp], ignore_index=True)
+
+        # print("split_filename: ", splitted_filename)
 
         df_ = pd.concat([df_, df_temp], axis=1)
 
-    df_["topology"] = df_topology
-    df_["target"] = df_target
-    df_["condition"] = df_condition
+        duplicate_columns = df_.columns[df_.columns.duplicated()].tolist()
+        # if duplicate_columns:
+        #     print(f"Duplicate columns found in : {duplicate_columns}")
+
+        # df_ = pd.merge(df_, df_temp, on='time', how='outer')
+
+        df_ = df_.loc[:, ~df_.columns.duplicated()]
 
     return df_
 
@@ -350,7 +438,6 @@ def generate_features_A12P12(filename, sensor, second, num_features, overlap_rat
     df = df[df["Sample"] <= 29]
 
     all_instance_list = df["Sample"].value_counts()
-    # print(all_instance_list)
     window_size = (all_instance_list[all_instance_list.index == 0].values).flat[
         0
     ] * second
@@ -366,7 +453,7 @@ def generate_features_A12P12(filename, sensor, second, num_features, overlap_rat
         grouped_means[sensor + "mean"] = df_chunk["Value"].mean()
         grouped_means[sensor + "std"] = df_chunk["Value"].std()
         grouped_means["time"] = df_chunk["Sample"]
-        # print(grouped_means.head())
+
         result = pd.concat([result, grouped_means], ignore_index=True)
     # Convert the features list to a DataFrame
     return result
@@ -380,13 +467,13 @@ def generate_features_H12(filename, sensor, second, num_features, overlap_rate):
     name_without_extension = os.path.splitext(os.path.basename(filename))[0]
     splitted_filename = name_without_extension.split("_")
 
-    window_size = 8000 * second
-
     if splitted_filename[-2] == "N":
         directory_path = os.path.dirname(filename)
+
+        # print("directory_path: ", directory_path)
         filename_noise = (
             directory_path
-            + "/"
+            + "/../"
             + splitted_filename[-2]
             + "_"
             + splitted_filename[-1]
@@ -395,14 +482,14 @@ def generate_features_H12(filename, sensor, second, num_features, overlap_rate):
         pd_N_file = pd.read_csv(filename_noise, index_col=None, header=0)
         pd_N_file.columns = ["Value"]
 
-        # Create a grouping variable
-        pd_N_file["Block"] = (pd_N_file.index // window_size) + 1
+        pd_N_file["Sample"] = pd_N_file.index // 8000
 
-        # Group by the 'Block' column
-        pd_N_file.groupby("Block")
-
-        overlap_size = int(window_size * overlap_rate)
-
+        all_instance_list = pd_N_file["Sample"].value_counts()
+        # print(all_instance_list)
+        window_size = (all_instance_list[all_instance_list.index == 0].values).flat[
+            0
+        ] * second
+        overlap_size = int((window_size * overlap_rate).astype(int))
         # counting the all records in a group
         N_data_split_list = windowed_view_df(pd_N_file, window_size, overlap_size)
 
@@ -416,20 +503,20 @@ def generate_features_H12(filename, sensor, second, num_features, overlap_rate):
             )
             N_grouped_means[sensor + "mean"] = N_df_chunk[column_name].mean()
             N_grouped_means[sensor + "std"] = N_df_chunk[column_name].std()
-            N_grouped_means["time"] = N_df_chunk["Block"]
+            N_grouped_means["time"] = N_df_chunk["Sample"]
 
             N_result = pd.concat([N_result, N_grouped_means], ignore_index=True)
-        # print(N_result)
     else:
         N_result = None
 
-    # Create a grouping variable
-    df["Block"] = (df.index // window_size) + 1
+    df["Sample"] = df.index // 8000
 
-    # Group by the 'Block' column
-    df.groupby("Block")
-    overlap_size = int(window_size * overlap_rate)
-    # counting the all records in a group
+    all_instance_list = df["Sample"].value_counts()
+    # print(all_instance_list)
+    window_size = (all_instance_list[all_instance_list.index == 0].values).flat[
+        0
+    ] * second
+    overlap_size = int((window_size * overlap_rate).astype(int))
     data_split_list = windowed_view_df(df, window_size, overlap_size)
 
     result = pd.DataFrame()
@@ -439,7 +526,7 @@ def generate_features_H12(filename, sensor, second, num_features, overlap_rate):
         grouped_means = calculate_group_means(df_chunk, num_features, sensor)
         grouped_means[sensor + "mean"] = df_chunk[column_name].mean()
         grouped_means[sensor + "std"] = df_chunk[column_name].std()
-        grouped_means["time"] = df_chunk["Block"]
+        grouped_means["time"] = df_chunk["Sample"]
 
         result = pd.concat([result, grouped_means], ignore_index=True)
 
@@ -474,3 +561,90 @@ def calculate_group_means(df, num_groups, sensor_name):
     grouped_means_transpose.reset_index(drop=True, inplace=True)
 
     return grouped_means_transpose
+
+
+def split_time_series_data(df, file_path, test_fraction):
+    # Sort the DataFrame by the 'time' column
+    df = df.sort_values(by="time")
+
+    # Calculate the split index based on the specified fraction
+    train_size = int(len(df) / (1 + test_fraction))
+
+    # Ensure the split is fair by checking the time intervals
+    while (
+        train_size < len(df) - 1
+        and df.iloc[train_size]["time"] == df.iloc[train_size + 1]["time"]
+    ):
+        train_size += 1
+
+    # Split the DataFrame into training and testing sets
+    train_df = df.iloc[:train_size]
+    test_df = df.iloc[train_size:]
+
+    # Save the training and testing sets to separate CSV files
+    train_file_path = file_path.replace(".csv", "_train.csv")
+    test_file_path = file_path.replace(".csv", "_test.csv")
+
+    train_df.to_csv(train_file_path, index=False)
+    test_df.to_csv(test_file_path, index=False)
+
+    # print(f"Training set saved to: {train_file_path}")
+    # print(f"Testing set saved to: {test_file_path}")
+
+    return train_df, test_df
+
+
+def split_data(file_path, output_path, test_fraction, num_files):
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(file_path)
+
+    # Split the DataFrame into subsets based on the target feature
+    target_types = df["target"].unique()
+
+    # Initialize lists to hold 80% and 20% data
+    eighty_percent_data = []
+    twenty_percent_data = []
+
+    for target in target_types:
+        if target == 0:
+            continue
+        target_df = df[df["target"] == target]
+
+        # Shuffle the DataFrame
+        target_df = target_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+        # Calculate the split index
+        split_index = int(len(target_df) * (1 - test_fraction))
+
+        # Split the DataFrame into 80% and 20%
+        eighty_df = target_df.iloc[:split_index]
+        twenty_df = target_df.iloc[split_index:]
+
+        eighty_percent_data.append(eighty_df)
+        twenty_percent_data.append(twenty_df)
+
+    # Combine all 80% data
+    eighty_percent_data = pd.concat(eighty_percent_data, ignore_index=True)
+
+    # Combine all 20% data and data labeled 0
+    twenty_percent_data = pd.concat(
+        twenty_percent_data + [df[df["target"] == 0]], ignore_index=True
+    )
+
+    # Shuffle the combined 20% data
+    twenty_percent_data = twenty_percent_data.sample(
+        frac=1, random_state=42
+    ).reset_index(drop=True)
+
+    # Split the shuffled 20% data into 8 files
+    twenty_splits = np.array_split(twenty_percent_data, num_files)
+
+    # Split the 80% data into 8 files
+    eighty_splits = np.array_split(eighty_percent_data, num_files)
+
+    # Combine 80% and 20% splits into 8 files
+    for i in range(num_files):
+        combined_df = pd.concat([eighty_splits[i], twenty_splits[i]], ignore_index=True)
+        output_file_path = os.path.join(output_path, f"split_{i+1}.csv")
+        combined_df.to_csv(output_file_path, index=False)
+        print(f"File saved to: {output_file_path}")
