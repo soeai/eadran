@@ -1,6 +1,7 @@
 import pika
 import json
 # from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject
+from qoa4ml.config.configs import AMQPConnectorConfig
 from qoa4ml.connector.amqp_connector import AmqpConnector
 import qoa4ml.utils.qoa_utils as utils
 from threading import Thread
@@ -11,7 +12,7 @@ class DataService_Simulation(object):
     def __init__(self):
         self.config = utils.load_config('../../fed_edge/conf/config.json')
         # self.amqp_collector = Amqp_Collector(self.config['amqp_in'],self)
-        self.amqp_connector = AmqpConnector(self.config['amqp_out'])
+        self.amqp_connector = AmqpConnector(AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"]))
         # self.thread = Thread(target=self.start_receive)
         # self.thread.start()
 
@@ -27,7 +28,7 @@ class DataService_Simulation(object):
 
 
 client = DataService_Simulation()
-with open('data_request.json') as f:
+with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge01.json') as f:
     req = json.load(f)
     # msg = {
     #     "edge_id": "DE001",

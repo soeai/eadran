@@ -40,10 +40,10 @@ class EdgeOrchestrator(HostObject):
         self.containers = []
         self.amqp_queue_in = AmqpCollector(
             AMQPCollectorConfig(**self.config["amqp_in"]["amqp_collector"]["conf"]),
-            self,
+            self
         )
         self.amqp_queue_out = AmqpConnector(
-            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"])
+            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"]),health_check_disable=True
         )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()

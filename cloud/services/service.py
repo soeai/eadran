@@ -631,6 +631,7 @@ class UserMgt(Resource):
                 return {"status": 1, "message": "Missing username in request."}, 400
 
         return {"status": 1, "message": "Invalid JSON payload."}
+
     def delete(self):
         # check_login = required_auth()
         # if check_login is not None:
