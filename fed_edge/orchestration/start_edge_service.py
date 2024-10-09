@@ -211,17 +211,23 @@ class EdgeOrchestrator(HostObject):
             # save data request to file
             json.dump(req_msg["data_request"], f)
             # execute data extraction module
-        command = self.config["modules"]["extract_data"]["command"]
-        module_name = self.config["modules"]["extract_data"]["module_name"]
-        params = self.config["modules"]["extract_data"]["params"]
+        command = self.config["extract_data_module"]["command"]
+        module_name = self.config["extract_data_module"]["module_name"]
+        params = self.config["extract_data_module"]["params"]
         rep_msg = subprocess.run(
             [command, module_name, params, filename], capture_output=True
         )
-        logging.info(rep_msg.stdout)
-        response = json.loads(rep_msg.stdout)
-        # cleanup
-        os.remove(filename)
-        return response
+        # logging.info(rep_msg.returncode)
+        # logging.info(rep_msg.stdout)
+        try:
+            response = {"status": 1, "description": "Error while extracting data."}
+            if rep_msg.returncode == 0:
+                response = json.loads(rep_msg.stdout)
+                # cleanup
+                os.remove(filename)
+            return response
+        except:
+            return {"status": 1}
 
     def health_report(self):
         try:

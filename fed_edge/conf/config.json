@@ -26,7 +26,7 @@
   "data": {
     "owner_id": "dp001",
     "dataset_id": "leak-base-case",
-    "dest_path": "../../data_samples",
+    "dest_path": "data_samples",
     "method": "local",
     "reader_module": {
       "storage_ref_id": "storage id of module",
@@ -36,7 +36,7 @@
   },
   "extract_data_module": {
     "command": "python3",
-    "module_name": "../data_extraction_module/simple_data_extraction.py",
+    "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py",
     "params": "--request"
   },
   "amqp_health_report": "healthreport.edge01",

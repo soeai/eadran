@@ -71,6 +71,7 @@ def data_extraction(params, request_id, _orchestrator=None):
                     )
                 )
                 _orchestrator.send(params, routing_key=routing)
+                _orchestrator.handling_edges[request_id] = [params["edge_id"]]
                 break
             elif count < 5:
                 logging.info("Edge is not available, sleeping 5 minutes to retry.")

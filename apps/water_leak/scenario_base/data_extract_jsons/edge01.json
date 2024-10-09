@@ -2,12 +2,12 @@
     "edge_id": "edge01",
     "data_request":
       {
-        "owner_id": "pd001",
+        "owner_id": "dp001",
         "dataset_id": "leak-base-case",
         "__comment": "features required by the above-mentioned dataset for the above-mentioned provider",
         "access_info": {
           "type": "file",
-          "location": "../../data_samples/fraudTrain_processed_SMOTE_1.csv",
+          "location": "data_samples/fraudTrain_processed_SMOTE_1.csv",
           "access_key": ""
         },
         "features": [],
