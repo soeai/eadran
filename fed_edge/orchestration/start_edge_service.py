@@ -207,33 +207,39 @@ class EdgeOrchestrator(HostObject):
     def extract_data(self, req_msg):
         if not os.path.isdir("temp"):
             os.mkdir("temp")
-        filename = "temp/request_{}.json".format(uuid.uuid4())
-        with open(filename, "w") as f:
-            # save data request to file
+        uuids = uuid.uuid4()
+        # save request command to file
+        request_filename = "temp/request_{}.json".format(uuids)
+        with open(request_filename, "w") as f:
             json.dump(req_msg["data_request"], f)
-            # execute data extraction module
-        command = self.config["extract_data_module"]["command"]
-        module_name = self.config["extract_data_module"]["module_name"]
-        params = self.config["extract_data_module"]["params"]
+
+        # save data config to file
+        data_conf_filename = "temp/data_conf_{}.json".format(uuids)
+        with open(data_conf_filename, "w") as f:
+            json.dump(self.config['extracted_data_conf'], f)
+
+        # execute data extraction module
+        command = self.config["extracted_data_conf"]['extract_module']["command"]
+        module_name = self.config["extracted_data_conf"]['extract_module']["module_name"]
         rep_msg = subprocess.run(
-            [command, module_name, params, filename], capture_output=True
+            [command, module_name, '--request', request_filename, "--conf", data_conf_filename], capture_output=True
         )
+        # cleanup
+        os.remove(request_filename)
+        os.remove(data_conf_filename)
         try:
-            logging.info(rep_msg.stdout)
+            # logging.info(rep_msg.stdout)
             response = {"status": 1, "description": "Error while extracting data."}
             if rep_msg.returncode == 0:
                 response = json.loads(rep_msg.stdout)
-                # cleanup
-                os.remove(filename)
             return response
         except:
             logging.error(rep_msg.stderr)
-            return {"status": 1}
+            return {"status": rep_msg.stderr, "description": "Error while extracting data."}
 
     def health_report(self):
         try:
             docker_res = docker.from_env().version()
-
         except:
             logging.warning(
                 "Docker is not installed. Thus service cannot serve fully function!"

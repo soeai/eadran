@@ -23,7 +23,7 @@
       }
     }
   },
-  "data": {
+  "extracted_data_conf": {
     "owner_id": "ttu_water_leak",
     "dataset_id": "water_leak_03",
     "dest_path": "apps/water_leak/extracted_data",
@@ -32,12 +32,11 @@
       "storage_ref_id": "storage id of module",
       "module_name": "data_reader",
       "function_map": "read_data"
+    },
+    "extract_module": {
+      "command": "python3",
+      "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py"
     }
-  },
-  "extract_data_module": {
-    "command": "python3",
-    "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py",
-    "params": "--request"
   },
   "amqp_health_report": "healthreport.edge03",
   "report_delay_time": 120,

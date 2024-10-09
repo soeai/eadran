@@ -6,6 +6,7 @@ from utils import build_filter_exp_pandas
 import json
 import os
 import random as rd
+import datetime as dt
 
 
 class TabularHandle(ABCTabular):
@@ -53,7 +54,7 @@ class TabularHandle(ABCTabular):
                     pass
 
             if method == 'local':
-                file_name = str(uuid.uuid4()) + '.csv'
+                file_name = self.dataset_id + "_" + str(dt.datetime.today().strftime('%Y%m%d%H%M%S')) + '.csv'
                 full_path = os.path.join(dest_path, file_name)
                 df.to_csv(full_path, index=False)
             elif method == 's3':
@@ -95,11 +96,11 @@ class TabularHandle(ABCTabular):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simple Data Extraction for CSV file')
     parser.add_argument('--request', type=str)
-    parser.add_argument('--conf', type=str, default='fed_edge/conf/config.json')
+    parser.add_argument('--conf', type=str)
     args = parser.parse_args()
 
     with open(args.conf) as f_conf:
-        conf = json.load(f_conf)['data']
+        conf = json.load(f_conf)
         with open(args.request) as f_req:
             req = json.load(f_req)
             if conf['owner_id'] == req['owner_id'] and conf['dataset_id'] == req['dataset_id']:

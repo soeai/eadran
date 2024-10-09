@@ -3,7 +3,14 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/data_samples/5d276238-913b-4432-a324-7e06195e78c2.csv">
+        <entry key="/apps/water_leak/extracted_data/533536db-41fc-485a-a1db-55cfc21d7db8.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/apps/water_leak/extracted_data/water_leak_02_20241009214224.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

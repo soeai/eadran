@@ -34,13 +34,15 @@
 #     print(status)
 import subprocess
 import json
-res = subprocess.run(["docker", "stats", "--no-stream", "--format", "{{ json . }}"], capture_output=True)
-if res.returncode ==0:
-    for line in res.stdout.decode("utf-8").split("\n"):
-        if len(line) > 0:
-            stats = json.loads(line)
-            print(stats['MemPerc'])
-            print(stats['MemUsage'])
-            print(stats['CPUPerc'])
-            print(stats['Name'])
-            print('------------')
+import datetime as dt
+# res = subprocess.run(["docker", "stats", "--no-stream", "--format", "{{ json . }}"], capture_output=True)
+# if res.returncode ==0:
+#     for line in res.stdout.decode("utf-8").split("\n"):
+#         if len(line) > 0:
+#             stats = json.loads(line)
+#             print(stats['MemPerc'])
+#             print(stats['MemUsage'])
+#             print(stats['CPUPerc'])
+#             print(stats['Name'])
+#             print('------------')
+print(dt.datetime.today().strftime('%Y%m%d%H%M%S'))
