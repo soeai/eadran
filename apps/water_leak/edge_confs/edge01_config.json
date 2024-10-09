@@ -1,0 +1,78 @@
+{
+  "edge_id": "edge01",
+  "amqp_in": {
+    "amqp_collector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "128.214.254.113",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "in_routing_key": "edge.#",
+        "in_queue": "queue_edge01"
+      }
+    }
+  },
+  "amqp_out": {
+    "amqp_connector": {
+      "class": "amqp",
+      "conf": {
+        "end_point": "128.214.254.113",
+        "exchange_name": "fedmarketplace",
+        "exchange_type": "topic",
+        "out_routing_key": "orchestrator.edge01"
+      }
+    }
+  },
+  "data": {
+    "owner_id": "ttu_water_leak",
+    "dataset_id": "water_leak_01",
+    "dest_path": "apps/water_leak/extracted_data",
+    "method": "local",
+    "reader_module": {
+      "storage_ref_id": "storage id of module",
+      "module_name": "data_reader",
+      "function_map": "read_data"
+    }
+  },
+  "extract_data_module": {
+    "command": "python3",
+    "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py",
+    "params": "--request"
+  },
+  "amqp_health_report": "healthreport.edge01",
+  "report_delay_time": 120,
+  "qoa_client": {
+    "client": {
+      "username": "edge_orchestration",
+      "instance_name": "",
+      "stage_id": "container_monitor",
+      "functionality": "",
+      "application_name": "",
+      "role": "",
+      "custom_info": ""
+    },
+    "connector": [
+      {
+        "name": "amqp_connector",
+        "connector_class": "AMQP",
+        "config": {
+          "end_point": "localhost",
+          "exchange_name": "test_qoa4ml",
+          "exchange_type": "topic",
+          "out_routing_key": "test.client1"
+        }
+      }
+    ],
+    "probes": [
+      {
+        "probe_type": "docker",
+        "frequency": 60,
+        "require_register": false,
+        "log_latency_flag": false,
+        "environment": "Edge",
+        "container_name": ""
+      }
+    ]
+  }
+}
+

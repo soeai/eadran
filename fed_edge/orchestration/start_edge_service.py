@@ -43,7 +43,8 @@ class EdgeOrchestrator(HostObject):
             self
         )
         self.amqp_queue_out = AmqpConnector(
-            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"]),health_check_disable=True
+            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"]),
+            health_check_disable=True
         )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
@@ -217,9 +218,8 @@ class EdgeOrchestrator(HostObject):
         rep_msg = subprocess.run(
             [command, module_name, params, filename], capture_output=True
         )
-        # logging.info(rep_msg.returncode)
-        # logging.info(rep_msg.stdout)
         try:
+            logging.info(rep_msg.stdout)
             response = {"status": 1, "description": "Error while extracting data."}
             if rep_msg.returncode == 0:
                 response = json.loads(rep_msg.stdout)
@@ -227,6 +227,7 @@ class EdgeOrchestrator(HostObject):
                 os.remove(filename)
             return response
         except:
+            logging.error(rep_msg.stderr)
             return {"status": 1}
 
     def health_report(self):
@@ -300,28 +301,6 @@ def container_monitor(
             probe_config["container_name"] = [container_name]
     client = QoaClient(config_dict=qoa_client_config)
     client.start_all_probes()
-    # connector = Amqp_Connector(AMQPConnectorConfig(**amqp_connector))
-    # docker_client = docker.from_env()
-    # # Or give configuration
-    # # docker_socket = "unix://var/run/docker.sock"
-    # # docker_client = docker.DockerClient(docker_socket)
-    # while True:
-    #     RUNNING = "running"
-    #     try:
-    #         container = docker_client.containers.get(container_name)
-    #     except docker.errors.NotFound as exc:
-    #         print(f"Check container name!\n{exc.explanation}")
-    #         break
-    #     else:
-    #         container_state = container.attrs["State"]
-    #         if container_state["Status"] == RUNNING:
-    #             con_stats = container.stats(stream=False)
-    #             # use request_id to correlate the message of container with model performance
-    #             msg = {"request_id": request_id}
-    #             connector.send_report(msg)
-    #         else:
-    #             break
-    #     time.sleep(10)
 
 
 if __name__ == "__main__":

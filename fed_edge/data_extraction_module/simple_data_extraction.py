@@ -100,10 +100,8 @@ if __name__ == '__main__':
 
     with open(args.conf) as f_conf:
         conf = json.load(f_conf)['data']
-        # with open("temp/request_3f2f75e3-3e3a-4b3b-b369-f103e1527b15.json") as f_req:
         with open(args.request) as f_req:
             req = json.load(f_req)
-            # print(conf['owner_id'], ' ', req['owner_id'] ,' ', conf['dataset_id'] ,' ', req['dataset_id'])
             if conf['owner_id'] == req['owner_id'] and conf['dataset_id'] == req['dataset_id']:
                 access_info = req['access_info']
                 features = req['features']

@@ -1,10 +1,10 @@
 {
-    "edge_id": "edge01",
+    "edge_id": "edge02",
     "model_id": "leak_case1",
     "data_request":
       {
         "owner_id": "ttu_water_leak",
-        "dataset_id": "water_leak_01",
+        "dataset_id": "water_leak_02",
         "__comment": "features required by the above-mentioned dataset for the above-mentioned provider",
         "access_info": {
           "type": "file",
@@ -28,7 +28,7 @@
           ]
         },
         "sample_limit": {
-          "number": 1000,
+          "number": 1500,
           "method": "random"
         },
         "qod": {

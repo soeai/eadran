@@ -1,3 +1,5 @@
+import time
+
 import pika
 import json
 # from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject
@@ -29,6 +31,20 @@ class DataService_Simulation(object):
 
 client = DataService_Simulation()
 with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge01.json') as f:
+    req = json.load(f)
+    # msg = {
+    #     "edge_id": "DE001",
+    #     "command":"ping"
+    #        }
+    # add message header
+    msg = {"type": Protocol.MSG_REQUEST,
+           "requester": Protocol.ACTOR_DATA_SERVICE,
+           "command": Protocol.DATA_EXTRACTION_COMMAND,
+           "content": req}
+    client.send(msg)
+
+time.sleep(5)
+with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge02.json') as f:
     req = json.load(f)
     # msg = {
     #     "edge_id": "DE001",
