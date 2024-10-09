@@ -197,7 +197,7 @@ class EdgeContainer(Generic):
             )
             edge_check = requests.get(url_mgt_service).json()
             logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
-            return bool(edge_check["status"])
+            return not bool(edge_check["status"])
         except Exception as e:
             logging.error(
                 "[ERROR] - Error {} while check dataset status: {}".format(
@@ -224,74 +224,77 @@ class EdgeContainer(Generic):
         return self.config["image_default"]
 
     def exec(self, params):
-        configs = params["config4edge_resp"]
-        # temps = configs.copy()
-        logging.info(f"Edge id: template id  =>  {configs}")
-        command_template = {
-            "edge_id": "",
-            "request_id": params["request_id"],
-            "command": "docker",
-            "params": "start",
-            "docker": [
-                {
-                    "image": None,
-                    "options": {
-                        "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
-                    },
-                    "arguments": [],
-                }
-            ],
-            "amqp_connector": params["amqp_connector"]
-        }
+        try:
+            configs = params["config4edge_resp"]
+            # temps = configs.copy()
+            logging.info(f"Edge id: template id  =>  {configs}")
+            command_template = {
+                "edge_id": "",
+                "request_id": params["request_id"],
+                "command": "docker",
+                "params": "start",
+                "docker": [
+                    {
+                        "image": None,
+                        "options": {
+                            "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
+                        },
+                        "arguments": [],
+                    }
+                ],
+                "amqp_connector": params["amqp_connector"]
+            }
 
-        self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
-        while True:
-            for edge_id in self.orchestrator.handling_edges[params["request_id"]]:
-                logging.info("Starting Edge [{}]: ".format(edge_id))
-                if not self.is_edge_ready(edge_id):
-                    # SEND COMMAND TO START EDGE ---> json
-                    command = command_template.copy()
-                    command["edge_id"] = edge_id
+            self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
+            while True:
+                for edge_id in self.orchestrator.handling_edges[params["request_id"]]:
+                    logging.info("Starting Edge [{}]: ".format(edge_id))
+                    if self.is_edge_ready(edge_id):
+                        # SEND COMMAND TO START EDGE ---> json
+                        command = command_template.copy()
+                        command["edge_id"] = edge_id
 
-                    # We now support only CPU tensorflow on Ubuntu for testing
-                    # in next version, we analyse info from edge to get correspondent image
-                    command["docker"][0]["image"] = self.get_image(params["platform"])
-                    command["docker"][0]["arguments"] = [
-                        self.orchestrator.url_storage_service,
-                        configs[edge_id],
-                    ]
+                        # We now support only CPU tensorflow on Ubuntu for testing
+                        # in next version, we analyse info from edge to get correspondent image
+                        command["docker"][0]["image"] = self.get_image(params["platform"])
+                        command["docker"][0]["arguments"] = [
+                            self.orchestrator.url_storage_service,
+                            configs[edge_id],
+                        ]
 
-                    for d in params["datasets"]:
-                        # if dataset on edge is local, we mount it into container
-                        if (
-                                d["edge_id"] == edge_id
-                                and d["read_info"]["method"] == "local"
-                        ):
-                            fullpath = d["read_info"]["location"]
-                            filename = fullpath.split("/")[-1]
-                            folder_path = fullpath[: fullpath.index(filename)]
-                            mount = "type=bind,source={},target={}".format(
-                                folder_path, "/data/"
-                            )
-                            command["docker"][0]["options"]["--mount"] = mount
+                        for d in params["datasets"]:
+                            # if dataset on edge is local, we mount it into container
+                            if (
+                                    d["edge_id"] == edge_id
+                                    and d["read_info"]["method"] == "local"
+                            ):
+                                fullpath = d["read_info"]["location"]
+                                filename = fullpath.split("/")[-1]
+                                folder_path = fullpath[: fullpath.index(filename)]
+                                mount = "type=bind,source={},target={}".format(
+                                    folder_path, "/data/"
+                                )
+                                command["docker"][0]["options"]["--mount"] = mount
 
-                    # send command to edge
-                    self.send_command(command)
+                        # send command to edge
+                        self.send_command(command)
 
-                    logging.info("Sent command: {} to {}".format(command, edge_id))
-                    # remove edge_id
-                    # temps.pop(edge_id, None)
+                        logging.info("Sent command: {} to {}".format(command, edge_id))
+                        # remove edge_id
+                        # temps.pop(edge_id, None)
 
-            if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
-                self.orchestrator.handling_edges.pop(params["request_id"])
-                break
-            # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
-            logging.info("Waiting to receive {} response(s) from edges".format(
-                len(self.orchestrator.handling_edges[params["request_id"]])))
-            time.sleep(5 * 60)
+                if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
+                    self.orchestrator.handling_edges.pop(params["request_id"])
+                    break
+                # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
+                logging.info("Waiting to receive {} response(s) from edges".format(
+                    len(self.orchestrator.handling_edges[params["request_id"]])))
+                time.sleep(5 * 60)
 
-        logging.info("Sent command to all edges.")
-
+            logging.info("Sent command to all edges.")
+        except:
+            logging.error("Start container error!")
+            pass
         # # after edge show the result.
         # if configs["create_qod"]:
         #     qod_container = QoDContainer(orchestrator=self.orchestrator)
@@ -307,7 +310,25 @@ class QoDContainer(Generic):
     def send_command(self, edge_command):
         self.orchestrator.send(edge_command)
 
+    def is_edge_ready(self, edge_id):
+        try:
+            url_mgt_service = (
+                    self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
+            )
+            edge_check = requests.get(url_mgt_service).json()
+            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
+            return not bool(edge_check["status"])
+        except Exception as e:
+            logging.error(
+                "[ERROR] - Error {} while check dataset status: {}".format(
+                    type(e), e.__traceback__
+                )
+            )
+            traceback.print_exception(*sys.exc_info())
+            return False
+
     def exec(self, params):
+        self.orchestrator.handling_edges[params["request_id"]] = [params["edge_id"]]
         config_id = upload_config(
             params, params["consumer_id"], self.orchestrator.url_storage_service
 
@@ -326,7 +347,7 @@ class QoDContainer(Generic):
                     "arguments": [
                         self.orchestrator.url_storage_service,
                         # params["read_info"]["reader_module"]["storage_ref_id"],
-                        config_id,
+                        config_id
                     ],
                 }
             ],
@@ -339,7 +360,17 @@ class QoDContainer(Generic):
             mount = "type=bind,source={},target={}".format(folder_path, "/data/")
             command["docker"][0]["options"]["--mount"] = mount
 
-
         # send command to edge
-        self.send_command(command)
-        logging.info("Sent QoD evaluation command to edge.")
+        while True:
+            if self.is_edge_ready(params["edge_id"]):
+                self.send_command(command)
+                logging.info("Sent QoD evaluation command to edge.")
+
+            if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
+                self.orchestrator.handling_edges.pop(params["request_id"])
+                break
+
+            # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
+            logging.info("Waiting to receive {} response(s) from edges".format(
+                len(self.orchestrator.handling_edges[params["request_id"]])))
+            time.sleep(5 * 60)

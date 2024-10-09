@@ -1,5 +1,6 @@
 {
     "edge_id": "edge01",
+    "model_id": "leak_case1",
     "data_request":
       {
         "owner_id": "dp001",
@@ -31,7 +32,7 @@
           "method": "random"
         },
         "qod": {
-          "evaluate": true,
+          "evaluate": false,
           "schema": "http://eadran.github.com/v1"
         }
       }

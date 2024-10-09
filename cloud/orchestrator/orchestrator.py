@@ -106,7 +106,7 @@ class Orchestrator(HostObject):
             )
             # WILL DETAIL LATER
             request_id = str(uuid.uuid4())
-            self.processing_tasks[request_id] = (time.time(), req_msg)
+            self.processing_tasks[request_id] = (time.time(), req_msg['content'])
             if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
                 Thread(target=start_training_process, args=(req_msg["content"], request_id, self)).start()
                 # start_training_process(req_msg["content"], request_id, self)
@@ -150,7 +150,7 @@ class Orchestrator(HostObject):
                         resp_content = req_msg["content"]
                         params = {
                             "edge_id": msg_task["edge_id"],
-                            "module_id": msg_task["module_id"],
+                            "model_id": msg_task["model_id"],
                             "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
                             "data_conf": resp_content["read_info"],
                         }
@@ -167,7 +167,7 @@ class Orchestrator(HostObject):
             )
             params = {
                 "edge_id": req_msg["edge_id"],
-                "module_id": req_msg["module_id"],
+                "model_id": req_msg["model_id"],
                 "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
                 "data_conf": req_msg["read_info"],
             }
