@@ -12,6 +12,10 @@
         "db_name": "db_health_log",
         "db_col": "col_health_log"
     },
+    "service_log":{
+        "db_name": "db_service_log",
+        "db_col": "col_service_log"
+    },
     "model_management":{
         "db_name": "db_model_management",
         "db_col": "col_model_management"

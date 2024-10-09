@@ -15,7 +15,6 @@ from cloud.orchestrator.commons.modules import (
     EdgeContainer,
     QoDContainer,
 )
-
 import logging
 import requests
 
@@ -61,7 +60,7 @@ def data_extraction(params, request_id, _orchestrator=None):
                     _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
             )
             edge_check = requests.get(url_mgt_service).json()
-            if edge_check["status"] == 0:
+            if edge_check["code"] == 0:
                 routing = edge_check["result"]["routing_key"]
                 params["request_id"] = request_id
                 params["command"] = Protocol.DATA_EXTRACTION_COMMAND
@@ -135,11 +134,15 @@ class Orchestrator(HostObject):
 
             if req_msg["response_id"] in self.processing_tasks.keys():
                 _, msg_task, requestor = self.processing_tasks.pop(req_msg["response_id"])
-                logging.info("Sending response to requestor {} of request {}".format(requestor, req_msg["response_id"]))
-                self.send({"status": 0,
-                           "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
-                           "request_id": req_msg["response_id"]},
-                          requestor + ".#")
+                logging.info("Responding request [{}] of [{}]".format(req_msg["response_id"]), requestor)
+                # CALL POST TO SERVICE HERE
+                requests.post(self.url_mgt_service + "/service/report",
+                              {"code": 0,
+                               "request_id": req_msg["response_id"]})
+                # self.send({"code": 0,
+                #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
+                #            "request_id": req_msg["response_id"]},
+                #           requestor + ".#")
 
                 if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
                     # if consumer as to evaluate qod while sending a data query, DO IT
@@ -157,22 +160,6 @@ class Orchestrator(HostObject):
                         request_id = str(uuid.uuid4())
                         self.processing_tasks[request_id] = (time.time(), req_msg, )
                         Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
-        # testing for qod service
-        # elif msg_type == Protocol.DATA_QOD_COMMAND:
-        #     logging.info(
-        #         "Received a response of request: [{}] from [{}]".format(
-        #             req_msg["response_id"], req_msg["responder"]
-        #         )
-        #     )
-        #     params = {
-        #         "edge_id": req_msg["edge_id"],
-        #         "model_id": req_msg["model_id"],
-        #         "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
-        #         "data_conf": req_msg["read_info"],
-        #     }
-        #     request_id = str(uuid.uuid4())
-        #     self.processing_tasks[request_id] = (time.time(), req_msg)
-        #     Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)

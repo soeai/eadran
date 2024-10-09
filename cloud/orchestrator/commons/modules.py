@@ -35,7 +35,7 @@ class FedServerContainer(Generic):
                             self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                     )
                     server_check = requests.get(url_mgt_service).json()
-                    if server_check["status"] == 0:
+                    if server_check["code"] == 0:
                         command = {
                             "edge_id": self.server_id,
                             "request_id": params["request_id"],
@@ -70,37 +70,37 @@ class FedServerContainer(Generic):
                                 },
                             ],
                         }
-                        # try:
-                        logging.info(
-                            "Sending command to server {}\n{}".format(
-                                self.server_id, command
+                        try:
+                            logging.info(
+                                "Sending command to server {}\n{}".format(
+                                    self.server_id, command
+                                )
                             )
-                        )
-                        # asynchronously send
-                        self.orchestrator.send(command)
-                        fed_server_ip = server_check["result"]["ip"]
-                        logging.info(
-                            "Federated Server is started at: {}:{}".format(
-                                fed_server_ip, self.fed_server_image_port
+                            # asynchronously send
+                            self.orchestrator.send(command)
+                            fed_server_ip = server_check["result"]["ip"]
+                            logging.info(
+                                "Federated Server is started at: {}:{}".format(
+                                    fed_server_ip, self.fed_server_image_port
+                                )
                             )
-                        )
-                        response["start_fed_resp"] = {
-                            "ip": fed_server_ip,
-                            "fed_server_port": self.fed_server_image_port,
-                            "rabbit_port": self.rabbit_image_port,
-                        }
-                        # except Exception as e:
-                        #     logging.error(
-                        #         "[ERROR] - Error {} while send start fed command: {}".format(
-                        #             type(e), e.__traceback__
-                        #         )
-                        #     )
-                        #     traceback.print_exception(*sys.exc_info())
-                        #     # response must be dictionary including IP of fed server
+                            response["start_fed_resp"] = {
+                                "ip": fed_server_ip,
+                                "fed_server_port": self.fed_server_image_port,
+                                "rabbit_port": self.rabbit_image_port,
+                            }
+                        except Exception as e:
+                            logging.error(
+                                "[ERROR] - Error {} while send start fed command: {}".format(
+                                    type(e), e.__traceback__
+                                )
+                            )
+                            traceback.print_exception(*sys.exc_info())
                         break
                     else:
-                        logging.info("Waiting Cloud Server for starting...")
-                        time.sleep(60)
+                        logging.info("Waiting 1 minute for starting Cloud Server...")
+                        time.sleep(5 * 60)
+
                 except Exception as e:
                     logging.error(
                         "[ERROR] - Error {} while start FedServer: {}".format(
@@ -148,7 +148,6 @@ class Config4Edge(Generic):
             generated_config = {
                 "consumer_id": params["consumer_id"],
                 "model_id": params["model_id"],
-                # "run_id": params["run_id"],
                 "dataset_id": dataset["dataset_id"],
                 "edge_id": dataset["edge_id"],
                 "monitor_interval": 10,
@@ -178,7 +177,6 @@ class Config4Edge(Generic):
             )
 
         params["config4edge_resp"] = config_id
-        # params["amqp_connector"] = generated_config['amqp_connector']
         return params
 
 
@@ -196,8 +194,8 @@ class EdgeContainer(Generic):
                     self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             )
             edge_check = requests.get(url_mgt_service).json()
-            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
-            return not bool(edge_check["status"])
+            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["code"]))
+            return not bool(edge_check["code"])
         except Exception as e:
             logging.error(
                 "[ERROR] - Error {} while check dataset status: {}".format(
@@ -226,8 +224,8 @@ class EdgeContainer(Generic):
     def exec(self, params):
         try:
             configs = params["config4edge_resp"]
-            # temps = configs.copy()
-            logging.info(f"Edge id: template id  =>  {configs}")
+
+            logging.info("Edge id: template id  => ".format(configs))
             command_template = {
                 "edge_id": "",
                 "request_id": params["request_id"],
@@ -246,6 +244,7 @@ class EdgeContainer(Generic):
             }
 
             self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
+
             while True:
                 for edge_id in self.orchestrator.handling_edges[params["request_id"]]:
                     logging.info("Starting Edge [{}]: ".format(edge_id))
@@ -280,12 +279,11 @@ class EdgeContainer(Generic):
                         self.send_command(command)
 
                         logging.info("Sent command: {} to {}".format(command, edge_id))
-                        # remove edge_id
-                        # temps.pop(edge_id, None)
 
                 if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
                     self.orchestrator.handling_edges.pop(params["request_id"])
                     break
+
                 # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
                 logging.info("Waiting to receive {} response(s) from edges".format(
                     len(self.orchestrator.handling_edges[params["request_id"]])))
@@ -294,13 +292,6 @@ class EdgeContainer(Generic):
             logging.info("Sent command to all edges.")
         except:
             logging.error("Start container error!")
-            pass
-        # # after edge show the result.
-        # if configs["create_qod"]:
-        #     qod_container = QoDContainer(orchestrator=self.orchestrator)
-        #     qod_container.exec(params["config4edge_resp"])
-        # else:
-        #     pass
 
 
 class QoDContainer(Generic):
@@ -316,8 +307,8 @@ class QoDContainer(Generic):
                     self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             )
             edge_check = requests.get(url_mgt_service).json()
-            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["status"]))
-            return not bool(edge_check["status"])
+            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["code"]))
+            return not bool(edge_check["code"])
         except Exception as e:
             logging.error(
                 "[ERROR] - Error {} while check dataset status: {}".format(
