@@ -144,7 +144,7 @@ class Orchestrator(HostObject):
                 _, msg_task = self.processing_tasks.pop(req_msg["response_id"])
                 if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
                     # if consumer as to evaluate qod while sending a data query, DO IT
-                    if msg_task["content"]["data_request"]["qod"]["evaluate"]:
+                    if msg_task["data_request"]["qod"]["evaluate"]:
                         # Build config for edge here from msg_task and res_msg (response from edge data extraction)
                         # send command to QoD Evaluation
                         resp_content = req_msg["content"]
