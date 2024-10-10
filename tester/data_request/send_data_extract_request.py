@@ -40,13 +40,13 @@ with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge01.json') 
            "content": req}
     client.send(msg)
 
-time.sleep(5)
-with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge02.json') as f:
-    req = json.load(f)
-    # add message header
-    msg = {"type": Protocol.MSG_REQUEST,
-           "requester": Protocol.ACTOR_DATA_SERVICE,
-           "command": Protocol.DATA_EXTRACTION_COMMAND,
-           "request_id": str(uuid.uuid4()),
-           "content": req}
-    client.send(msg)
+# time.sleep(5)
+# with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge02.json') as f:
+#     req = json.load(f)
+#     # add message header
+#     msg = {"type": Protocol.MSG_REQUEST,
+#            "requester": Protocol.ACTOR_DATA_SERVICE,
+#            "command": Protocol.DATA_EXTRACTION_COMMAND,
+#            "request_id": str(uuid.uuid4()),
+#            "content": req}
+#     client.send(msg)
