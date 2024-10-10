@@ -32,8 +32,8 @@
   "sample_rate": 50,
   "timer": 10,
 
-  "url_mgt_service": "http://192.168.80.68:8080",
-  "url_storage_service": "http://192.168.80.68:8081",
+  "url_mgt_service": "http://128.214.254.113:8080",
+  "url_storage_service": "http://128.214.254.113:8081",
   "server_id": "fedserver001",
   "fed_server_image_name": "trungdonggg/training-server",
   "fed_server_image_port": 8080,

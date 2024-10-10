@@ -181,7 +181,7 @@ class Config4Edge(Generic):
 
 
 class EdgeContainer(Generic):
-    def __init__(self, orchestrator, config="./conf/image4edge.json"):
+    def __init__(self, orchestrator, config="cloud/orchestrator/conf/image4edge.json"):
         if config is not None:
             self.config = utils.load_config(config)
         else:
