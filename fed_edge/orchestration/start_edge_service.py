@@ -70,19 +70,19 @@ class EdgeOrchestrator(HostObject):
                             json.dump(req_msg['config'], f)
                         status = []
                         for config in req_msg["docker"]:
-                            status.append(
-                                self.start_container(config, req_msg["request_id"],fname)
-                            )
-                            # start monitor
-                            Thread(
-                                target=container_monitor,
-                                args=(
-                                    req_msg['amqp_connector']["amqp_connector"],
-                                    config["options"]["--name"],
-                                    req_msg["request_id"],
-                                    self.config["qoa_client"]
-                                ),
-                            ).start()
+                            r = self.start_container(config, req_msg["request_id"],fname)
+                            if r == 0:
+                                # start monitor
+                                Thread(
+                                    target=container_monitor,
+                                    args=(
+                                        req_msg['config']["amqp_connector"],
+                                        config["options"]["--name"],
+                                        req_msg["request_id"],
+                                        self.config["qoa_client"]
+                                    ),
+                                ).start()
+                            status.append(r)
                         response = {
                             "edge_id": self.edge_id,
                             "status": int(sum(status)),
@@ -158,13 +158,14 @@ class EdgeOrchestrator(HostObject):
                         command.extend([k, v])
                 else:
                     command.append(k)
-            command.append(config["image"])
             folder_path, fname = conf_file.split("/")
             folder_path = os.path.abspath(folder_path)
             mount_conf = "type=bind,source={},target={}".format(
                 folder_path, "/app/conf/"
             )
             command.extend(["--mount", mount_conf])
+
+            command.append(config["image"])
 
             if "arguments" in config.keys():
                 command.extend(config["arguments"])

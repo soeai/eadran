@@ -145,22 +145,22 @@ class Orchestrator(HostObject):
                 #            "request_id": req_msg["response_id"]},
                 #           requestor + ".#")
 
-                if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
-                    # if consumer as to evaluate qod while sending a data query, DO IT
-                    if msg_task["data_request"]["qod"]["evaluate"]:
-                        # Build config for edge here from msg_task and res_msg (response from edge data extraction)
-                        # send command to QoD Evaluation
-                        resp_content = req_msg["content"]
-                        params = {
-                            "edge_id": msg_task["edge_id"],
-                            "model_id": msg_task["model_id"],
-                            "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
-                            "data_conf": resp_content["read_info"],
-                        }
-
-                        request_id = str(uuid.uuid4())
-                        self.processing_tasks[request_id] = (time.time(), req_msg, )
-                        Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
+                # if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
+                #     # if consumer as to evaluate qod while sending a data query, DO IT
+                #     if msg_task["data_request"]["qod"]["evaluate"]:
+                #         # Build config for edge here from msg_task and res_msg (response from edge data extraction)
+                #         # send command to QoD Evaluation
+                #         resp_content = req_msg["content"]
+                #         params = {
+                #             "edge_id": msg_task["edge_id"],
+                #             "model_id": msg_task["model_id"],
+                #             "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
+                #             "data_conf": resp_content["read_info"],
+                #         }
+                #
+                #         request_id = str(uuid.uuid4())
+                #         self.processing_tasks[request_id] = (time.time(), req_msg, )
+                #         Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)

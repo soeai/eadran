@@ -195,7 +195,7 @@ async def check_docker_running(container_name: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Federated Server Orchestrator Micro-Service...")
-    parser.add_argument('--conf', help='config file', default="../conf/config.json")
+    parser.add_argument('--conf', help='config file', default="fed_server/conf/config.json")
     args = parser.parse_args()
     IPAddr = socket.gethostbyname(socket.gethostname())
     orchestrator = FedServerOrchestrator(args.conf)
