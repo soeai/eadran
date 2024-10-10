@@ -42,4 +42,4 @@ RUN chmod 755 ./start.sh
 
 # ENTRYPOINT ["tail", "-f", "/dev/null"]  # DEUBUG MODE
 
-ENTRYPOINT ["./start.sh", "storage_service", "config_file_id", "session_id"]
+ENTRYPOINT ["./start.sh", "storage_service", "session_id", "config_file"]

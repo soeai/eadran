@@ -48,6 +48,8 @@ class EdgeOrchestrator(HostObject):
         )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
+        if not os.path.isdir("conf_temp"):
+            os.mkdir("conf_temp")
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
@@ -59,28 +61,33 @@ class EdgeOrchestrator(HostObject):
                     req_msg["request_id"], req_msg["command"]
                 )
             )
+
             if req_msg["command"].lower() == "docker":
                 if req_msg["params"].lower() == "start":
-                    status = []
-                    for config in req_msg["docker"]:
-                        status.append(
-                            self.start_container(config, req_msg["request_id"])
-                        )
-                        # start monitor
-                        Thread(
-                            target=container_monitor,
-                            args=(
-                                req_msg["amqp_connector"],
-                                config["options"]["--name"],
-                                req_msg["request_id"],
-                                self.config["qoa_client"]
-                            ),
-                        ).start()
-                    response = {
-                        "edge_id": self.edge_id,
-                        "status": int(sum(status)),
-                        "detail": status,
-                    }
+                    if "config" in req_msg.keys():
+                        fname = "conf_temp/config_" + req_msg["request_id"] + ".json"
+                        with open(fname, 'w') as f:
+                            json.dump(req_msg['config'], f)
+                        status = []
+                        for config in req_msg["docker"]:
+                            status.append(
+                                self.start_container(config, req_msg["request_id"],fname)
+                            )
+                            # start monitor
+                            Thread(
+                                target=container_monitor,
+                                args=(
+                                    req_msg['amqp_connector']["amqp_connector"],
+                                    config["options"]["--name"],
+                                    req_msg["request_id"],
+                                    self.config["qoa_client"]
+                                ),
+                            ).start()
+                        response = {
+                            "edge_id": self.edge_id,
+                            "status": int(sum(status)),
+                            "detail": status,
+                        }
                 elif req_msg["params"].lower() == "stop":
                     status = []
                     for container in req_msg["containers"]:
@@ -118,7 +125,7 @@ class EdgeOrchestrator(HostObject):
     def start_amqp(self):
         self.amqp_thread.start()
 
-    def start_container(self, config, request_id):
+    def start_container(self, config, request_id, conf_file):
         try:
             # check container is running with the same name, stop it
             logging.info(
@@ -152,11 +159,20 @@ class EdgeOrchestrator(HostObject):
                 else:
                     command.append(k)
             command.append(config["image"])
+            folder_path, fname = conf_file.split("/")
+            folder_path = os.path.abspath(folder_path)
+            mount_conf = "type=bind,source={},target={}".format(
+                folder_path, "/app/conf/"
+            )
+            command.extend(["--mount", mount_conf])
 
             if "arguments" in config.keys():
                 command.extend(config["arguments"])
 
             command.append(request_id)  # will be attached in report model performance
+            command.append(fname)
+
+            logging.debug("Start container with command: {}".format(command))
 
             res = subprocess.run(command, capture_output=True)
             logging.info("Start container result: {}".format(res))
@@ -299,7 +315,7 @@ async def check_docker_running(container_name: str):
 def container_monitor(
         amqp_connector: dict, container_name, request_id, qoa_client_config
 ):
-    print(amqp_connector)
+    logging.info("monitoring: ", amqp_connector)
     qoa_client_config["connector"] = [amqp_connector]
     qoa_client_config["client"]["instance_name"] = request_id
     for probe_config in qoa_client_config["probes"]:

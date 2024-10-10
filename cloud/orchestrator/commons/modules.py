@@ -150,7 +150,6 @@ class Config4Edge(Generic):
                 "model_id": params["model_id"],
                 "dataset_id": dataset["dataset_id"],
                 "edge_id": dataset["edge_id"],
-                "monitor_interval": 10,
                 "fed_server": f"{params['start_fed_resp']['ip']}:{params['start_fed_resp']['fed_server_port']}",
                 "data_conf": dataset["read_info"],
                 "model_conf": params["model_conf"],
@@ -172,9 +171,10 @@ class Config4Edge(Generic):
                 generated_config["create_qod"] = dataset["create_qod"]
 
             # Upload generated config to storage
-            config_id[dataset["edge_id"]] = upload_config(
-                generated_config, params["consumer_id"], self.orchestrator.url_storage_service
-            )
+            config_id[dataset["edge_id"]] = generated_config
+            # config_id[dataset["edge_id"]] = upload_config(
+            #     generated_config, params["consumer_id"], self.orchestrator.url_storage_service
+            # )
 
         params["config4edge_resp"] = config_id
         return params
@@ -240,7 +240,7 @@ class EdgeContainer(Generic):
                         "arguments": [],
                     }
                 ],
-                "amqp_connector": params["amqp_connector"]
+                "config": ""
             }
 
             self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
@@ -258,8 +258,9 @@ class EdgeContainer(Generic):
                         command["docker"][0]["image"] = self.get_image(params["platform"])
                         command["docker"][0]["arguments"] = [
                             self.orchestrator.url_storage_service,
-                            configs[edge_id],
+                            # configs[edge_id],
                         ]
+                        command['config'] = configs[edge_id]
 
                         for d in params["datasets"]:
                             # if dataset on edge is local, we mount it into container
@@ -320,10 +321,10 @@ class QoDContainer(Generic):
 
     def exec(self, params):
         self.orchestrator.handling_edges[params["request_id"]] = [params["edge_id"]]
-        config_id = upload_config(
-            params, params["consumer_id"], self.orchestrator.url_storage_service
-
-        )
+        # config_id = upload_config(
+        #     params, params["consumer_id"], self.orchestrator.url_storage_service
+        #
+        # )
         command = {
             "edge_id": params["edge_id"],
             "request_id": params["request_id"],
@@ -336,13 +337,16 @@ class QoDContainer(Generic):
                         "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
                     },
                     "arguments": [
-                        self.orchestrator.url_storage_service,
+                        self.orchestrator.url_storage_service
                         # params["read_info"]["reader_module"]["storage_ref_id"],
-                        config_id
+                        # config_id
                     ],
                 }
             ],
-            "amqp_connector": self.orchestrator.config['amqp_out']['amqp_connector']['conf']
+            "config":{
+                "data_conf": params['data_conf'],
+                "url_service": self.orchestrator.url_mgt_service
+            }
         }
         if params["read_info"]["method"] == "local":
             fullpath = params["read_info"]["location"]
