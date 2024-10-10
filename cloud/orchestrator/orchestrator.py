@@ -137,7 +137,7 @@ class Orchestrator(HostObject):
                 logging.info("Responding request [{}] of [{}]".format(req_msg["response_id"], requestor))
                 # CALL POST TO SERVICE HERE
                 r = requests.post(url=self.url_mgt_service + "/service/report",
-                                  json={"code": 0,"request_id": req_msg["response_id"]})
+                                  json={"json_payload":{"code": 0,"request_id": req_msg["response_id"]}})
                 print(r.content)
                 # self.send({"code": 0,
                 #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
