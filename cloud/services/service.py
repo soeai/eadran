@@ -708,7 +708,35 @@ class EADRANService(Resource):
         self.collection = self.db[kwargs["service_log"]["db_col"]]
 
     def get(self):
-        return {"code": 0}
+        req_args = request.query_string.decode("utf-8").split("&")
+
+        # get param from args here
+        if len(req_args) > 0:
+            # get param from args here
+            query = req_args[0].split("=")
+            if query[0] == "eid":
+                result = list(
+                    self.collection.find({"content.edge_id": query[1]})
+                        .sort([("start_at", pymongo.DESCENDING)])
+                )
+                if len(result) > 0:
+                    response = [r.pop("_id", None) for r in result]
+                else:
+                    return {"code": 1, "message": "edge_id does not exist."}, 404
+
+                return {"code": 0, "result": response}
+            elif query[0] == "mid":
+                result = list(
+                    self.collection.find({"content.model_id": query[1]})
+                        .sort([("start_at", pymongo.DESCENDING)])
+                )
+                if len(result) > 0:
+                    response = [r.pop("_id", None) for r in result]
+                else:
+                    return {"code": 1, "message": "model_id does not exist."}, 404
+
+                return {"code": 0, "result": response}
+            return {"code": 1, "message": "query string must provide (eid=?? or mid=??)."}, 404
 
     def post(self, op):
         # ======================= MESSAGE RECEIVE FROM CLIENT
