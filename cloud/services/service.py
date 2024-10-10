@@ -788,6 +788,7 @@ class EADRANService(Resource):
                     {"request_id": json_msg["request_id"]},
                     {"$set": {"status": "finished" if json_msg['code'] == 0 else "error", "done_at": time.time()}}
                 )
+                return {"code": 0, "message": "updated"}
         return {"code": 1, "message": "request must enclose a json object"}, 400
 
 
