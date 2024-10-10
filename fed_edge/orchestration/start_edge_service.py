@@ -88,6 +88,9 @@ class EdgeOrchestrator(HostObject):
                             "status": int(sum(status)),
                             "detail": status,
                         }
+                        # clean config
+                        os.remove(fname)
+
                 elif req_msg["params"].lower() == "stop":
                     status = []
                     for container in req_msg["containers"]:

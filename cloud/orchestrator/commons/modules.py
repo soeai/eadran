@@ -29,12 +29,14 @@ class FedServerContainer(Generic):
         response = params
         if params is not None:  # check Param
             # check service to make sure server is running well
+            self.orchestrator.handling_edges[params["request_id"]] = [self.server_id]
             while True:
                 try:
                     url_mgt_service = (
                             self.orchestrator.url_mgt_service + "/health?id=" + self.server_id
                     )
                     server_check = requests.get(url_mgt_service).json()
+                    # logging.info("status of federated server: {}".format(not bool(server_check["code"])))
                     if server_check["code"] == 0:
                         command = {
                             "edge_id": self.server_id,
@@ -96,10 +98,16 @@ class FedServerContainer(Generic):
                                 )
                             )
                             traceback.print_exception(*sys.exc_info())
+
+                        logging.info("Waiting federated server response...")
+                        flag = 0
+                        while len(self.orchestrator.handling_edges[params["request_id"]]) > 0 and flag < 30:
+                            time.sleep(10)
+                            flag += 1
                         break
                     else:
                         logging.info("Waiting 1 minute for starting Cloud Server...")
-                        time.sleep(5 * 60)
+                        time.sleep(60)
 
                 except Exception as e:
                     logging.error(
@@ -194,7 +202,7 @@ class EdgeContainer(Generic):
                     self.orchestrator.url_mgt_service + "/health?id=" + str(edge_id)
             )
             edge_check = requests.get(url_mgt_service).json()
-            logging.info("Status of edge [{}]: ".format(edge_id, edge_check["code"]))
+            logging.info("Status of edge [{}]: {}".format(edge_id, not bool(edge_check["code"])))
             return not bool(edge_check["code"])
         except Exception as e:
             logging.error(
@@ -280,6 +288,8 @@ class EdgeContainer(Generic):
                         self.send_command(command)
 
                         logging.info("Sent command: {} to {}".format(command, edge_id))
+                    else:
+                        logging.info("waiting edge {} to be available...".format(edge_id))
 
                 if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
                     self.orchestrator.handling_edges.pop(params["request_id"])
