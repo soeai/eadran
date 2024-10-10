@@ -139,6 +139,7 @@ class Orchestrator(HostObject):
                 r = requests.post(url=self.url_mgt_service + "/service/report",
                                   headers={"Content-Type": "application/json"},
                                   data=json.dumps({"code": 0,"request_id": req_msg["response_id"]}))
+                print(r.content)
                 # self.send({"code": 0,
                 #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
                 #            "request_id": req_msg["response_id"]},
