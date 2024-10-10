@@ -28,8 +28,10 @@ class FedServerOrchestrator(HostObject):
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
-        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']), self)
-        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
+        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
+                                           self)
+        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']),
+                                            health_check_disable=True)
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 

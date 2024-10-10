@@ -732,8 +732,6 @@ class EADRANService(Resource):
                 else:
                     return {"code": 1, "message": "edge_id does not exist."}, 404
 
-
-
             return {"code": 1, "message": "query string must provide (eid=?? or mid=??)."}, 404
 
     def post(self, op):

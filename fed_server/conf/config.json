@@ -1,6 +1,6 @@
 {
   "edge_id": "fedserver001",
-  "ip": "128.214.254.113",
+  "ip": "128.214.255.226",
   "amqp_in": {
     "amqp_collector": {
       "class": "amqp",
