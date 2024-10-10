@@ -726,11 +726,13 @@ class EADRANService(Resource):
                             .sort([("start_at", pymongo.DESCENDING)])
                     )
                 if len(result) > 0:
-                    response = [r.pop("_id", None) for r in result]
+                    for r in result:
+                        r.pop("_id", None)
+                    return {"code": 0, "result": result}
                 else:
                     return {"code": 1, "message": "edge_id does not exist."}, 404
 
-                return {"code": 0, "result": response}
+
 
             return {"code": 1, "message": "query string must provide (eid=?? or mid=??)."}, 404
 
