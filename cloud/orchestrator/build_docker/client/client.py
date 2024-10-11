@@ -8,7 +8,7 @@ from urllib.request import urlretrieve
 import flwr as fl
 import qoa4ml.utils.qoa_utils as utils
 from qoa4ml.qoa_client import QoaClient
-from qoa4ml.config.configs import ClientInfo, ClientConfig
+from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
 import numpy as np
 # from qoa4ml.reports.rohe_reports import RoheReport
 # from qoa4ml.config.configs import MetricConfig
@@ -149,9 +149,15 @@ if __name__ == '__main__':
         custom_info=""
     )
 
+    connector_config = ConnectorConfig(
+        name=client_conf['amqp_connector']['name'],
+        connector_class=client_conf['amqp_connector']['connector_class'],
+        config=AMQPConnectorConfig(**client_conf['amqp_connector']['config'])
+    )
+
     cconfig = ClientConfig(
         client=client_info,
-        connector=client_conf['amqp_connector']
+        connector=[connector_config]
         )
 
     qoa_client = QoaClient(

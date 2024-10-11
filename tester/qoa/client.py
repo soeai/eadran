@@ -178,12 +178,12 @@ if __name__ == '__main__':
     cconfig = ClientConfig(
         client=client_info,
         connector=[connector_config],
-        probes=[{"probe_type": "docker",
-                 "frequency": 300,
-                 "require_register": False,
-                 "log_latency_flag": False,
-                 "environment": "Edge",
-                 "container_name": "recursing_curie"}]
+        # probes=[{"probe_type": "docker",
+        #          "frequency": 300,
+        #          "require_register": False,
+        #          "log_latency_flag": False,
+        #          "environment": "Edge",
+        #          "container_name": "recursing_curie"}]
     )
     # print(cconfig)
     qoa_client = QoaClient(
