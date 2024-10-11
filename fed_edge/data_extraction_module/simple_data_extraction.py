@@ -109,10 +109,12 @@ if __name__ == '__main__':
                 label = req['label']
                 filters = req['filters'] if 'filters' in req.keys() else None
                 sample = req['sample_limit'] if 'sample_limit' in req.keys() else None
-                response_json = TabularHandle(req['dataset_id'], access_info, conf).extract(features,
-                                                                                            label,
-                                                                                            filters,
-                                                                                            sample)
+                response_json = TabularHandle(dataset_id=req['dataset_id'],
+                                              access_info=access_info,
+                                              reader_module=conf).extract(features,
+                                                                        label,
+                                                                        filters,
+                                                                        sample)
                 print(response_json)
             else:
                 raise Exception('Opp! Request is not for me!!!!')

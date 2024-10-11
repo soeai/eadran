@@ -1,2 +1,3 @@
 qoa4ml==0.3.10
 docker
+pandas
