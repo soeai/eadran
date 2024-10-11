@@ -55,10 +55,10 @@
         "name": "amqp_connector",
         "connector_class": "AMQP",
         "config": {
-          "end_point": "localhost",
-          "exchange_name": "test_qoa4ml",
+          "end_point": "128.214.255.226",
+          "exchange_name": "fml_model_report",
           "exchange_type": "topic",
-          "out_routing_key": "test.client1"
+          "out_routing_key": "receiver.edge04"
         }
       }
     ],
