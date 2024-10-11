@@ -269,6 +269,7 @@ class EdgeContainer(Generic):
                             self.orchestrator.url_storage_service,
                             # configs[edge_id],
                         ]
+                        command["docker"][0]["options"]["--name"] = command["docker"][0]["options"]["--name"] + "_" + edge_id
                         command['config'] = configs[edge_id]
 
                         for d in params["datasets"]:
