@@ -65,7 +65,7 @@ class EdgeOrchestrator(HostObject):
             if req_msg["command"].lower() == "docker":
                 if req_msg["params"].lower() == "start":
                     if "config" in req_msg.keys():
-                        fname = "conf_temp/{}_config_" + req_msg["request_id"] + ".json".format(self.edge_id)
+                        fname = "conf_temp/{}_config_{}.json".format(self.edge_id, req_msg["request_id"])
                         with open(fname, 'w') as f:
                             json.dump(req_msg['config'], f)
                         status = []
