@@ -320,12 +320,12 @@ async def check_docker_running(container_name: str):
 def container_monitor(
         amqp_connector: dict, container_name, request_id, qoa_client_config
 ):
-    logging.info("monitoring: ", amqp_connector)
     qoa_client_config["connector"] = [amqp_connector]
     qoa_client_config["client"]["instance_name"] = request_id
     for probe_config in qoa_client_config["probes"]:
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]
+    logging.info("monitoring: ", qoa_client_config)
     client = QoaClient(config_dict=qoa_client_config)
     client.start_all_probes()
 

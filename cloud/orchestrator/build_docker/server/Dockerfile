@@ -67,7 +67,7 @@ RUN chmod 755 ./start.sh
 
 
 # Run the application.
-ENTRYPOINT ["./start.sh", "8080", "5"]
+ENTRYPOINT ["./start.sh"]
 
-#CMD ["8081", "5"]
+CMD ["8080", "10"]
 

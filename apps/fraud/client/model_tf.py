@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import time
 model = None
 
 
@@ -16,11 +16,13 @@ def init(in_shape=10):
 
 def fit(x, y):
     history = model.fit(x, y, epochs=1, batch_size=32)
+    time.sleep(30)
     return history.history["precision"][0], history.history["loss"][0]
 
 
 def evaluate(x, y):
     loss, precision = model.evaluate(x, y, 32)
+    time.sleep(30)
     return precision, loss
 
 
