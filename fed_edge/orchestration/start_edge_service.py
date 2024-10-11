@@ -246,7 +246,7 @@ class EdgeOrchestrator(HostObject):
             [command, module_name, '--request', request_filename, "--conf", data_conf_filename], capture_output=True
         )
         try:
-            # logging.info(rep_msg.stdout)
+            logging.info(rep_msg.stdout)
             response = {"status": 1, "description": "Error while extracting data."}
             if rep_msg.returncode == 0:
                 response = json.loads(rep_msg.stdout)
