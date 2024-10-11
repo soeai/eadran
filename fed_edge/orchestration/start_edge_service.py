@@ -94,7 +94,7 @@ class EdgeOrchestrator(HostObject):
                 elif req_msg["params"].lower() == "stop":
                     status = []
                     for container in req_msg["containers"]:
-                        self.stop_container(container)
+                        status.append(self.stop_container(container))
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),
@@ -185,6 +185,7 @@ class EdgeOrchestrator(HostObject):
 
             if asyncio.run(check_docker_running(config["options"]["--name"])):
                 return 0
+            return 1
 
         except Exception as e:
             logging.error(
