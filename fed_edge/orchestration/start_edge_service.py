@@ -71,17 +71,17 @@ class EdgeOrchestrator(HostObject):
                         status = []
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"],fname)
-                            if r == 0:
-                                # start monitor
-                                Thread(
-                                    target=container_monitor,
-                                    args=(
-                                        req_msg['config']["amqp_connector"],
-                                        config["options"]["--name"],
-                                        req_msg["request_id"],
-                                        self.config["qoa_client"]
-                                    ),
-                                ).start()
+                            # if r == 0:
+                            #     # start monitor
+                            #     Thread(
+                            #         target=container_monitor,
+                            #         args=(
+                            #             req_msg['config']["amqp_connector"],
+                            #             config["options"]["--name"],
+                            #             req_msg["request_id"],
+                            #             self.config["qoa_client"]
+                            #         ),
+                            #     ).start()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
