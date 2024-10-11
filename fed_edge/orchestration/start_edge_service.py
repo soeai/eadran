@@ -164,7 +164,7 @@ class EdgeOrchestrator(HostObject):
             folder_path, fname = conf_file.split("/")
             folder_path = os.path.abspath(folder_path)
             mount_conf = "type=bind,source={},target={}".format(
-                folder_path, "/app/conf/"
+                folder_path, "/conf/"
             )
             command.extend(["--mount", mount_conf])
 
