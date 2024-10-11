@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting Federated Client with: --service=$1 --request_id=$2 --conf=$3"
+echo "Starting Federated Client with: --service=$1 --sessionid=$2 --conf=$3"
 
 #get requirements file from storage
 #if [ ! -f "$2" ]; then

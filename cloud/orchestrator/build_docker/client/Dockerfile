@@ -21,7 +21,7 @@ FROM tensorflow/tensorflow
 
 RUN mkdir -p /app
 RUN mkdir -p /data
-RUN mkdir -p /app/conf
+RUN mkdir -p /conf
 
 WORKDIR /app
 
