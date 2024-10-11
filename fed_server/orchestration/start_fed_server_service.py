@@ -90,6 +90,8 @@ class FedServerOrchestrator(HostObject):
                                  capture_output=True)
 
             if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
+                if config["options"]["--name"] == 'rabbitmq':
+                    pass
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", config["options"]["--name"]])
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
