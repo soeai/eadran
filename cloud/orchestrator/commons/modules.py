@@ -156,6 +156,7 @@ class Config4Edge(Generic):
             generated_config = {
                 "consumer_id": params["consumer_id"],
                 "model_id": params["model_id"],
+                "run_id": params['run_id'],
                 "dataset_id": dataset["dataset_id"],
                 "edge_id": dataset["edge_id"],
                 "fed_server": f"{params['start_fed_resp']['ip']}:{params['start_fed_resp']['fed_server_port']}",
