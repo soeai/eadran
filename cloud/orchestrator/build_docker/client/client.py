@@ -111,7 +111,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     url_service = args.service + "/storage/obj?key="
-    client_conf = utils.load_config(args.conf)
+    client_conf = utils.load_config("conf/" + args.conf)
 
     print(client_conf)
 
