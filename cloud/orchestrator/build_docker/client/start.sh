@@ -13,4 +13,4 @@ echo "Starting Federated Client with: --service=$1 --request_id=$2 --conf=$3"
 #fi
 
 # check python3 vs current environment from the docker instance
-python client.py --service=$1 --sessionid=$2 --conf=conf/$3
+python client.py --service=$1 --sessionid=$2 --conf=$3
