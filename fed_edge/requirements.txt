@@ -1,2 +1,2 @@
-qoa4ml==0.2.17
-docker==7.1.0
+qoa4ml==0.3.10
+docker

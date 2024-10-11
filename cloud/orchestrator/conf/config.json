@@ -35,9 +35,9 @@
   "url_mgt_service": "http://128.214.254.113:8080",
   "url_storage_service": "http://128.214.254.113:8081",
   "server_id": "fedserver001",
-  "fed_server_image_name": "trungdonggg/training-server",
+  "fed_server_image_name": "dungcao1979/eadran-fed-server",
   "fed_server_image_port": 8080,
   "rabbitmq_image_name": "rabbitmq",
   "rabbitmq_image_port": 5672,
-  "eadran_qod_image_name": "chanhlong/qod:latest"
+  "eadran_qod_image_name": "dungcao1979/eadran-edge-qod"
 }

@@ -1,0 +1,39 @@
+{
+  "consumer_id": "dungcao",
+  "model_id": "leak_case1",
+  "datasets": [
+    {
+      "dataset_id": "water_leak_01",
+      "edge_id": "edge01",
+      "read_info": {
+        "method": "local",
+        "location": "apps/water_leak/extracted_data/water_leak_01_20241011003021.csv",
+        "format": "",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "dungcao_fraud_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    }
+  ],
+  "platform": "tensorflow_cpu",
+  "requirement_libs": [],
+  "model_conf": {
+    "storage_ref_id": "dungcao_fraud_model_tf_v1",
+    "module_name": "model_tf",
+    "function_map": {
+      "train": "fit",
+      "evaluate": "evaluate",
+      "set_weights": "set_weights",
+      "get_weights": "get_weights"
+    },
+    "train_hyper_param": {
+      "epochs": 10
+    }
+  },
+  "pre_train_model": {
+    "storage_ref_id": ""
+  }
+}

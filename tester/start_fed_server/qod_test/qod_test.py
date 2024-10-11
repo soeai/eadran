@@ -60,7 +60,7 @@ if __name__ == "__main__":
         "model_id": "tensorflow001",
         "data_conf": {
             "method": "local",
-            "location": "/path/to/data/fraudTrain_processed_SMOTE_1.csv",
+            "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/fraudTrain_processed_SMOTE_1.csv",
             "reader_module": {
                 "storage_ref_id": "665d497f52c81403417a6a4e"
             }
