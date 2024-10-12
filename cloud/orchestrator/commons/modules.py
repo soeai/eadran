@@ -1,10 +1,11 @@
-import uuid
-from abc import ABC, abstractmethod
-import qoa4ml.utils.qoa_utils as utils
-import traceback, sys
-import requests, json, os, time
-import threading
 import logging
+import sys
+import traceback
+from abc import ABC, abstractmethod
+
+import qoa4ml.utils.qoa_utils as utils
+import requests
+import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -122,27 +123,27 @@ class FedServerContainer(Generic):
         return response
 
 
-def upload_config(config, username, url_storage_service):
-    # Specify the file path
-    json_file_path = f"{username}_config_{config['edge_id']}.json"
-
-    # Write the config dictionary to the JSON file
-    with open(json_file_path, "w") as json_file:
-        json.dump(config, json_file)
-
-    uri = f"{url_storage_service}/storage/obj"
-    files = {
-        "file": (json_file_path, open(json_file_path, "rb"), "application/json")
-    }
-    data = {"user": username}
-
-    response = requests.post(uri, files=files, data=data)
-    response.raise_for_status()  # Ensure the request was successful
-
-    storage_id = response.json()["storage_id"]
-    os.remove(json_file_path)
-
-    return storage_id
+# def upload_config(config, username, url_storage_service):
+#     # Specify the file path
+#     json_file_path = f"{username}_config_{config['edge_id']}.json"
+#
+#     # Write the config dictionary to the JSON file
+#     with open(json_file_path, "w") as json_file:
+#         json.dump(config, json_file)
+#
+#     uri = f"{url_storage_service}/storage/obj"
+#     files = {
+#         "file": (json_file_path, open(json_file_path, "rb"), "application/json")
+#     }
+#     data = {"user": username}
+#
+#     response = requests.post(uri, files=files, data=data)
+#     response.raise_for_status()  # Ensure the request was successful
+#
+#     storage_id = response.json()["storage_id"]
+#     os.remove(json_file_path)
+#
+#     return storage_id
 
 
 class Config4Edge(Generic):
@@ -269,7 +270,8 @@ class EdgeContainer(Generic):
                             self.orchestrator.url_storage_service,
                             # configs[edge_id],
                         ]
-                        command["docker"][0]["options"]["--name"] = command_template["docker"][0]["options"]["--name"] + "_" + edge_id
+                        command["docker"][0]["options"]["--name"] = command_template["docker"][0]["options"]["--name"] \
+                                                                    + "_" + edge_id
                         command['config'] = configs[edge_id]
 
                         for d in params["datasets"]:
@@ -355,7 +357,7 @@ class QoDContainer(Generic):
                     ],
                 }
             ],
-            "config":{
+            "config": {
                 "data_conf": params['data_conf'],
                 "url_service": self.orchestrator.url_mgt_service
             }

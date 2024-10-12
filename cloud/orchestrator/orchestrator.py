@@ -18,7 +18,11 @@ from cloud.orchestrator.commons.modules import (
 import logging
 import requests
 
-logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(
+    filename='orchestrator.logs',  # The file where logs will be saved
+    filemode='a',  # 'a' to append, 'w' to overwrite
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
+    level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 

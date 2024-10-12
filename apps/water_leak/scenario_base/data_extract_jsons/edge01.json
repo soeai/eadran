@@ -5,11 +5,11 @@
       {
         "owner_id": "ttu_water_leak",
         "dataset_id": "water_leak_01",
-        "__comment": "features required by the above-mentioned dataset for the above-mentioned provider",
+        "__comment": "access key is saved in .env of local edge.",
         "access_info": {
           "type": "file",
           "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/fraudTrain_processed_SMOTE_1.csv",
-          "access_key": ""
+          "access_key": "env"
         },
         "features": [],
         "label": {

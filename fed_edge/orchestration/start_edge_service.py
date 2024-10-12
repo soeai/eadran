@@ -26,7 +26,11 @@ from qoa4ml.connector.amqp_connector import AmqpConnector, AMQPConnectorConfig
 import asyncio
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='eadran_edge.logs',  # The file where logs will be saved
+    filemode='a',  # 'a' to append, 'w' to overwrite
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
+    level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
@@ -65,12 +69,19 @@ class EdgeOrchestrator(HostObject):
             if req_msg["command"].lower() == "docker":
                 if req_msg["params"].lower() == "start":
                     if "config" in req_msg.keys():
-                        fname = "conf_temp/{}_config_{}.json".format(self.edge_id, req_msg["request_id"])
-                        with open(fname, 'w') as f:
+                        file_config_name = "conf_temp/{}_config_{}.json".format(self.edge_id, req_msg["request_id"])
+                        with open(file_config_name, 'w') as f:
                             json.dump(req_msg['config'], f)
                         status = []
                         for config in req_msg["docker"]:
-                            r = self.start_container(config, req_msg["request_id"],fname)
+                            r = self.start_container(config, req_msg["request_id"],file_config_name)
+                            _args = (
+                                    req_msg['config']["amqp_connector"],
+                                    config["options"]["--name"],
+                                    req_msg["request_id"],
+                                    self.config["qoa_client"]
+                            )
+                            print("PARAMS FOR MONITOR: ", _args)
                             # if r == 0:
                             #     # start monitor
                             #     Thread(
@@ -89,7 +100,7 @@ class EdgeOrchestrator(HostObject):
                             "detail": status,
                         }
                         # clean config
-                        os.remove(fname)
+                        os.remove(file_config_name)
 
                 elif req_msg["params"].lower() == "stop":
                     status = []

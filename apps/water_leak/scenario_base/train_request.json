@@ -1,13 +1,29 @@
 {
   "consumer_id": "dungcao",
   "model_id": "leak_case1",
+  "run_id": 1,
   "datasets": [
     {
       "dataset_id": "water_leak_01",
       "edge_id": "edge01",
       "read_info": {
         "method": "local",
-        "location": "apps/water_leak/extracted_data/water_leak_01_20241011003021.csv",
+        "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_01_20241011133825.csv",
+        "format": "",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "dungcao_fraud_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_02",
+      "edge_id": "edge02",
+      "read_info": {
+        "method": "local",
+        "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_01_20241011133825.csv",
         "format": "",
         "params": "",
         "reader_module": {
@@ -30,7 +46,7 @@
       "get_weights": "get_weights"
     },
     "train_hyper_param": {
-      "epochs": 10
+      "epochs": 100
     }
   },
   "pre_train_model": {

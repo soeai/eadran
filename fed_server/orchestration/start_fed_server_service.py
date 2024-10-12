@@ -18,7 +18,11 @@ from qoa4ml.collector.amqp_collector import AmqpCollector, HostObject, AMQPColle
 from qoa4ml.connector.amqp_connector import AmqpConnector, AMQPConnectorConfig
 import asyncio
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='eadran_server.logs',  # The file where logs will be saved
+    filemode='a',  # 'a' to append, 'w' to overwrite
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
+    level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
@@ -89,34 +93,34 @@ class FedServerOrchestrator(HostObject):
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
                                  capture_output=True)
 
-            if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
-                if config["options"]["--name"] == 'rabbitmq':
-                    pass
+            if res.returncode == 0 and \
+                    config['options']['--name'] in str(res.stdout) and \
+                    config["options"]["--name"] != 'rabbitmq':
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", config["options"]["--name"]])
                 subprocess.run(["docker", "remove", config["options"]["--name"]])
 
-            logging.info("Starting a new container...")
-            command = ["docker", "run", "-d"]
-            for (k, v) in config["options"].items():
-                if v is not None and len(v) > 0:
-                    if k == "-p":
-                        for port in v:
-                            command.extend(["-p", port])
-                    elif k != "-d":
-                        command.extend([k, v])
-                else:
-                    command.append(k)
-            command.append(config["image"])
+                logging.info("Starting a new container...")
+                command = ["docker", "run", "-d"]
+                for (k, v) in config["options"].items():
+                    if v is not None and len(v) > 0:
+                        if k == "-p":
+                            for port in v:
+                                command.extend(["-p", port])
+                        elif k != "-d":
+                            command.extend([k, v])
+                    else:
+                        command.append(k)
+                command.append(config["image"])
 
-            if 'arguments' in config.keys():
-                command.extend(config['arguments'])
-            res = subprocess.run(command, capture_output=True)
-            logging.info("Start container result: {}".format(res))
-            self.containers.append(config["options"]["--name"])
+                if 'arguments' in config.keys():
+                    command.extend(config['arguments'])
+                res = subprocess.run(command, capture_output=True)
+                logging.info("Start container result: {}".format(res))
+                self.containers.append(config["options"]["--name"])
 
-            if asyncio.run(check_docker_running(config["options"]["--name"])):
-                return 0
+                if asyncio.run(check_docker_running(config["options"]["--name"])):
+                    return 0
 
         except Exception as e:
             logging.error("[ERROR] - Error {} while estimating contribution: {}".format(type(e), e.__traceback__))
@@ -179,7 +183,7 @@ async def check_docker_running(container_name: str):
     # in your environment
     docker_client = docker.from_env()
 
-    await asyncio.sleep(2)
+    await asyncio.sleep(5)
 
     try:
         container = docker_client.containers.get(container_name)
