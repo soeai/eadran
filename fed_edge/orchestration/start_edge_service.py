@@ -75,24 +75,17 @@ class EdgeOrchestrator(HostObject):
                         status = []
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"],file_config_name)
-                            _args = (
-                                    req_msg['config']["amqp_connector"],
-                                    config["options"]["--name"],
-                                    req_msg["request_id"],
-                                    self.config["qoa_client"]
-                            )
-                            print("PARAMS FOR MONITOR: ", _args)
-                            # if r == 0:
-                            #     # start monitor
-                            #     Thread(
-                            #         target=container_monitor,
-                            #         args=(
-                            #             req_msg['config']["amqp_connector"],
-                            #             config["options"]["--name"],
-                            #             req_msg["request_id"],
-                            #             self.config["qoa_client"]
-                            #         ),
-                            #     ).start()
+                            if r == 0:
+                                # start monitor
+                                Thread(
+                                    target=container_monitor,
+                                    args=(
+                                        req_msg['config']["amqp_connector"],
+                                        config["options"]["--name"],
+                                        req_msg["request_id"],
+                                        self.config["qoa_client"]
+                                    ),
+                                ).start()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
@@ -337,8 +330,8 @@ def container_monitor(
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]
     logging.info("monitoring: ", qoa_client_config)
-    client = QoaClient(config_dict=qoa_client_config)
-    client.start_all_probes()
+    # client = QoaClient(config_dict=qoa_client_config)
+    # client.start_all_probes()
 
 
 if __name__ == "__main__":
