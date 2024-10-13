@@ -76,22 +76,22 @@ class EdgeOrchestrator(HostObject):
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
-                                Thread(target=container_monitor,args=(config["options"]["--name"],)).start()
+                                # Thread(target=container_monitor,args=(config["options"]["--name"],)).start()
                                 # # start monitor
                                 # # container_monitor(req_msg['config']["amqp_connector"],
                                 # #         config["options"]["--name"],
                                 # #         req_msg["request_id"],
                                 # #         self.config)
-                                # t = Thread(
-                                #     target=container_monitor,
-                                #     args=(
-                                #         req_msg['config']["amqp_connector"],
-                                #         config["options"]["--name"],
-                                #         req_msg["request_id"],
-                                #         self.config
-                                #     ),
-                                # )
-                                # t.start()
+                                t = Thread(
+                                    target=container_monitor,
+                                    args=(
+                                        req_msg['config']["amqp_connector"],
+                                        config["options"]["--name"],
+                                        req_msg["request_id"],
+                                        self.config
+                                    ),
+                                )
+                                t.start()
                                 # t.join()
                             status.append(r)
                         response = {
