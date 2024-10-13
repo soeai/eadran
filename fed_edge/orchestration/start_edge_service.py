@@ -76,22 +76,23 @@ class EdgeOrchestrator(HostObject):
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
-                                # start monitor
-                                # container_monitor(req_msg['config']["amqp_connector"],
+                                Thread(target=monitor_container_stats,args=(config["options"]["--name"],)).start()
+                                # # start monitor
+                                # # container_monitor(req_msg['config']["amqp_connector"],
+                                # #         config["options"]["--name"],
+                                # #         req_msg["request_id"],
+                                # #         self.config)
+                                # t = Thread(
+                                #     target=container_monitor,
+                                #     args=(
+                                #         req_msg['config']["amqp_connector"],
                                 #         config["options"]["--name"],
                                 #         req_msg["request_id"],
-                                #         self.config)
-                                t = Thread(
-                                    target=container_monitor,
-                                    args=(
-                                        req_msg['config']["amqp_connector"],
-                                        config["options"]["--name"],
-                                        req_msg["request_id"],
-                                        self.config
-                                    ),
-                                )
-                                t.start()
-                                t.join()
+                                #         self.config
+                                #     ),
+                                # )
+                                # t.start()
+                                # t.join()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
@@ -356,6 +357,27 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
             qoa4ml_client.stop_all_probes()
         time.sleep(5)
 
+
+def monitor_container_stats(container_name):
+    client = docker.from_env()  # Create a Docker client from environment variables
+
+    try:
+        container = client.containers.get(container_name)  # Get the container by name
+        print(f"Monitoring stats for container '{container_name}'...")
+
+        while True:
+            stats = container.stats(stream=False)  # Get stats once
+            print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
+            print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
+            print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
+            print(f"Network I/O: {stats['networks']}")
+            time.sleep(10)  # Wait before getting stats again
+    except docker.errors.NotFound:
+        print(f"Container '{container_name}' not found.")
+    except KeyboardInterrupt:
+        print("Monitoring stopped.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")

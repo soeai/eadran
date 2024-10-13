@@ -201,7 +201,7 @@ if __name__ == '__main__':
       }]
     client_conf['qoa_client']['probes'] = [{
         "probe_type": "docker",
-        "frequency": 60,
+        "frequency": 1000,
         "require_register": False,
         "log_latency_flag": False,
         "environment": "Edge",
