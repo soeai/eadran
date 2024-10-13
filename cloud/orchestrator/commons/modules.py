@@ -177,7 +177,8 @@ class Config4Edge(Generic):
                         "end_point": params['start_fed_resp']['ip'],
                         "exchange_name": "fml_model_report",
                         "exchange_type": "topic",
-                        "out_routing_key": "service." + params["model_id"] + "." + dataset["edge_id"]
+                        "out_routing_key": "service." + params["model_id"] + "." + dataset["edge_id"],
+                        "health_check_disable": True
                     }
                 }
             }
@@ -241,6 +242,7 @@ class EdgeContainer(Generic):
             configs = params["config4edge_resp"]
 
             logging.info("Edge id: template id  => ".format(configs))
+            container_name = f"fed_worker_container_{params['consumer_id']}_{params['model_id']}"
             command_template = {
                 "edge_id": "",
                 "request_id": params["request_id"],
@@ -250,7 +252,7 @@ class EdgeContainer(Generic):
                     {
                         "image": None,
                         "options": {
-                            "--name": f"fed_worker_container_{params['consumer_id']}_{params['model_id']}",
+                            "--name": None,
                         },
                         "arguments": [],
                     }
@@ -275,8 +277,7 @@ class EdgeContainer(Generic):
                             self.orchestrator.url_storage_service,
                             # configs[edge_id],
                         ]
-                        command["docker"][0]["options"]["--name"] = command_template["docker"][0]["options"]["--name"] \
-                                                                    + "_" + edge_id
+                        command["docker"][0]["options"]["--name"] = container_name + "_" + edge_id
                         command['config'] = configs[edge_id]
 
                         for d in params["datasets"]:

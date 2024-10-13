@@ -59,7 +59,7 @@
           "end_point": "128.214.255.226",
           "exchange_name": "fml_model_report",
           "exchange_type": "topic",
-          "out_routing_key": "receiver.edge01",
+          "out_routing_key": "service.edge01",
           "health_check_disable": true
         }
       }

@@ -15,6 +15,8 @@ from threading import Thread
 import docker
 import psutil
 import qoa4ml.utils.qoa_utils as utils
+from qoa4ml.config.configs import ClientInfo, ConnectorConfig, ClientConfig
+
 from cloud.commons.default import Protocol
 from qoa4ml.collector.amqp_collector import (
     AmqpCollector,
@@ -82,7 +84,7 @@ class EdgeOrchestrator(HostObject):
                                         req_msg['config']["amqp_connector"],
                                         config["options"]["--name"],
                                         req_msg["request_id"],
-                                        self.config["qoa_client"]
+                                        self.config
                                     ),
                                 ).start()
                             status.append(r)
@@ -321,15 +323,31 @@ async def check_docker_running(container_name: str):
 
 
 def container_monitor(
-        amqp_connector: dict, container_name, request_id, qoa_client_config
+        amqp_connector: dict, container_name, request_id, client_conf
 ):
-    qoa_client_config["connector"] = [amqp_connector]
-    qoa_client_config["client"]["instance_name"] = request_id
-    for probe_config in qoa_client_config["probes"]:
+    client_info = ClientInfo(
+        name=client_conf['edge_id'],
+        instance_name=request_id
+    )
+
+    connector_config = ConnectorConfig(**amqp_connector)
+
+    for probe_config in client_conf["probes"]:
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]
-    logging.info("monitoring: ", qoa_client_config)
-    client = QoaClient(config_dict=qoa_client_config)
+
+    cconfig = ClientConfig(
+        client=client_info,
+        connector=[connector_config],
+        probes=client_conf['probes']
+    )
+
+    qoa_client = QoaClient(
+        config_dict=cconfig
+    )
+
+    logging.info("monitoring: ", qoa_client)
+    client = QoaClient(config_dict=qoa_client)
     client.start_all_probes()
 
 
