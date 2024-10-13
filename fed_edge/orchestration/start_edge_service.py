@@ -76,7 +76,7 @@ class EdgeOrchestrator(HostObject):
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
-                                Thread(target=monitor_container_stats,args=(config["options"]["--name"],)).start()
+                                Thread(target=container_monitor,args=(config["options"]["--name"],)).start()
                                 # # start monitor
                                 # # container_monitor(req_msg['config']["amqp_connector"],
                                 # #         config["options"]["--name"],
@@ -329,55 +329,95 @@ async def check_docker_running(container_name: str):
 
 
 def container_monitor(amqp_connector: dict, container_name, request_id, client_conf):
+    BYTES_TO_MB = 1024.0 * 1024.0
     client_info = {
         "name": client_conf['edge_id'],
         "instance_name": request_id
     }
     # probes = client_conf['qoa_client_probes'].copy()
     # probes['container_name'] = [container_name]
-    probes = {
-        "probe_type": "docker",
-        "frequency": client_conf['qoa_client_probes']['frequency'],
-        "require_register": False,
-        "log_latency_flag": False,
-        "environment": "Edge",
-        "container_name": [container_name]
-    }
+    # probes = {
+    #     "probe_type": "docker",
+    #     "frequency": client_conf['qoa_client_probes']['frequency'],
+    #     "require_register": False,
+    #     "log_latency_flag": False,
+    #     "environment": "Edge",
+    #     "container_name": [container_name]
+    # }
 
     qoa4ml_conf = {
         "client": client_info,
-        "connector": [amqp_connector],
-        "probes": [probes]
+        "connector": [amqp_connector]
+        # "probes": [probes]
     }
     logging.info("monitoring: ", qoa4ml_conf)
     qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
-    qoa4ml_client.start_all_probes()
-    while True:
-        if not asyncio.run(check_docker_running(container_name)):
-            qoa4ml_client.stop_all_probes()
-        time.sleep(5)
-
-
-def monitor_container_stats(container_name):
+    # qoa4ml_client.start_all_probes()
     client = docker.from_env()  # Create a Docker client from environment variables
-
     try:
         container = client.containers.get(container_name)  # Get the container by name
         print(f"Monitoring stats for container '{container_name}'...")
 
         while True:
-            stats = container.stats(stream=False)  # Get stats once
-            print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
-            print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
-            print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
-            print(f"Network I/O: {stats['networks']}")
-            time.sleep(10)  # Wait before getting stats again
+            if asyncio.run(check_docker_running(container_name)):
+                stats = container.stats(stream=False)  # Get stats once
+
+                usage_delta = (
+                        stats["cpu_stats"]["cpu_usage"]["total_usage"]
+                        - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+                )
+                system_delta = (
+                        stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
+                )
+                len_cpu = stats["cpu_stats"]["online_cpus"]
+                cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
+
+                report = {"cpu_percentage": cpu_percentage,
+                          "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB,
+                          "container_image": container.image
+                          }
+                # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
+                # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
+                # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
+                # print(f"Network I/O: {stats['networks']}")
+                qoa4ml_client.report(report=report,submit=True)
+            else:
+                break
+            time.sleep(client_conf['qoa_client_probes']['frequency'])  # Wait before getting stats again
     except docker.errors.NotFound:
         print(f"Container '{container_name}' not found.")
     except KeyboardInterrupt:
         print("Monitoring stopped.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+    # while True:
+    #     if not asyncio.run(check_docker_running(container_name)):
+    #         qoa4ml_client.stop_all_probes()
+    #     time.sleep(5)
+
+
+# def monitor_container_stats(container_name):
+#     client = docker.from_env()  # Create a Docker client from environment variables
+#
+#     try:
+#         container = client.containers.get(container_name)  # Get the container by name
+#         print(f"Monitoring stats for container '{container_name}'...")
+#
+#         while True:
+#             stats = container.stats(stream=False)  # Get stats once
+#             print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
+#             print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
+#             print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
+#             print(f"Network I/O: {stats['networks']}")
+#             time.sleep(10)  # Wait before getting stats again
+#     except docker.errors.NotFound:
+#         print(f"Container '{container_name}' not found.")
+#     except KeyboardInterrupt:
+#         print("Monitoring stopped.")
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
