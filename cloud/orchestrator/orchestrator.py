@@ -88,8 +88,7 @@ class Orchestrator(HostObject):
         self.config = utils.load_config(config)
         self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
                                            self)
-        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']),
-                                            health_check_disable=True)
+        self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
         self.thread = Thread(target=self.start_receive)
         self.url_mgt_service = self.config["url_mgt_service"]
         self.url_storage_service = self.config["url_storage_service"]

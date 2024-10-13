@@ -47,8 +47,7 @@ class EdgeOrchestrator(HostObject):
             self
         )
         self.amqp_queue_out = AmqpConnector(
-            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"]),
-            health_check_disable=True
+            AMQPConnectorConfig(**self.config["amqp_out"]["amqp_connector"]["conf"])
         )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
@@ -330,8 +329,8 @@ def container_monitor(
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]
     logging.info("monitoring: ", qoa_client_config)
-    # client = QoaClient(config_dict=qoa_client_config)
-    # client.start_all_probes()
+    client = QoaClient(config_dict=qoa_client_config)
+    client.start_all_probes()
 
 
 if __name__ == "__main__":

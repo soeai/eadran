@@ -20,7 +20,8 @@
         "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "orchestrator.fedserver001"
+        "out_routing_key": "orchestrator.fedserver001",
+        "health_check_disable": true
       }
     }
   },

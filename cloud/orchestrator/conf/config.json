@@ -18,7 +18,8 @@
         "end_point":"128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "edge"
+        "out_routing_key": "edge",
+        "health_check_disable": true
       }
     }
   },

@@ -144,7 +144,7 @@ if __name__ == '__main__':
         stage_id="eadran:" + client_conf['edge_id'],
         functionality=client_conf['dataset_id'],
         application_name=client_conf['model_id'],
-        role='eadran:edge',
+        role='eadran:mlm_performance',
         run_id=str(client_conf['run_id']),
         custom_info=""
     )
