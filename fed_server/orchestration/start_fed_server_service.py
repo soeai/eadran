@@ -92,13 +92,16 @@ class FedServerOrchestrator(HostObject):
             res = subprocess.run(["docker", "ps", "-a", "--filter", "name=" + config["options"]["--name"]],
                                  capture_output=True)
 
-            if res.returncode == 0 and \
-                    config['options']['--name'] in str(res.stdout) and \
-                    config["options"]["--name"] != 'rabbitmq':
-                logging.info("Stopping the running container...")
-                subprocess.run(["docker", "stop", config["options"]["--name"]])
-                subprocess.run(["docker", "remove", config["options"]["--name"]])
+            flag = True
+            if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
+                if config["options"]["--name"] == 'rabbitmq':
+                    flag = False
+                else:
+                    logging.info("Stopping the running container...")
+                    subprocess.run(["docker", "stop", config["options"]["--name"]])
+                    subprocess.run(["docker", "remove", config["options"]["--name"]])
 
+            if flag:
                 logging.info("Starting a new container...")
                 command = ["docker", "run", "-d"]
                 for (k, v) in config["options"].items():
