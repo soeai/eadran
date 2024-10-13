@@ -43,7 +43,7 @@
   "report_delay_time": 120,
   "qoa_client_probes": {
         "probe_type": "docker",
-        "frequency": 60,
+        "frequency": 10,
         "require_register": false,
         "log_latency_flag": false,
         "environment": "Edge",
