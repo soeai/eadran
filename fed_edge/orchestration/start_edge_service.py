@@ -85,10 +85,11 @@ class EdgeOrchestrator(HostObject):
                                 t = Thread(
                                     target=container_monitor,
                                     args=(
-                                        req_msg['config']["amqp_connector"],
-                                        config["options"]["--name"],
+                                        req_msg['config'],
+                                        # req_msg['config']["amqp_connector"],
+                                        # config["options"]["--name"],
                                         req_msg["request_id"],
-                                        self.config
+                                        # self.config
                                     ),
                                 )
                                 t.start()
@@ -328,11 +329,23 @@ async def check_docker_running(container_name: str):
         docker_client.close()
 
 
-def container_monitor(amqp_connector: dict, container_name, request_id, client_conf):
+def container_monitor(client_conf, request_id, container_name):
     BYTES_TO_MB = 1024.0 * 1024.0
+    # client_info = {
+    #     "name": client_conf['edge_id'],
+    #     "instance_name": request_id
+    # }
     client_info = {
-        "name": client_conf['edge_id'],
-        "instance_name": request_id
+        "name" : client_conf['edge_id'],
+        "user_id" :client_conf['consumer_id'],
+        "username": "edge_container",
+        "instance_name": request_id,
+        "stage_id": "eadran:" + client_conf['edge_id'],
+        "functionality": client_conf['dataset_id'],
+        "application_name": client_conf['model_id'],
+        "role": 'eadran:mlm_resource',
+        "run_id": str(client_conf['run_id']),
+        "custom_info": ""
     }
     # probes = client_conf['qoa_client_probes'].copy()
     # probes['container_name'] = [container_name]
@@ -347,9 +360,10 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
 
     qoa4ml_conf = {
         "client": client_info,
-        "connector": [amqp_connector]
+        "connector": [client_conf["amqp_connector"]]
         # "probes": [probes]
     }
+
     logging.info("monitoring: ", qoa4ml_conf)
     qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
     # qoa4ml_client.start_all_probes()
@@ -380,7 +394,7 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
                 # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
                 # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
                 # print(f"Network I/O: {stats['networks']}")
-                qoa4ml_client.report(report=report,submit=True)
+                qoa4ml_client.report(report={"resource_monitor": report},submit=True)
             else:
                 break
             time.sleep(client_conf['qoa_client_probes']['frequency'])  # Wait before getting stats again

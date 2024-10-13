@@ -87,7 +87,7 @@ class FedMarkClient(fl.client.NumPyClient):
                       'evaluate_on_test': self.x_eval is not None,
                       'train_round': config['fit_round'],
                       'train_duration': np.round(self.total_time, 0)}
-            self.qoa_monitor.report(report=report,submit=True)
+            self.qoa_monitor.report(report={"quality_of_training": report},submit=True)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
