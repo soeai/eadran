@@ -78,15 +78,19 @@ class EdgeOrchestrator(HostObject):
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
                                 # start monitor
-                                Thread(
-                                    target=container_monitor,
-                                    args=(
-                                        req_msg['config']["amqp_connector"],
+                                self.container_monitor(req_msg['config']["amqp_connector"],
                                         config["options"]["--name"],
                                         req_msg["request_id"],
-                                        self.config
-                                    ),
-                                ).start()
+                                        self.config)
+                                # Thread(
+                                #     target=container_monitor,
+                                #     args=(
+                                #         req_msg['config']["amqp_connector"],
+                                #         config["options"]["--name"],
+                                #         req_msg["request_id"],
+                                #         self.config
+                                #     ),
+                                # ).start()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
@@ -349,7 +353,7 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
     while True:
         if not asyncio.run(check_docker_running(container_name)):
             qoa4ml_client.stop_all_probes()
-        time.sleep(10)
+        time.sleep(5)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
