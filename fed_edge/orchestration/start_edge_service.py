@@ -327,21 +327,22 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
         "name": client_conf['edge_id'],
         "instance_name": request_id
     }
-    client_conf['qoa_client_probes']['container_name'] = [container_name]
-    # probes = {
-    #     "probe_type": "docker",
-    #     "frequency": client_conf['qoa_client']['probes']['frequency'],
-    #     "require_register": False,
-    #     "log_latency_flag": False,
-    #     "environment": "Edge",
-    #     "container_name": [container_name]
-    # }
+    # probes = client_conf['qoa_client_probes'].copy()
+    # probes['container_name'] = [container_name]
+    probes = {
+        "probe_type": "docker",
+        "frequency": client_conf['qoa_client']['probes']['frequency'],
+        "require_register": False,
+        "log_latency_flag": False,
+        "environment": "Edge",
+        "container_name": [container_name]
+    }
 
     # logging.info("monitoring: ", qoa_client)
     QoaClient(config_dict={
         "client": client_info,
         "connector": [amqp_connector],
-        "probes": [client_conf['qoa_client_probes']]
+        "probes": [probes]
     }).start_all_probes()
 
 
