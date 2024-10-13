@@ -346,7 +346,10 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
     logging.info("monitoring: ", qoa4ml_conf)
     qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
     qoa4ml_client.start_all_probes()
-
+    while True:
+        if not asyncio.run(check_docker_running(container_name)):
+            qoa4ml_client.stop_all_probes()
+        time.sleep(10)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
