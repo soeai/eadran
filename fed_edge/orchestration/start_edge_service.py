@@ -385,8 +385,8 @@ def container_monitor(client_conf, request_id, container_name):
                 cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
 
                 report = {"cpu_percentage": cpu_percentage,
-                          "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB,
-                          "container_image": container.image
+                          "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB
+                          # "container_image": container.image
                           }
                 # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
                 # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
