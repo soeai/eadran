@@ -86,10 +86,8 @@ class EdgeOrchestrator(HostObject):
                                     target=container_monitor,
                                     args=(
                                         req_msg['config'],
-                                        # req_msg['config']["amqp_connector"],
-                                        # config["options"]["--name"],
                                         req_msg["request_id"],
-                                        # self.config
+                                        config["options"]["--name"]
                                     ),
                                 )
                                 t.start()
