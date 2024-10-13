@@ -212,7 +212,7 @@ if __name__ == '__main__':
     #
     # qoa4ml_conf = utils.load_config("temp_conf.json")
     # print(type(client_conf['qoa_client']))
-    # print(client_conf['qoa_client'])
+    print(client_conf['qoa_client'])
     qoa_client = QoaClient(
         config_dict=client_conf['qoa_client']
     )

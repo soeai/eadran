@@ -338,12 +338,14 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
         "container_name": [container_name]
     }
 
-    # logging.info("monitoring: ", qoa_client)
-    QoaClient(config_dict={
+    qoa4ml_conf = {
         "client": client_info,
         "connector": [amqp_connector],
         "probes": [probes]
-    }).start_all_probes()
+    }
+    logging.info("monitoring: ", qoa4ml_conf)
+    qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
+    qoa4ml_client.start_all_probes()
 
 
 if __name__ == "__main__":
