@@ -69,8 +69,8 @@ class FedMarkClient(fl.client.NumPyClient):
         # train
         self.model_set_weights(parameters)
         # get performance of first time
-        if self.pre_train_performance == 0:
-            self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
+        # if self.pre_train_performance == 0:
+        self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
         self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
 
         weight = self.model_get_weights()
@@ -82,6 +82,9 @@ class FedMarkClient(fl.client.NumPyClient):
                       'pre_train_performance': self.pre_train_performance,
                       'pre_loss_value': self.pre_train_loss,
                       'post_loss_value': self.post_train_loss,
+                      'test_performance': self.test_performance,
+                      'test_loss': self.test_loss,
+                      'evaluate_on_test': self.x_eval is not None,
                       'train_round': config['fit_round'],
                       'train_duration': np.round(self.total_time, 0)}
             self.qoa_monitor.report(report=report,submit=True)

@@ -346,7 +346,7 @@ def container_monitor(
         config_dict=cconfig
     )
 
-    logging.info("monitoring: ", qoa_client)
+    # logging.info("monitoring: ", qoa_client)
     client = QoaClient(config_dict=qoa_client)
     client.start_all_probes()
 
