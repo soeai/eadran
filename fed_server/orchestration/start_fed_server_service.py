@@ -94,7 +94,7 @@ class FedServerOrchestrator(HostObject):
 
             flag = True
             if res.returncode == 0 and config['options']['--name'] in str(res.stdout):
-                if config["options"]["--name"] == 'rabbitmq':
+                if config["options"]["--name"].startswith('rabbit'):
                     flag = False
                 else:
                     logging.info("Stopping the running container...")

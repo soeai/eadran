@@ -322,9 +322,7 @@ async def check_docker_running(container_name: str):
         docker_client.close()
 
 
-def container_monitor(
-        amqp_connector: dict, container_name, request_id, client_conf
-):
+def container_monitor(amqp_connector: dict, container_name, request_id, client_conf):
     client_info = ClientInfo(
         name=client_conf['edge_id'],
         instance_name=request_id
@@ -333,8 +331,8 @@ def container_monitor(
     connector_config = ConnectorConfig(**amqp_connector)
     logging.info(amqp_connector)
     for probe_config in client_conf['qoa_client']["probes"]:
-        if probe_config["probe_type"] == "docker":
-            probe_config["container_name"] = [container_name]
+        # if probe_config["probe_type"] == "docker":
+        probe_config["container_name"] = [container_name]
 
     logging.info(client_conf['qoa_client']['probes'])
     cconfig = ClientConfig(
