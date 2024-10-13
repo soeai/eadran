@@ -15,7 +15,6 @@ from threading import Thread
 import docker
 import psutil
 import qoa4ml.utils.qoa_utils as utils
-from qoa4ml.config.configs import ClientInfo, ConnectorConfig, ClientConfig
 
 from cloud.commons.default import Protocol
 from qoa4ml.collector.amqp_collector import (
@@ -78,19 +77,21 @@ class EdgeOrchestrator(HostObject):
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
                                 # start monitor
-                                container_monitor(req_msg['config']["amqp_connector"],
-                                        config["options"]["--name"],
-                                        req_msg["request_id"],
-                                        self.config)
-                                # Thread(
-                                #     target=container_monitor,
-                                #     args=(
-                                #         req_msg['config']["amqp_connector"],
+                                # container_monitor(req_msg['config']["amqp_connector"],
                                 #         config["options"]["--name"],
                                 #         req_msg["request_id"],
-                                #         self.config
-                                #     ),
-                                # ).start()
+                                #         self.config)
+                                t = Thread(
+                                    target=container_monitor,
+                                    args=(
+                                        req_msg['config']["amqp_connector"],
+                                        config["options"]["--name"],
+                                        req_msg["request_id"],
+                                        self.config
+                                    ),
+                                )
+                                t.start()
+                                t.join()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
@@ -354,6 +355,7 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
         if not asyncio.run(check_docker_running(container_name)):
             qoa4ml_client.stop_all_probes()
         time.sleep(5)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Edge Orchestrator Micro-Service...")
