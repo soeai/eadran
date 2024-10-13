@@ -12,6 +12,7 @@ import datetime as dt
 class TabularHandle(ABCTabular):
     def extract(self, _features, _label, _filters, _sample_limit):
         dest_path = os.path.abspath(self.reader_module['dest_path'])
+        os.makedirs(dest_path, exist_ok=True)
         method = self.reader_module['method']
         df = None
         if self.type == 'file':

@@ -181,7 +181,7 @@ class EdgeOrchestrator(HostObject):
             command.append(request_id)  # will be attached in report model performance
             command.append(fname)
 
-            logging.debug("Start container with command: {}".format(command))
+            logging.info("Start container with command: {}".format(command))
 
             res = subprocess.run(command, capture_output=True)
             logging.info("Start container result: {}".format(res))
@@ -330,15 +330,23 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
 
     connector_config = ConnectorConfig(**amqp_connector)
     logging.info(amqp_connector)
-    for probe_config in client_conf['qoa_client']["probes"]:
-        # if probe_config["probe_type"] == "docker":
-        probe_config["container_name"] = [container_name]
+    probes = {
+        "probe_type": "docker",
+        "frequency": client_conf['qoa_client']['probes']['frequency'],
+        "require_register": False,
+        "log_latency_flag": False,
+        "environment": "Edge",
+        "container_name": [container_name]
+    }
+    # for probe_config in client_conf['qoa_client']["probes"]:
+    #     # if probe_config["probe_type"] == "docker":
+    #     probe_config["container_name"] = [container_name]
 
-    logging.info(client_conf['qoa_client']['probes'])
+    # logging.info(client_conf['qoa_client']['probes'])
     cconfig = ClientConfig(
         client=client_info,
         connector=[connector_config],
-        probes=client_conf['qoa_client']['probes']
+        probes=[probes]
     )
 
     qoa_client = QoaClient(
