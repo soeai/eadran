@@ -1,6 +1,6 @@
 pymongo
 minio
-qoa4ml==0.3.10
+qoa4ml==0.3.14
 flask_restful
 flask
 flask_cors
