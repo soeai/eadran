@@ -78,7 +78,7 @@ class EdgeOrchestrator(HostObject):
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
                                 # start monitor
-                                self.container_monitor(req_msg['config']["amqp_connector"],
+                                container_monitor(req_msg['config']["amqp_connector"],
                                         config["options"]["--name"],
                                         req_msg["request_id"],
                                         self.config)
