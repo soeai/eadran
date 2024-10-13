@@ -331,7 +331,7 @@ def container_monitor(amqp_connector: dict, container_name, request_id, client_c
     # probes['container_name'] = [container_name]
     probes = {
         "probe_type": "docker",
-        "frequency": client_conf['qoa_client']['probes']['frequency'],
+        "frequency": client_conf['qoa_client_probes']['frequency'],
         "require_register": False,
         "log_latency_flag": False,
         "environment": "Edge",
