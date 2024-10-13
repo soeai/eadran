@@ -3,6 +3,7 @@ We assume that the data for training is available that can be accessed through a
 note that other tasks have been done to prepare such a data for the training task
 '''
 import argparse
+import json
 import time
 import uuid
 
@@ -10,7 +11,8 @@ import docker
 import flwr as fl
 import numpy as np
 import qoa4ml.utils.qoa_utils as utils
-from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig, ProbeConfig
+from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig, ProbeConfig, \
+    DockerProbeConfig
 from qoa4ml.qoa_client import QoaClient
 
 
@@ -144,50 +146,75 @@ if __name__ == '__main__':
     # # X, y = dps_read_data_module("/data/" + filename)
     # X, y = dps_read_data_module("/home/longnguyen/Downloads/Fraud_Data/" + filename)
 
-    # docker_res = docker.from_env().version()
-    # print(docker_res)
+    docker_res = docker.from_env().version()
+    print(docker_res)
 
-    client_info = ClientInfo(
-        name=client_conf['edge_id'],
-        user_id=client_conf['consumer_id'],
-        username=client_conf['dataset_id'],
-        instance_id=str(uuid.uuid4()),
-        instance_name='session_001',
-        stage_id="version:1",
-        functionality="test",
-        application_name=client_conf['model_id'],
-        role='fml:eadran',
-        run_id=str(client_conf['run_id']),
-        custom_info=""
-    )
-
-    connector_config = ConnectorConfig(
-        name=client_conf['consumer_id'],
-        connector_class="AMQP",
-        config=AMQPConnectorConfig(**client_conf['amqp_connector']['conf'])
-    )
-
+    # client_info = ClientInfo(
+    #     name=client_conf['edge_id'],
+    #     user_id=client_conf['consumer_id'],
+    #     username=client_conf['dataset_id'],
+    #     instance_id=str(uuid.uuid4()),
+    #     instance_name='session_001',
+    #     stage_id="version:1",
+    #     functionality="test",
+    #     application_name=client_conf['model_id'],
+    #     role='fml:eadran',
+    #     run_id=str(client_conf['run_id']),
+    #     custom_info=""
+    # )
+    #
+    # connector_config = ConnectorConfig(
+    #     name=client_conf['consumer_id'],
+    #     connector_class="AMQP",
+    #     config=AMQPConnectorConfig(**client_conf['amqp_connector']['conf'])
+    # )
+    #
     # probe_config = ProbeConfig(
     #     probe_type="docker",
     #     frequency=10,
     #     require_register=False,
     #     log_latency_flag=False,
     #     environment="Edge",
-    #     container_name="recursing_curie"
+    #     container_name=["rabbitmq"]
     # )
-    cconfig = ClientConfig(
-        client=client_info,
-        connector=[connector_config],
-        # probes=[{"probe_type": "docker",
-        #          "frequency": 300,
-        #          "require_register": False,
-        #          "log_latency_flag": False,
-        #          "environment": "Edge",
-        #          "container_name": "recursing_curie"}]
-    )
-    # print(cconfig)
+    # cconfig = ClientConfig(
+    #     client=client_info,
+    #     connector=[connector_config],
+    #     # probes=[probe_config]
+    #     # probes=[{"probe_type": "docker",
+    #     #          "frequency": 30,
+    #     #          "require_register": False,
+    #     #          "log_latency_flag": False,
+    #     #          "environment": "Edge",
+    #     #          "container_name": ["rabbitmq"]}]
+    # )
+    client_conf['qoa_client']['connector'] = [{
+        "name": "amqp_connector",
+        "connector_class": "AMQP",
+        "config": {
+          "end_point": "128.214.255.226",
+          "exchange_name": "fml_model_report",
+          "exchange_type": "topic",
+          "out_routing_key": "service.edge02",
+          "health_check_disable": True
+        }
+      }]
+    client_conf['qoa_client']['probes'] = [{
+        "probe_type": "docker",
+        "frequency": 60,
+        "require_register": False,
+        "log_latency_flag": False,
+        "environment": "Edge",
+        "container_name": ["rabbitmq"]
+      }]
+    # with open("temp_conf.json", 'w') as f:
+    #     json.dump(client_conf['qoa_client'],f)
+    #
+    # qoa4ml_conf = utils.load_config("temp_conf.json")
+    # print(type(client_conf['qoa_client']))
+    # print(client_conf['qoa_client'])
     qoa_client = QoaClient(
-        config_dict=cconfig
+        config_dict=client_conf['qoa_client']
     )
 
     # qoa_client.observe_metric('post_train_performance', 0.9)
@@ -202,14 +229,14 @@ if __name__ == '__main__':
     # qoa_client.observe_inference_metric("accuracy", 1)
     # qoa_client.timer()
     # print(qoa_client.qoa_report.report)
-    for i in range(5):
-        print(qoa_client.report(report={'post_train_performance': 0.9,
-                                        'pre_train_performance': 0.91,
-                                        'pre_loss_value': 2,
-                                        'post_loss_value': 4,
-                                        'train_round': (i+1),
-                                        'train_duration': 34},submit=True))
-        time.sleep(5)
+    # for i in range(5):
+    #     print(qoa_client.report(report={'post_train_performance': 0.9,
+    #                                     'pre_train_performance': 0.91,
+    #                                     'pre_loss_value': 2,
+    #                                     'post_loss_value': 4,
+    #                                     'train_round': (i+1),
+    #                                     'train_duration': 34},submit=True))
+    #     time.sleep(5)
     # print(qoa_client.qoa_report.report)
 
     # print(amqp_connector)
@@ -218,7 +245,7 @@ if __name__ == '__main__':
     # for probe_config in qoa_client_config["probes"]:
     #     if probe_config["probe_type"] == "docker":
     #         probe_config["container_name"] = [container_name]
-    print(qoa_client)
+    # print(qoa_client)
     # client = QoaClient(config_dict=qoa_client)
     qoa_client.start_all_probes()
     while True:

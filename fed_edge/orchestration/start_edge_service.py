@@ -75,7 +75,7 @@ class EdgeOrchestrator(HostObject):
                             json.dump(req_msg['config'], f)
                         status = []
                         for config in req_msg["docker"]:
-                            r = self.start_container(config, req_msg["request_id"],file_config_name)
+                            r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
                                 # start monitor
                                 Thread(
@@ -323,39 +323,26 @@ async def check_docker_running(container_name: str):
 
 
 def container_monitor(amqp_connector: dict, container_name, request_id, client_conf):
-    client_info = ClientInfo(
-        name=client_conf['edge_id'],
-        instance_name=request_id
-    )
-
-    connector_config = ConnectorConfig(**amqp_connector)
-    logging.info(amqp_connector)
-    probes = {
-        "probe_type": "docker",
-        "frequency": client_conf['qoa_client']['probes']['frequency'],
-        "require_register": False,
-        "log_latency_flag": False,
-        "environment": "Edge",
-        "container_name": [container_name]
+    client_info = {
+        "name": client_conf['edge_id'],
+        "instance_name": request_id
     }
-    # for probe_config in client_conf['qoa_client']["probes"]:
-    #     # if probe_config["probe_type"] == "docker":
-    #     probe_config["container_name"] = [container_name]
-
-    # logging.info(client_conf['qoa_client']['probes'])
-    cconfig = ClientConfig(
-        client=client_info,
-        connector=[connector_config],
-        probes=[probes]
-    )
-
-    qoa_client = QoaClient(
-        config_dict=cconfig
-    )
+    client_conf['qoa_client_probes']['container_name'] = [container_name]
+    # probes = {
+    #     "probe_type": "docker",
+    #     "frequency": client_conf['qoa_client']['probes']['frequency'],
+    #     "require_register": False,
+    #     "log_latency_flag": False,
+    #     "environment": "Edge",
+    #     "container_name": [container_name]
+    # }
 
     # logging.info("monitoring: ", qoa_client)
-    client = QoaClient(config_dict=qoa_client)
-    client.start_all_probes()
+    QoaClient(config_dict={
+        "client": client_info,
+        "connector": [amqp_connector],
+        "probes": [client_conf['qoa_client_probes']]
+    }).start_all_probes()
 
 
 if __name__ == "__main__":
