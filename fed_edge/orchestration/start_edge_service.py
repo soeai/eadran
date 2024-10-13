@@ -327,12 +327,9 @@ async def check_docker_running(container_name: str):
         docker_client.close()
 
 
-def container_monitor(client_conf, request_id, container_name):
+def container_monitor(client_conf, request_id, container_name, frequency=10):
     BYTES_TO_MB = 1024.0 * 1024.0
-    # client_info = {
-    #     "name": client_conf['edge_id'],
-    #     "instance_name": request_id
-    # }
+
     client_info = {
         "name" : client_conf['edge_id'],
         "user_id" :client_conf['consumer_id'],
@@ -345,30 +342,18 @@ def container_monitor(client_conf, request_id, container_name):
         "run_id": str(client_conf['run_id']),
         "custom_info": ""
     }
-    # probes = client_conf['qoa_client_probes'].copy()
-    # probes['container_name'] = [container_name]
-    # probes = {
-    #     "probe_type": "docker",
-    #     "frequency": client_conf['qoa_client_probes']['frequency'],
-    #     "require_register": False,
-    #     "log_latency_flag": False,
-    #     "environment": "Edge",
-    #     "container_name": [container_name]
-    # }
 
     qoa4ml_conf = {
         "client": client_info,
         "connector": [client_conf["amqp_connector"]]
-        # "probes": [probes]
     }
 
-    logging.info("monitoring: ", qoa4ml_conf)
+    # logging.info("monitoring: ", qoa4ml_conf)
     qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
-    # qoa4ml_client.start_all_probes()
-    client = docker.from_env()  # Create a Docker client from environment variables
+    docker_client = docker.from_env()  # Create a Docker client from environment variables
     try:
-        container = client.containers.get(container_name)  # Get the container by name
-        print(f"Monitoring stats for container '{container_name}'...")
+        container = docker_client.containers.get(container_name)  # Get the container by name
+        logging.info(f"Monitoring stats for container '{container_name}'...")
 
         while True:
             if asyncio.run(check_docker_running(container_name)):
@@ -395,7 +380,8 @@ def container_monitor(client_conf, request_id, container_name):
                 qoa4ml_client.report(report={"resource_monitor": report},submit=True)
             else:
                 break
-            time.sleep(client_conf['qoa_client_probes']['frequency'])  # Wait before getting stats again
+            time.sleep(frequency)  # Wait before getting stats again
+
     except docker.errors.NotFound:
         print(f"Container '{container_name}' not found.")
     except KeyboardInterrupt:
@@ -403,32 +389,6 @@ def container_monitor(client_conf, request_id, container_name):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    # while True:
-    #     if not asyncio.run(check_docker_running(container_name)):
-    #         qoa4ml_client.stop_all_probes()
-    #     time.sleep(5)
-
-
-# def monitor_container_stats(container_name):
-#     client = docker.from_env()  # Create a Docker client from environment variables
-#
-#     try:
-#         container = client.containers.get(container_name)  # Get the container by name
-#         print(f"Monitoring stats for container '{container_name}'...")
-#
-#         while True:
-#             stats = container.stats(stream=False)  # Get stats once
-#             print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
-#             print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
-#             print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
-#             print(f"Network I/O: {stats['networks']}")
-#             time.sleep(10)  # Wait before getting stats again
-#     except docker.errors.NotFound:
-#         print(f"Container '{container_name}' not found.")
-#     except KeyboardInterrupt:
-#         print("Monitoring stopped.")
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
