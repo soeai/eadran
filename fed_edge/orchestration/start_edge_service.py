@@ -332,14 +332,14 @@ def container_monitor(
 
     connector_config = ConnectorConfig(**amqp_connector)
 
-    for probe_config in client_conf["probes"]:
+    for probe_config in client_conf['qoa_client']["probes"]:
         if probe_config["probe_type"] == "docker":
             probe_config["container_name"] = [container_name]
 
     cconfig = ClientConfig(
         client=client_info,
         connector=[connector_config],
-        probes=client_conf['probes']
+        probes=client_conf['qoa_client']['probes']
     )
 
     qoa_client = QoaClient(
