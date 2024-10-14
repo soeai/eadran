@@ -128,7 +128,6 @@ class FedServerOrchestrator(HostObject):
                     }
             elif req_msg['command'].lower() == Protocol.QOT_COLLECTOR_COMMAND:
                 Thread(target=self.start_qot_collector,
-                       args=(req_msg,),
                        name="qot_collector_subprocess").start()
 
             logging.info(f"Response: {response}")

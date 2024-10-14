@@ -7,6 +7,8 @@ import qoa4ml.utils.qoa_utils as utils
 import requests
 import time
 
+from cloud.commons.default import Protocol
+
 logging.basicConfig(
     filename='orchestrator.logs',  # The file where logs will be saved
     filemode='a',  # 'a' to append, 'w' to overwrite
@@ -110,6 +112,15 @@ class FedServerContainer(Generic):
                         while len(self.orchestrator.handling_edges[params["request_id"]]) > 0 and flag < 30:
                             time.sleep(10)
                             flag += 1
+
+                        # start qot collector
+                        command = {
+                            "edge_id": self.server_id,
+                            "request_id": params["request_id"],
+                            "command": Protocol.QOT_COLLECTOR_COMMAND
+                        }
+                        self.orchestrator.send(command)
+
                         break
                     else:
                         logging.info("Waiting 1 minute for starting Cloud Server...")
