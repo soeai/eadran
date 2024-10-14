@@ -253,6 +253,7 @@ class FedServerOrchestrator(HostObject):
                     "type": "service",
                     "request_id": request_id
                 }
+                logging.info("notify to service that the training process finished! {}".format(service_status))
                 # check how many container running
                 self.amqp_queue_out.send_report(json.dumps(service_status),
                                                 routing_key=self.config['amqp_health_report'])
