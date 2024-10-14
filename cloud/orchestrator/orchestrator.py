@@ -139,7 +139,7 @@ class Orchestrator(HostObject):
                 _, msg_task, requestor = self.processing_tasks.pop(req_msg["response_id"])
                 # CALL POST TO SERVICE HERE
                 r = requests.post(url=self.url_mgt_service + "/service/report",
-                                  json={"code": 0,"request_id": req_msg["response_id"]})
+                                  json={"code": 0, "request_id": req_msg["response_id"]})
                 logging.info("Respond request [{}] of [{}]: {}".format(req_msg["response_id"],
                                                                          requestor,
                                                                          r.status_code))

@@ -4,6 +4,8 @@
 import argparse
 import json
 import logging
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -26,12 +28,67 @@ logging.basicConfig(
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
+async def check_docker_running(container_name: str):
+    """Verify the status of a container by its name
+
+    :param container_name: the name of the container
+    :return: boolean or None
+    """
+    RUNNING = "running"
+    # Connect to Docker using the default socket or the configuration
+    # in your environment
+    docker_client = docker.from_env()
+
+    await asyncio.sleep(5)
+
+    try:
+        container = docker_client.containers.get(container_name)
+        container_state = container.attrs["State"]
+        return container_state["Status"] == RUNNING
+    except docker.errors.NotFound:
+        logging.info(f"Container '{container_name}' not found.")
+        return False
+    except docker.errors.APIError as e:
+        logging.info(f"Error communicating with Docker API: {e}")
+        return False
+    finally:
+        docker_client.close()
+
+
+async def container_exit_success(container_name: str):
+    """Verify the status of a container by its name
+
+    :param container_name: the name of the container
+    :return: boolean or None
+    """
+    RUNNING = "running"
+    # Connect to Docker using the default socket or the configuration
+    # in your environment
+    docker_client = docker.from_env()
+
+    await asyncio.sleep(1)
+
+    try:
+        container = docker_client.containers.get(container_name)
+        container_state = container.attrs["State"]
+        return container_state["Status"]['ExitCode'] == 0
+    except docker.errors.NotFound:
+        logging.info(f"Container '{container_name}' not found.")
+        return False
+    except docker.errors.APIError as e:
+        logging.info(f"Error communicating with Docker API: {e}")
+        return False
+    finally:
+        docker_client.close()
+
+
 class FedServerOrchestrator(HostObject):
     def __init__(self, config, ip=None):
         self.ip = ip
         self.config = utils.load_config(config)
         self.edge_id = self.config['edge_id']
         self.containers = []
+        self.processes = []
         self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
                                            self)
         self.amqp_queue_out = AmqpConnector(AMQPConnectorConfig(**self.config['amqp_out']['amqp_connector']['conf']))
@@ -44,11 +101,16 @@ class FedServerOrchestrator(HostObject):
         if req_msg['edge_id'] == self.edge_id or req_msg['edge_id'] == '*':
             logging.info("Received a request [{}] for [{}]".format(req_msg['request_id'], req_msg['command']))
             response = None
-            if req_msg['command'].lower() == 'docker':
+            if req_msg['command'].lower() == Protocol.DOCKER_COMMAND:
                 if req_msg['params'].lower() == 'start':
                     status = []
                     for config in req_msg["docker"]:
-                        status.append(self.start_container(config))
+                        r = self.start_container(config)
+                        if r == 0:
+                            Thread(target=self.report_container_status,
+                                   args=(config["options"]["--name"],
+                                         req_msg['request_id']))
+                        status.append(r)
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),
@@ -64,6 +126,10 @@ class FedServerOrchestrator(HostObject):
                         "status": int(sum(status)),
                         "detail": status
                     }
+            elif req_msg['command'].lower() == Protocol.QOT_COLLECTOR_COMMAND:
+                Thread(target=self.start_qot_collector,
+                       args=(req_msg,),
+                       name="qot_collector_subprocess").start()
 
             logging.info(f"Response: {response}")
 
@@ -155,6 +221,7 @@ class FedServerOrchestrator(HostObject):
 
         health_post = {
             "edge_id": self.edge_id,
+            "type": "edge",
             "ip": self.config['ip'] if self.ip is None else self.ip,
             "routing_key": self.config['amqp_in']['amqp_collector']['conf']['in_routing_key'],
             "health": {
@@ -173,32 +240,28 @@ class FedServerOrchestrator(HostObject):
             health_post['health']['mem'] = psutil.virtual_memory()[1]
             health_post['health']['cpu'] = psutil.cpu_count()
 
+    def start_qot_collector(self):
+        rep_msg = subprocess.Popen(
+            ["python3", "fed_server/qot_eval/rabbitmq2kafka.py","--proxy", self.config['ip']], start_new_session=True
+        )
+        self.processes.append(rep_msg.pid)
 
-async def check_docker_running(container_name: str):
-    """Verify the status of a container by its name
-
-    :param container_name: the name of the container
-    :return: boolean or None
-    """
-    RUNNING = "running"
-    # Connect to Docker using the default socket or the configuration
-    # in your environment
-    docker_client = docker.from_env()
-
-    await asyncio.sleep(5)
-
-    try:
-        container = docker_client.containers.get(container_name)
-        container_state = container.attrs["State"]
-        return container_state["Status"] == RUNNING
-    except docker.errors.NotFound:
-        logging.info(f"Container '{container_name}' not found.")
-        return False
-    except docker.errors.APIError as e:
-        logging.info(f"Error communicating with Docker API: {e}")
-        return False
-    finally:
-        docker_client.close()
+    def report_container_status(self, container_name, request_id):
+        while True:
+            if not asyncio.run(check_docker_running(container_name)):
+                service_status = {
+                    "code": int(not container_exit_success(container_name)),
+                    "type": "service",
+                    "request_id": request_id
+                }
+                # check how many container running
+                self.amqp_queue_out.send_report(json.dumps(service_status),
+                                                routing_key=self.config['amqp_health_report'])
+                if len(self.processes) > 0:
+                    os.killpg(os.getpgid(self.processes[0]), signal.SIGTERM)
+                break
+            else:
+                time.sleep(10)
 
 
 if __name__ == '__main__':

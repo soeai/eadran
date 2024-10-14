@@ -245,17 +245,34 @@ class ResourceHealthReport(HostObject):
             **_config["amqp_health_report"]['amqp_in']['amqp_collector']['conf'])
         self.amqp_collector = AmqpCollector(self.amqp_collector_config, self)
         Thread(target=self.start_amqp).start()
-        self.db = (
+
+        db_edge = (
             mongo_client.get_database(_config["health_log"]["db_name"])
             if _config["health_log"]["db_name"] in mongo_client.list_database_names()
             else mongo_client[_config["health_log"]["db_name"]]
         )
-        self.collection = self.db[_config["health_log"]["db_col"]]
+        self.collection_edge = db_edge[_config["health_log"]["db_col"]]
+
+        db_service = (
+            mongo_client.get_database(_config["service_log"]["db_name"])
+            if _config["service_log"]["db_name"]
+               in mongo_client.list_database_names()
+            else mongo_client[_config["service_log"]["db_name"]]
+        )
+        self.collection_service = db_service[_config["service_log"]["db_col"]]
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
-        req_msg["timestamp"] = time.time()
-        self.collection.insert_one(req_msg)
+        if req_msg['type'] == "edge":
+            req_msg.pop('type', None)
+            req_msg["timestamp"] = time.time()
+            self.collection_edge.insert_one(req_msg)
+        elif req_msg['type'] == "service":
+            req_msg.pop('type', None)
+            self.collection_service.find_one_and_update(
+                    {"request_id": req_msg["request_id"]},
+                    {"$set": {"status": "finished" if req_msg['code'] == 0 else "error", "finish_at": time.time()}}
+                )
 
     def start_amqp(self):
         self.amqp_collector.start_collecting()
@@ -718,21 +735,26 @@ class EADRANService(Resource):
                 if op == 'model':
                     result = list(
                         self.collection.find({"content.model_id": query[1]})
-                            .sort([("start_at", pymongo.DESCENDING)])
+                            .sort([("init_at", pymongo.DESCENDING)])
                     )
                 elif op == "edge":
                     result = list(
                         self.collection.find({"content.edge_id": query[1]})
-                            .sort([("start_at", pymongo.DESCENDING)])
+                            .sort([("init_at", pymongo.DESCENDING)])
+                    )
+                elif op == "status":
+                    result = list(
+                        self.collection.find({"request_id": query[1]})
+                            .sort([("init_at", pymongo.DESCENDING)])
                     )
                 if len(result) > 0:
                     for r in result:
                         r.pop("_id", None)
                     return {"code": 0, "result": result}
                 else:
-                    return {"code": 1, "message": "edge_id does not exist."}, 404
+                    return {"code": 1, "message": "*_id does not exist."}, 404
 
-            return {"code": 1, "message": "query string must provide (eid=?? or mid=??)."}, 404
+            return {"code": 1, "message": "query string must provide (id=?? or id=??)."}, 404
 
     def post(self, op):
         # ======================= MESSAGE RECEIVE FROM CLIENT
@@ -803,14 +825,17 @@ class EADRANService(Resource):
                 db_msg = orchestrator_command.copy()
                 db_msg.pop("type")
                 db_msg.pop("requester")
-                db_msg['status'] = "processing"
-                db_msg["start_at"] = time.time()
+                db_msg['status'] = "initializing"
+                db_msg["init_at"] = time.time()
                 self.collection.insert_one(db_msg)
-                return {"code": 0, "message": "starting", "request_id": request_id}
+                return {"code": 0,
+                        "message": "initializing",
+                        "request_id": request_id,
+                        "comment": "Get the status of the process /service/status?id=request_id"}
             elif op == 'report':
                 self.collection.find_one_and_update(
                     {"request_id": json_msg["request_id"]},
-                    {"$set": {"status": "finished" if json_msg['code'] == 0 else "error", "done_at": time.time()}}
+                    {"$set": {"status": "processing" if json_msg['code'] == 0 else "error", "start_at": time.time()}}
                 )
                 return {"code": 0, "message": "updated"}
         return {"code": 1, "message": "request must enclose a json object"}, 400

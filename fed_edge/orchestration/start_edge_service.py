@@ -35,6 +35,33 @@ logging.basicConfig(
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
+async def check_docker_running(container_name: str):
+    """Verify the status of a container by its name
+
+    :param container_name: the name of the container
+    :return: boolean or None
+    """
+    RUNNING = "running"
+    # Connect to Docker using the default socket or the configuration
+    # in your environment
+    docker_client = docker.from_env()
+
+    await asyncio.sleep(5)
+
+    try:
+        container = docker_client.containers.get(container_name)
+        container_state = container.attrs["State"]
+        return container_state["Status"] == RUNNING
+    except docker.errors.NotFound:
+        logging.info(f"Container '{container_name}' not found.")
+        return False
+    except docker.errors.APIError as e:
+        logging.info(f"Error communicating with Docker API: {e}")
+        return False
+    finally:
+        docker_client.close()
+
+
 class EdgeOrchestrator(HostObject):
     def __init__(
             self,
@@ -66,7 +93,7 @@ class EdgeOrchestrator(HostObject):
                 )
             )
 
-            if req_msg["command"].lower() == "docker":
+            if req_msg["command"].lower() == Protocol.DOCKER_COMMAND:
                 if req_msg["params"].lower() == "start":
                     if "config" in req_msg.keys():
                         file_config_name = "conf_temp/{}_config_{}.json".format(self.edge_id, req_msg["request_id"])
@@ -76,22 +103,15 @@ class EdgeOrchestrator(HostObject):
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
                             if r == 0:
-                                # Thread(target=container_monitor,args=(config["options"]["--name"],)).start()
-                                # # start monitor
-                                # # container_monitor(req_msg['config']["amqp_connector"],
-                                # #         config["options"]["--name"],
-                                # #         req_msg["request_id"],
-                                # #         self.config)
-                                t = Thread(
-                                    target=container_monitor,
+                                Thread(
+                                    target=self.container_monitor,
                                     args=(
                                         req_msg['config'],
                                         req_msg["request_id"],
                                         config["options"]["--name"]
                                     ),
-                                )
-                                t.start()
-                                # t.join()
+                                    name="monitor_edge_container_process"
+                                ).start()
                             status.append(r)
                         response = {
                             "edge_id": self.edge_id,
@@ -171,7 +191,7 @@ class EdgeOrchestrator(HostObject):
                         command.extend([k, v])
                 else:
                     command.append(k)
-            folder_path, fname = conf_file.split("/")
+            folder_path, filename = conf_file.split("/")
             folder_path = os.path.abspath(folder_path)
             mount_conf = "type=bind,source={},target={}".format(
                 folder_path, "/conf/"
@@ -184,7 +204,7 @@ class EdgeOrchestrator(HostObject):
                 command.extend(config["arguments"])
 
             command.append(request_id)  # will be attached in report model performance
-            command.append(fname)
+            command.append(filename)
 
             logging.info("Start container with command: {}".format(command))
 
@@ -279,6 +299,7 @@ class EdgeOrchestrator(HostObject):
 
         health_post = {
             "edge_id": self.edge_id,
+            "type": "edge",
             "routing_key": self.config["amqp_in"]["amqp_collector"]["conf"][
                 "in_routing_key"
             ],
@@ -299,96 +320,67 @@ class EdgeOrchestrator(HostObject):
             health_post["health"]["mem"] = psutil.virtual_memory()[1]
             health_post["health"]["cpu"] = psutil.cpu_count()
 
+    def container_monitor(self, client_conf, request_id, container_name):
+        BYTES_TO_MB = 1024.0 * 1024.0
 
-async def check_docker_running(container_name: str):
-    """Verify the status of a container by its name
+        client_info = {
+            "name" : client_conf['edge_id'],
+            "user_id" :client_conf['consumer_id'],
+            "username": "edge_container",
+            "instance_name": request_id,
+            "stage_id": "eadran:" + client_conf['edge_id'],
+            "functionality": client_conf['dataset_id'],
+            "application_name": client_conf['model_id'],
+            "role": 'eadran:mlm_resource',
+            "run_id": str(client_conf['run_id']),
+            "custom_info": ""
+        }
 
-    :param container_name: the name of the container
-    :return: boolean or None
-    """
-    RUNNING = "running"
-    # Connect to Docker using the default socket or the configuration
-    # in your environment
-    docker_client = docker.from_env()
+        qoa4ml_conf = {
+            "client": client_info,
+            "connector": [client_conf["amqp_connector"]]
+        }
 
-    await asyncio.sleep(5)
+        # logging.info("monitoring: ", qoa4ml_conf)
+        qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
+        docker_client = docker.from_env()  # Create a Docker client from environment variables
+        try:
+            container = docker_client.containers.get(container_name)  # Get the container by name
+            logging.info(f"Monitoring stats for container '{container_name}'...")
 
-    try:
-        container = docker_client.containers.get(container_name)
-        container_state = container.attrs["State"]
-        return container_state["Status"] == RUNNING
-    except docker.errors.NotFound:
-        logging.info(f"Container '{container_name}' not found.")
-        return False
-    except docker.errors.APIError as e:
-        logging.info(f"Error communicating with Docker API: {e}")
-        return False
-    finally:
-        docker_client.close()
+            while True:
+                if asyncio.run(check_docker_running(container_name)):
+                    stats = container.stats(stream=False)  # Get stats once
 
+                    usage_delta = (
+                            stats["cpu_stats"]["cpu_usage"]["total_usage"]
+                            - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+                    )
+                    system_delta = (
+                            stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
+                    )
+                    len_cpu = stats["cpu_stats"]["online_cpus"]
+                    cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
 
-def container_monitor(client_conf, request_id, container_name, frequency=10):
-    BYTES_TO_MB = 1024.0 * 1024.0
+                    report = {"cpu_percentage": cpu_percentage,
+                              "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB
+                              # "container_image": container.image
+                              }
+                    # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
+                    # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
+                    # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
+                    # print(f"Network I/O: {stats['networks']}")
+                    qoa4ml_client.report(report={"resource_monitor": report}, submit=True)
+                else:
+                    break
+                time.sleep(self.config['monitor_frequency'])  # Wait before getting stats again
 
-    client_info = {
-        "name" : client_conf['edge_id'],
-        "user_id" :client_conf['consumer_id'],
-        "username": "edge_container",
-        "instance_name": request_id,
-        "stage_id": "eadran:" + client_conf['edge_id'],
-        "functionality": client_conf['dataset_id'],
-        "application_name": client_conf['model_id'],
-        "role": 'eadran:mlm_resource',
-        "run_id": str(client_conf['run_id']),
-        "custom_info": ""
-    }
-
-    qoa4ml_conf = {
-        "client": client_info,
-        "connector": [client_conf["amqp_connector"]]
-    }
-
-    # logging.info("monitoring: ", qoa4ml_conf)
-    qoa4ml_client = QoaClient(config_dict=qoa4ml_conf)
-    docker_client = docker.from_env()  # Create a Docker client from environment variables
-    try:
-        container = docker_client.containers.get(container_name)  # Get the container by name
-        logging.info(f"Monitoring stats for container '{container_name}'...")
-
-        while True:
-            if asyncio.run(check_docker_running(container_name)):
-                stats = container.stats(stream=False)  # Get stats once
-
-                usage_delta = (
-                        stats["cpu_stats"]["cpu_usage"]["total_usage"]
-                        - stats["precpu_stats"]["cpu_usage"]["total_usage"]
-                )
-                system_delta = (
-                        stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
-                )
-                len_cpu = stats["cpu_stats"]["online_cpus"]
-                cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
-
-                report = {"cpu_percentage": cpu_percentage,
-                          "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB
-                          # "container_image": container.image
-                          }
-                # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
-                # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
-                # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
-                # print(f"Network I/O: {stats['networks']}")
-                qoa4ml_client.report(report={"resource_monitor": report},submit=True)
-            else:
-                break
-            time.sleep(frequency)  # Wait before getting stats again
-
-    except docker.errors.NotFound:
-        print(f"Container '{container_name}' not found.")
-    except KeyboardInterrupt:
-        print("Monitoring stopped.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
+        except docker.errors.NotFound:
+            print(f"Container '{container_name}' not found.")
+        except KeyboardInterrupt:
+            print("Monitoring stopped.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":

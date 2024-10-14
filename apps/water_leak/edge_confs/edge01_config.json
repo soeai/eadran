@@ -41,13 +41,6 @@
   },
   "amqp_health_report": "healthreport.edge01",
   "report_delay_time": 120,
-  "qoa_client_probes": {
-        "probe_type": "docker",
-        "frequency": 10,
-        "require_register": false,
-        "log_latency_flag": false,
-        "environment": "Edge",
-        "container_name": ""
-  }
+  "monitor_frequency": 10
 }
 

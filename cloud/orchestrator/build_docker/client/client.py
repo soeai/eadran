@@ -171,6 +171,6 @@ if __name__ == '__main__':
                                custom_module=mcs_custom_module,
                                x_train=X,
                                y_train=y,
-                               qoa_monitor=qoa_client)
+                               qoa_monitor=qoa_client).to_client()
 
-    fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
+    fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)
