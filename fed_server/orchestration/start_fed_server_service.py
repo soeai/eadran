@@ -240,10 +240,11 @@ class FedServerOrchestrator(HostObject):
             health_post['health']['cpu'] = psutil.cpu_count()
 
     def start_qot_collector(self):
-        rep_msg = subprocess.Popen(
-            ["python3", "fed_server/qot_eval/rabbitmq2kafka.py","--proxy", self.config['ip']], start_new_session=True
-        )
-        self.processes.append(rep_msg.pid)
+        pass
+        # rep_msg = subprocess.Popen(
+        #     ["python3", "fed_server/qot_eval/rabbitmq2kafka.py","--proxy", self.config['ip']], start_new_session=True
+        # )
+        # self.processes.append(rep_msg.pid)
 
     def report_container_status(self, container_name, request_id):
         while True:
