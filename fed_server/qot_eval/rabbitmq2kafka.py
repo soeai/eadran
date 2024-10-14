@@ -12,9 +12,9 @@ from qoa4ml.config.configs import AMQPCollectorConfig
 class MessageProxy(HostObject):
     def __init__(self, proxy_ip, topic):
         self.config = utils.load_config('fed_server/conf/queue2kafka.json')
-        self.config['amqp_connector']['conf'] = str(proxy_ip)
+        self.config['amqp_collector']['conf'] = str(proxy_ip)
         self.topic = topic
-        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_in']['amqp_collector']['conf']),
+        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_collector']['conf']),
                                            self)
         self.file = open("qot_result.log", "w")
         # self.producer = KafkaProducer(bootstrap_servers=self.config['kafka_connector']['bootstrap_servers'],

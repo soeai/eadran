@@ -1,5 +1,5 @@
 {
-    "amqp_connector":{
+    "amqp_collector":{
         "conf":{
             "end_point": "128.214.255.226",
             "exchange_name": "fml_model_report",
