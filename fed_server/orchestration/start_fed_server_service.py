@@ -109,7 +109,7 @@ class FedServerOrchestrator(HostObject):
                         if r == 0:
                             Thread(target=self.report_container_status,
                                    args=(config["options"]["--name"],
-                                         req_msg['request_id']))
+                                         req_msg['request_id'])).start()
                         status.append(r)
                     response = {
                         "edge_id": self.edge_id,
