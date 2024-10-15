@@ -29,27 +29,26 @@ object Util {
     import spark.implicits._
 
     val qom = new StructType()
-      .add($"train_performance_after".double)
-      .add($"train_performance_before".double)
-      .add($"loss_value_after".double)
-      .add($"loss_value_before".double)
-      .add($"test_performance_after".double)
-      .add($"test_performance_before".double)
-      .add($"duration".double)
+      .add($"report.quality_of_model.post_train_performance".double)
+      .add($"report.quality_of_model.pre_train_performance".double)
+      .add($"report.quality_of_model.pre_loss_value".double)
+      .add($"report.quality_of_model.post_loss_value".double)
+      .add($"report.quality_of_model.train_round".long)
+      .add($"report.quality_of_model.train_duration".double)
+      .add($"report.quality_of_model.test_performance".double)
+      .add($"report.quality_of_model.test_loss".double)
+      .add($"report.quality_of_model.evaluate_on_test".boolean)
 
     val resource = new StructType()
-      .add($"cpu".double)
-      .add($"memory".long)
-      .add($"gpu".double)
-      .add($"network".double)
-      .add($"storage".long)
+      .add($"report.resource_monitor.cpu_percentage".double)
+      .add($"report.resource_monitor.memory_usage".double)
 
     val message = new StructType()
-      .add($"model_id".string)
-      .add($"run_id".string)
-      .add($"dataset_id".string)
-      .add($"edge_id".string)
-      .add($"train_round".long)
+      .add($"metadata.name".string)  //edge_id
+      .add($"metadata.run_id".string)
+      .add($"metadata.functionality".string) //dataset_id
+      .add($"metadata.application_name".string) // model_id
+      .add($"train_round".long) //???
       .add($"timestamp".timestamp)
       .add("quality_of_model", qom)
       .add("resource_monitor", resource)

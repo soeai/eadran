@@ -124,6 +124,7 @@ object StreamProcessing {
       .select($"model_id".alias("model_id_"),
         $"dataset_id".alias("dataset_id_"),
         $"qom_function", $"resource_function",
+        $"resource_function", $"resource_function",
         $"cost_qod".cast("double").alias("cost_qod"),
         $"cost_context".cast("double").alias("cost_context"))
 
