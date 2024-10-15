@@ -833,11 +833,21 @@ class EADRANService(Resource):
                         "request_id": request_id,
                         "comment": "Get the status of the process /service/status?id=request_id"}
             elif op == 'report':
-                self.collection.find_one_and_update(
-                    {"request_id": json_msg["request_id"]},
-                    {"$set": {"status": "processing" if json_msg['code'] == 0 else "error", "start_at": time.time()}}
-                )
-                return {"code": 0, "message": "updated"}
+                if json_msg['type'] == "response":
+                    self.collection.find_one_and_update(
+                        {"request_id": json_msg["request_id"]},
+                        {"$set": {"status": "processing" if json_msg['code'] == 0 else "error", "start_at": time.time()}}
+                    )
+                    return {"code": 0, "message": "updated"}
+                elif json_msg['type'] == 'qod_report':
+                    self.collection.find_one_and_update(
+                        {"request_id": json_msg["request_id"]},
+                        {"$set": {
+                            "qod": json_msg['qod'],
+                            "status": "finished" if json_msg['code'] == 0 else "error",
+                            "finish_at": time.time()}}
+                    )
+                    return {"code": 0, "message": "updated"}
         return {"code": 1, "message": "request must enclose a json object"}, 400
 
 

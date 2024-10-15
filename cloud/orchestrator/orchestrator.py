@@ -41,7 +41,10 @@ def start_training_process(params, request_id, _orchestrator=None):
 
 def start_container_at_edge(params, request_id, _orchestrator=None):
     params["request_id"] = request_id
-    pipeline = Pipeline([Config4Edge(_orchestrator)], params)
+    pipeline = Pipeline(
+        task_list=[Config4Edge(_orchestrator),
+                   EdgeContainer(_orchestrator, config=_orchestrator.docker_image_conf)],
+        params=params)
     pipeline.exec()
 
 
@@ -139,10 +142,10 @@ class Orchestrator(HostObject):
                 _, msg_task, requestor = self.processing_tasks.pop(req_msg["response_id"])
                 # CALL POST TO SERVICE HERE
                 r = requests.post(url=self.url_mgt_service + "/service/report",
-                                  json={"code": 0, "request_id": req_msg["response_id"]})
+                                  json={"type": "response", "code": 0, "request_id": req_msg["response_id"]})
                 logging.info("Respond request [{}] of [{}]: {}".format(req_msg["response_id"],
-                                                                         requestor,
-                                                                         r.status_code))
+                                                                       requestor,
+                                                                       r.status_code))
                 # self.send({"code": 0,
                 #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
                 #            "request_id": req_msg["response_id"]},

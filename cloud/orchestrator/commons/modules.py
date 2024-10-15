@@ -368,7 +368,7 @@ class QoDContainer(Generic):
                         "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
                     },
                     "arguments": [
-                        self.orchestrator.url_storage_service
+                        # self.orchestrator.url_storage_service
                         # params["read_info"]["reader_module"]["storage_ref_id"],
                         # config_id
                     ],
@@ -376,11 +376,12 @@ class QoDContainer(Generic):
             ],
             "config": {
                 "data_conf": params['data_conf'],
-                "url_service": self.orchestrator.url_mgt_service
+                "mgt_service": self.orchestrator.url_mgt_service,
+                "storage_service": self.orchestrator.url_storage_service
             }
         }
-        if params["read_info"]["method"] == "local":
-            fullpath = params["read_info"]["location"]
+        if params['data_conf']["read_info"]["method"] == "local":
+            fullpath = params['data_conf']["read_info"]["location"]
             filename = fullpath.split("/")[-1]
             folder_path = fullpath[: fullpath.index(filename)]
             mount = "type=bind,source={},target={}".format(folder_path, "/data/")
