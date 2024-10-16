@@ -22,6 +22,7 @@ FROM tensorflow/tensorflow
 RUN mkdir -p /app
 RUN mkdir -p /data
 RUN mkdir -p /conf
+RUN mkdir -p /share_volume
 
 WORKDIR /app
 

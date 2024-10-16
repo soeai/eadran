@@ -79,8 +79,11 @@ class EdgeOrchestrator(HostObject):
         )
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
-        if not os.path.isdir("conf_temp"):
-            os.mkdir("conf_temp")
+
+        if not os.path.isdir("conf_{}".format(self.edge_id)):
+            os.mkdir("conf_{}".format(self.edge_id))
+        if not os.path.isdir("share_{}".format(self.edge_id)):
+            os.mkdir("share_{}".format(self.edge_id))
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
@@ -96,7 +99,7 @@ class EdgeOrchestrator(HostObject):
             if req_msg["command"].lower() == Protocol.DOCKER_COMMAND:
                 if req_msg["params"].lower() == "start":
                     if "config" in req_msg.keys():
-                        file_config_name = "conf_temp/{}_config_{}.json".format(self.edge_id, req_msg["request_id"])
+                        file_config_name = "conf_{}/{}_config_{}.json".format(self.edge_id, self.edge_id, req_msg["request_id"])
                         with open(file_config_name, 'w') as f:
                             json.dump(req_msg['config'], f)
                         status = []
@@ -197,6 +200,7 @@ class EdgeOrchestrator(HostObject):
                 folder_path, "/conf/"
             )
             command.extend(["--mount", mount_conf])
+            command.extend(["-v", os.path.abspath("share_{}".format(self.edge_id)) + ":/share_volume"])
 
             command.append(config["image"])
 
@@ -362,15 +366,21 @@ class EdgeOrchestrator(HostObject):
                     len_cpu = stats["cpu_stats"]["online_cpus"]
                     cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
 
-                    report = {"cpu_percentage": cpu_percentage,
-                              "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB
-                              # "container_image": container.image
-                              }
-                    # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
-                    # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
-                    # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
-                    # print(f"Network I/O: {stats['networks']}")
-                    qoa4ml_client.report(report={"resource_monitor": report}, submit=True)
+                    share_variables = None
+                    if os.path.exists("share_{}/{}.json".format(self.edge_id, self.edge_id)):
+                        with open("share_{}/{}.json".format(self.edge_id, self.edge_id)) as f:
+                            share_variables = json.load(f)
+
+                    if share_variables is not None and share_variables['status'] == 'start':
+                        report = {"cpu_percentage": cpu_percentage,
+                                  "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB,
+                                  "train_round": share_variables['train_round']
+                                  }
+                        qoa4ml_client.report(report={"resource_monitor": report}, submit=True)
+                        # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
+                        # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
+                        # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
+                        # print(f"Network I/O: {stats['networks']}")
                 else:
                     break
                 time.sleep(self.config['monitor_frequency'])  # Wait before getting stats again

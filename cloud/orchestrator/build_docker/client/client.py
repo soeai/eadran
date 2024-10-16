@@ -3,6 +3,7 @@ We assume that the data for training is available that can be accessed through a
 note that other tasks have been done to prepare such a data for the training task
 '''
 import argparse
+import json
 import time
 from urllib.request import urlretrieve
 import flwr as fl
@@ -66,6 +67,9 @@ class FedMarkClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):  # type: ignore
         start_time = time.time()
+        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+            json.dump({"train_round": config['fit_round'],
+                       "status": "start"}, f)
         # train
         self.model_set_weights(parameters)
         # get performance of first time
@@ -87,7 +91,11 @@ class FedMarkClient(fl.client.NumPyClient):
                       'evaluate_on_test': self.x_eval is not None,
                       'train_round': config['fit_round'],
                       'train_duration': np.round(self.total_time, 0)}
-            self.qoa_monitor.report(report={"quality_of_model": report},submit=True)
+            self.qoa_monitor.report(report={"quality_of_model": report}, submit=True)
+
+        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+            json.dump({"train_round": config['fit_round'],
+                       "status": "end"}, f)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
