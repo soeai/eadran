@@ -373,10 +373,10 @@ class EdgeOrchestrator(HostObject):
 
                     if share_variables is not None and share_variables['status'] == 'start':
                         report = {"cpu_percentage": cpu_percentage,
-                                  "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB,
-                                  "train_round": share_variables['train_round']
+                                  "memory_usage": stats["memory_stats"]["usage"] / BYTES_TO_MB
                                   }
-                        qoa4ml_client.report(report={"resource_monitor": report}, submit=True)
+                        qoa4ml_client.report(report={"train_round": share_variables['train_round'],
+                                                     "resource_monitor": report}, submit=True)
                         # print(f"CPU Percentage: {stats['cpu_stats']['cpu_usage']['total_usage']}")
                         # print(f"Memory Usage: {stats['memory_stats']['usage']} bytes")
                         # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")

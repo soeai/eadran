@@ -1,7 +1,7 @@
 import argparse
 import json
 from threading import Thread
-
+from datetime import datetime
 import qoa4ml.utils.qoa_utils as utils
 from kafka import KafkaProducer
 from qoa4ml.collector.amqp_collector import AmqpCollector
@@ -16,16 +16,17 @@ class MessageProxy(HostObject):
         self.topic = topic
         self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_collector']['conf']),
                                            self)
-        self.file = open("qot_result.log", "w")
-        # self.producer = KafkaProducer(bootstrap_servers=self.config['kafka_connector']['bootstrap_servers'],
-        #                  value_serializer=lambda m: json.dumps(m).encode('ascii'))
+        # self.file = open("qot_result.log", "w")
+        self.producer = KafkaProducer(bootstrap_servers=self.config['kafka_connector']['bootstrap_servers'],
+                         value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
         self.thread = Thread(target=self.start_receive)
 
     def message_processing(self, ch, method, props, body):
         mess = json.loads(str(body.decode("utf-8")).replace("'", '"'))
-        self.file.writelines(mess)
-        # self.producer.send(self.topic, mess)
+        mess['timestamp'] = datetime.fromtimestamp(mess['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+        # self.file.writelines(mess)
+        self.producer.send(self.topic, mess)
 
     def start_receive(self):
         self.amqp_queue_in.start_collecting()

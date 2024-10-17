@@ -89,9 +89,9 @@ class FedMarkClient(fl.client.NumPyClient):
                       'test_performance': self.test_performance,
                       'test_loss': self.test_loss,
                       'evaluate_on_test': self.x_eval is not None,
-                      'train_round': config['fit_round'],
                       'train_duration': np.round(self.total_time, 0)}
-            self.qoa_monitor.report(report={"quality_of_model": report}, submit=True)
+            self.qoa_monitor.report(report={'train_round': config['fit_round'],
+                                            "quality_of_model": report}, submit=True)
 
         with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
             json.dump({"train_round": config['fit_round'],

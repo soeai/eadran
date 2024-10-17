@@ -9,7 +9,7 @@
         }
     },
     "kafka_connector": {
-        "bootstrap_servers": "XYZ_TOBE_FILLED",
-        "topic": "fedmarketplace-spark"
+        "bootstrap_servers": "localhost:9092",
+        "topic": "eadran_water_leak"
     }
 }
