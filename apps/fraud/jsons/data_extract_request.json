@@ -1,0 +1,35 @@
+{
+    "edge_id": "edge02",
+    "model_id": "leak_case1",
+    "data_request":
+      {
+        "owner_id": "ttu_water_leak",
+        "dataset_id": "water_leak_02",
+        "__comment": "features required by the above-mentioned dataset for the above-mentioned provider",
+        "access_info": {
+          "type": "file",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/fraud_detection/fraudTrain_processed_SMOTE_1.csv",
+          "access_key": ""
+        },
+        "features": [],
+        "label": {
+          "name": "is_fraud",
+          "index": 4,
+          "dtype": "categorical"
+        },
+        "filters": {
+          "operator": "",
+          "constraints": [
+            {
+              "feature_name": "gender_",
+              "from": 1,
+              "to": "*"
+            }
+          ]
+        },
+        "sample_limit": {
+          "number": 10000,
+          "method": "random"
+        }
+      }
+}
