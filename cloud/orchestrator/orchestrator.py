@@ -103,11 +103,16 @@ class Orchestrator(HostObject):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
         msg_type = req_msg["type"]
         if msg_type == Protocol.MSG_REQUEST:
-            logging.info(
-                "Received a message from [{}] for [{}]".format(
-                    req_msg["requester"], req_msg["command"]
-                )
-            )
+            logging.info("Received a message from [{}] for [{}]".format(req_msg["requester"], req_msg["command"]))
+
+            # {
+            #     "type": Protocol.MSG_REQUEST,
+            #     "requester": Protocol.ACTOR_DATA_SERVICE,
+            #     "command": Protocol.DATA_QOD_COMMAND,
+            #     "request_id": request_id,
+            #     "content": json_msg,
+            # }
+
             request_id = req_msg['request_id']
             self.processing_tasks[request_id] = (time.time(), req_msg['content'], req_msg["requester"])
             if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
@@ -121,13 +126,11 @@ class Orchestrator(HostObject):
             elif req_msg["command"] == Protocol.DATA_QOD_COMMAND:
                 Thread(target=start_qod_container_at_edge, args=(req_msg["content"], request_id, self)).start()
 
-        # {'type': 'response',
-        #  'response_id': '54b8ed47-82e9-4e78-9efc-610728484dfa',
-        #  'responder': 'edge002',
-        #  'content':
-        #      {'edge_id': 'edge002',
-        #       'status': 0,
-        #       'detail': [0]}
+        # {
+        #     "type": Protocol.MSG_RESPONSE,
+        #     "response_id": req_msg['request_id'],
+        #     "responder": edge_id,
+        #     "content": response
         #  }
         elif msg_type == Protocol.MSG_RESPONSE:
             logging.info(
@@ -142,7 +145,10 @@ class Orchestrator(HostObject):
                 _, msg_task, requestor = self.processing_tasks.pop(req_msg["response_id"])
                 # CALL POST TO SERVICE HERE
                 r = requests.post(url=self.url_mgt_service + "/service/report",
-                                  json={"type": "response", "code": 0, "request_id": req_msg["response_id"]})
+                                  json={"type": "response",
+                                        "code": 0,
+                                        "request_id": req_msg["response_id"],
+                                        "result": req_msg['content']})
                 logging.info("Respond request [{}] of [{}]: {}".format(req_msg["response_id"],
                                                                        requestor,
                                                                        r.status_code))
@@ -150,23 +156,6 @@ class Orchestrator(HostObject):
                 #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
                 #            "request_id": req_msg["response_id"]},
                 #           requestor + ".#")
-
-                # if msg_task["command"] == Protocol.DATA_EXTRACTION_COMMAND:
-                #     # if consumer as to evaluate qod while sending a data query, DO IT
-                #     if msg_task["data_request"]["qod"]["evaluate"]:
-                #         # Build config for edge here from msg_task and res_msg (response from edge data extraction)
-                #         # send command to QoD Evaluation
-                #         resp_content = req_msg["content"]
-                #         params = {
-                #             "edge_id": msg_task["edge_id"],
-                #             "model_id": msg_task["model_id"],
-                #             "consumer_id": Protocol.ACTOR_ORCHESTRATOR,
-                #             "data_conf": resp_content["read_info"],
-                #         }
-                #
-                #         request_id = str(uuid.uuid4())
-                #         self.processing_tasks[request_id] = (time.time(), req_msg, )
-                #         Thread(target=start_qod_container_at_edge, args=(params, request_id, self)).start()
 
     def send(self, msg, routing_key=None):
         self.amqp_queue_out.send_report(json.dumps(msg), routing_key=routing_key)

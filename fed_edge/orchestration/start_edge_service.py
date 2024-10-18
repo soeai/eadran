@@ -148,7 +148,7 @@ class EdgeOrchestrator(HostObject):
                     "type": Protocol.MSG_RESPONSE,
                     "response_id": req_msg["request_id"],
                     "responder": self.edge_id,
-                    "content": response,
+                    "content": response
                 }
                 logging.info(f"Response message: {msg}")
                 self.amqp_queue_out.send_report(json.dumps(msg))

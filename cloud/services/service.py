@@ -836,7 +836,10 @@ class EADRANService(Resource):
                 if json_msg['type'] == "response":
                     self.collection.find_one_and_update(
                         {"request_id": json_msg["request_id"]},
-                        {"$set": {"status": "processing" if json_msg['code'] == 0 else "error", "start_at": time.time()}}
+                        {"$set": {
+                            "result": json_msg['result'],
+                            "status": "started" if json_msg['code'] == 0 else "error",
+                            "start_at": time.time()}}
                     )
                     return {"code": 0, "message": "updated"}
                 elif json_msg['type'] == 'qod_report':
