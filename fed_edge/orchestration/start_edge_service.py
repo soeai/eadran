@@ -105,7 +105,7 @@ class EdgeOrchestrator(HostObject):
                         status = []
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
-                            if r == 0:
+                            if r == 0 and req_msg['monitor']:
                                 Thread(
                                     target=self.container_monitor,
                                     args=(

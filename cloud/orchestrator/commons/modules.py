@@ -268,7 +268,8 @@ class EdgeContainer(Generic):
                         "arguments": [],
                     }
                 ],
-                "config": ""
+                "config": "",
+                "monitor": True
             }
 
             self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
@@ -374,7 +375,8 @@ class QoDContainer(Generic):
                         "data_conf": ds['read_info'],
                         "mgt_service": self.orchestrator.url_mgt_service,
                         "storage_service": self.orchestrator.url_storage_service
-                    }
+                    },
+                    "monitor": False
                 }
                 if ds["read_info"]["method"] == "local":
                     fullpath = ds["read_info"]["location"]
