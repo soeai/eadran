@@ -14,7 +14,7 @@
 ## the application crashes without emitting any logs due to buffering.
 #ENV PYTHONUNBUFFERED=1
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 #WORKDIR /app
 
