@@ -1,4 +1,4 @@
-qoa4ml==0.3.14
+qoa4ml==0.3.15
 pandas
 cleanlab
 imblearn
