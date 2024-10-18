@@ -28,7 +28,7 @@ WORKDIR /app
 COPY . .
 
 RUN apt update
-RUN apt install -y git wget make build-essential manpages-dev python3-pip
+RUN apt install -y git wget make build-essential manpages-dev python-pip
 
 RUN pip3 install --upgrade pip setuptools wheel
 
@@ -39,4 +39,4 @@ RUN chmod 755 ./start.sh
 # Run the application.
 ENTRYPOINT ["./start.sh"]
 
-CMD ["http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
+CMD ["sessionid", "config.json"]

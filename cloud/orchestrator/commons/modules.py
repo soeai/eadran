@@ -274,6 +274,10 @@ class EdgeContainer(Generic):
             self.orchestrator.handling_edges[params["request_id"]] = list(configs.keys())
 
             while True:
+                if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
+                    self.orchestrator.handling_edges.pop(params["request_id"])
+                    break
+
                 for edge_id in self.orchestrator.handling_edges[params["request_id"]]:
                     logging.info("Starting Edge [{}]: ".format(edge_id))
                     if self.is_edge_ready(edge_id):
@@ -284,20 +288,17 @@ class EdgeContainer(Generic):
                         # We now support only CPU tensorflow on Ubuntu for testing
                         # in next version, we analyse info from edge to get correspondent image
                         command["docker"][0]["image"] = self.get_image(params["platform"])
-                        command["docker"][0]["arguments"] = [
-                            self.orchestrator.url_storage_service,
-                            # configs[edge_id],
-                        ]
+                        command["docker"][0]["arguments"] = [self.orchestrator.url_storage_service]
                         command["docker"][0]["options"]["--name"] = container_name + "_" + edge_id
                         command['config'] = configs[edge_id]
 
-                        for d in params["datasets"]:
+                        for ds in params["datasets"]:
                             # if dataset on edge is local, we mount it into container
                             if (
-                                    d["edge_id"] == edge_id
-                                    and d["read_info"]["method"] == "local"
+                                    ds["edge_id"] == edge_id
+                                    and ds["read_info"]["method"] == "local"
                             ):
-                                fullpath = d["read_info"]["location"]
+                                fullpath = ds["read_info"]["location"]
                                 filename = fullpath.split("/")[-1]
                                 folder_path = fullpath[: fullpath.index(filename)]
                                 mount = "type=bind,source={},target={}".format(
@@ -311,10 +312,6 @@ class EdgeContainer(Generic):
                         logging.info("Sent command: {} to {}".format(command, edge_id))
                     else:
                         logging.info("waiting edge {} to be available...".format(edge_id))
-
-                if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
-                    self.orchestrator.handling_edges.pop(params["request_id"])
-                    break
 
                 # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
                 logging.info("Waiting to receive {} response(s) from edges".format(
@@ -351,51 +348,44 @@ class QoDContainer(Generic):
             return False
 
     def exec(self, params):
-        self.orchestrator.handling_edges[params["request_id"]] = [params["edge_id"]]
-        # config_id = upload_config(
-        #     params, params["consumer_id"], self.orchestrator.url_storage_service
-        #
-        # )
-        command = {
-            "edge_id": params["edge_id"],
-            "request_id": params["request_id"],
-            "command": "docker",
-            "params": "start",
-            "docker": [
-                {
-                    "image": self.orchestrator.config["eadran_qod_image_name"],
-                    "options": {
-                        "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
-                    },
-                    "arguments": [
-                        # self.orchestrator.url_storage_service
-                        # params["read_info"]["reader_module"]["storage_ref_id"],
-                        # config_id
-                    ],
-                }
-            ],
-            "config": {
-                "data_conf": params['data_conf'],
-                "mgt_service": self.orchestrator.url_mgt_service,
-                "storage_service": self.orchestrator.url_storage_service
-            }
-        }
-        if params['data_conf']["read_info"]["method"] == "local":
-            fullpath = params['data_conf']["read_info"]["location"]
-            filename = fullpath.split("/")[-1]
-            folder_path = fullpath[: fullpath.index(filename)]
-            mount = "type=bind,source={},target={}".format(folder_path, "/data/")
-            command["docker"][0]["options"]["--mount"] = mount
-
+        self.orchestrator.handling_edges[params["request_id"]] = [ds["edge_id"] for ds in params['datasets']]
         # send command to edge
         while True:
-            if self.is_edge_ready(params["edge_id"]):
-                self.send_command(command)
-                logging.info("Sent QoD evaluation command to edge.")
-
             if len(self.orchestrator.handling_edges[params["request_id"]]) == 0:
                 self.orchestrator.handling_edges.pop(params["request_id"])
                 break
+
+            for ds in params['datasets']:
+                command = {
+                    "edge_id": ds["edge_id"],
+                    "request_id": params["request_id"],
+                    "command": "docker",
+                    "params": "start",
+                    "docker": [
+                        {
+                            "image": self.orchestrator.config["eadran_qod_image_name"],
+                            "options": {
+                                "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
+                            },
+                            "arguments": [],
+                        }
+                    ],
+                    "config": {
+                        "data_conf": ds['read_info'],
+                        "mgt_service": self.orchestrator.url_mgt_service,
+                        "storage_service": self.orchestrator.url_storage_service
+                    }
+                }
+                if ds["read_info"]["method"] == "local":
+                    fullpath = ds["read_info"]["location"]
+                    filename = fullpath.split("/")[-1]
+                    folder_path = fullpath[: fullpath.index(filename)]
+                    mount = "type=bind,source={},target={}".format(folder_path, "/data/")
+                    command["docker"][0]["options"]["--mount"] = mount
+
+                if self.is_edge_ready(ds["edge_id"]):
+                    self.send_command(command)
+                    logging.info("Sent QoD evaluation command to edge {}.".format(ds["edge_id"]))
 
             # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
             logging.info("Waiting to receive {} response(s) from edges".format(

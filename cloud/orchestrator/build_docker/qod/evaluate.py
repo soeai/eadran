@@ -187,7 +187,7 @@ if __name__ == '__main__':
     client_conf = utils.load_config(args.conf)
     logging.info(client_conf)
 
-    url_service = client_conf['storage_service'] + "/storage/obj?id="
+    url_service = client_conf['storage_service'] + "/storage/obj?key="
 
     # download code of DPs to read data
     urlretrieve(url_service + client_conf['data_conf']['reader_module']['storage_ref_id'],
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
                                    client_conf['data_conf']['reader_module']["function_map"])
 
-    filename = client_conf['data_conf']['read_info']['location'].split('/')[-1]
+    filename = client_conf['data_conf']['location'].split('/')[-1]
     X, y = dps_read_data_module("/data/" + filename)
 
     qod_metrics = {"class_overlap": class_overlap(X,y),
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     r = requests.post(url=client_conf['mgt_service'] + "/service/report",
                       json={"type": "qod_report",
                             "code": 0,
-                            "request_id": client_conf["request_id"],
+                            "request_id": args.sessionid,
                             "qod": qod_metrics})
     logging.info("Post QoD request [{}] --result [{}]: status {}".format(args.sessionid,
                                                                          qod_metrics,
