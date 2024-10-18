@@ -372,6 +372,7 @@ class QoDContainer(Generic):
                         }
                     ],
                     "config": {
+                        "dataset_id": ds['dataset_id'],
                         "data_conf": ds['read_info'],
                         "mgt_service": self.orchestrator.url_mgt_service,
                         "storage_service": self.orchestrator.url_storage_service

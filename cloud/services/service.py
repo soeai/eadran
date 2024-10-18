@@ -842,10 +842,11 @@ class EADRANService(Resource):
                 elif json_msg['type'] == 'qod_report':
                     self.collection.find_one_and_update(
                         {"request_id": json_msg["request_id"]},
-                        {"$set": {
-                            "qod": json_msg['qod'],
-                            "status": "finished" if json_msg['code'] == 0 else "error",
-                            "finish_at": time.time()}}
+                        {"$push": {"qod": json_msg['qod']},
+                         "$set": {
+                             "status": "finished" if json_msg['code'] == 0 else "error",
+                             "finish_at": time.time()}
+                         }
                     )
                     return {"code": 0, "message": "updated"}
         return {"code": 1, "message": "request must enclose a json object"}, 400
