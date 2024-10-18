@@ -250,7 +250,7 @@ class FedServerOrchestrator(HostObject):
         while True:
             if not asyncio.run(check_docker_running(container_name)):
                 service_status = {
-                    "code": int(not container_exit_success(container_name)),
+                    "code": int(not asyncio.run(container_exit_success(container_name))),
                     "type": "service",
                     "request_id": request_id
                 }
