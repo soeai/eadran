@@ -1,7 +1,7 @@
 package org.eadran.utils
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StructField, _}
 
 import java.sql.Timestamp
 import java.time.{LocalDateTime, ZoneOffset}
@@ -28,31 +28,34 @@ object Util {
 
     import spark.implicits._
 
-    val qom = new StructType()
-      .add($"train_performance_after".double)
-      .add($"train_performance_before".double)
-      .add($"loss_value_after".double)
-      .add($"loss_value_before".double)
-      .add($"test_performance_after".double)
-      .add($"test_performance_before".double)
-      .add($"duration".double)
-
-    val resource = new StructType()
-      .add($"cpu".double)
-      .add($"memory".long)
-      .add($"gpu".double)
-      .add($"network".double)
-      .add($"storage".long)
-
-    val message = new StructType()
-      .add($"model_id".string)
-      .add($"run_id".string)
-      .add($"dataset_id".string)
-      .add($"edge_id".string)
-      .add($"train_round".long)
-      .add($"timestamp".timestamp)
-      .add("quality_of_model", qom)
-      .add("resource_monitor", resource)
+    val message = new StructType(Array(
+      StructField("metadata", StructType(Array(
+        StructField("name", StringType, true),
+        StructField("run_id", StringType, true),
+        StructField("functionality", StringType, true),
+        StructField("application_name", StringType, true)
+      ))),
+      StructField("timestamp", TimestampType, true),
+      StructField("report", StructType(Array(
+        StructField("train_round", IntegerType, true),
+        StructField("quality_of_model",StructType(Array(
+          StructField("post_train_performance", DoubleType, true),
+          StructField("pre_train_performance", DoubleType, true),
+          StructField("pre_loss_value", DoubleType, true),
+          StructField("post_loss_value", DoubleType, true),
+          StructField("train_duration", DoubleType, true),
+          StructField("test_performance", DoubleType, true),
+          StructField("test_loss", DoubleType, true)
+        )),true),
+        StructField("resource_monitor",StructType(Array(
+          StructField("cpu_percentage", DoubleType, true),
+          StructField("memory_usage", DoubleType, true),
+//          StructField("gpu", DoubleType, true),
+//          StructField("network", DoubleType, true),
+//          StructField("storage", DoubleType, true),
+        )),true)
+      ))),
+    ))
 
     message
   }

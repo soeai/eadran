@@ -1,33 +1,45 @@
+import argparse
 import json
-from qoa4ml.collector.amqp_collector import AmqpCollector
+from threading import Thread
+from datetime import datetime
+import qoa4ml.utils.qoa_utils as utils
 from kafka import KafkaProducer
-import logging
+from qoa4ml.collector.amqp_collector import AmqpCollector
+from qoa4ml.collector.host_object import HostObject
+from qoa4ml.config.configs import AMQPCollectorConfig
 
 
-class MessageProxy(object):
-    # Client can define any class as long as it has "message_processing" method
-    def __init__(self, kafka, topic):
-        # TO DO
-        self.kafka = kafka
+class MessageProxy(HostObject):
+    def __init__(self, proxy_ip, topic):
+        self.config = utils.load_config('fed_server/conf/queue2kafka.json')
+        self.config['amqp_collector']['conf']['end_point'] = str(proxy_ip)
         self.topic = topic
-        logging.info("Adaptor RabbitMQ_2_Kafka started ....")
-
-    def message_processing(self, ch, method, props, body):
-        # This is a call back function form Amqp_Collector
-        # Report processing here
-        # current processing is print to console
-        body = body.replace("\'", "\"")
-        mess = json.loads(str(body.decode("utf-8")))
-        # print(mess)
-        # current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        self.kafka.send(self.topic, mess)
-
-
-with open("../conf/queue2kafka.json") as f:
-    connector_conf = json.load(f)
-producer = KafkaProducer(bootstrap_servers=connector_conf['kafka_connector']['bootstrap_servers'],
+        self.amqp_queue_in = AmqpCollector(AMQPCollectorConfig(**self.config['amqp_collector']['conf']),
+                                           self)
+        # self.file = open("qot_result.log", "w")
+        self.producer = KafkaProducer(bootstrap_servers=self.config['kafka_connector']['bootstrap_servers'],
                          value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
-client = MessageProxy(producer, connector_conf['kafka_connector']['topic'])
-collector = AmqpCollector(connector_conf['amqp_connector']['conf'], host_object=client)
-collector.start()
+        self.thread = Thread(target=self.start_receive)
+
+    def message_processing(self, ch, method, props, body):
+        mess = json.loads(str(body.decode("utf-8")).replace("'", '"'))
+        mess['timestamp'] = datetime.fromtimestamp(mess['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+        # self.file.writelines(mess)
+        self.producer.send(self.topic, mess)
+
+    def start_receive(self):
+        self.amqp_queue_in.start_collecting()
+
+    def start(self):
+        self.thread.start()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Receive from edge")
+    parser.add_argument("--proxy", type=str)
+    parser.add_argument("--topic", type=str)
+    args = parser.parse_args()
+
+    proxy = MessageProxy(args.proxy, args.topic)
+    proxy.start()

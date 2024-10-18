@@ -8,7 +8,7 @@
 #FROM python:${PYTHON_VERSION}-slim as base
 #FROM tensorflow/serving:latest-devel as build_image
 #FROM tensorflow/tensorflow-cpu:latest      image doesnot exist
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 #FROM tensorflow/tensorflow
 # Prevents Python from writing pyc files.
 #ENV PYTHONDONTWRITEBYTECODE=1
@@ -21,6 +21,8 @@ FROM ubuntu:20.04
 
 RUN mkdir -p /app
 RUN mkdir -p /data
+RUN mkdir -p /conf
+RUN mkdir -p /share_volume
 
 WORKDIR /app
 
@@ -39,4 +41,4 @@ RUN chmod 755 ./start.sh
 # Run the application.
 ENTRYPOINT ["./start.sh"]
 
-CMD ["http://192.168.10.234:8081", "661e92b7d3341cbe6ff0fb42"]
+CMD ["sessionid", "config.json"]

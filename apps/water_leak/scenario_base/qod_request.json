@@ -1,0 +1,18 @@
+{
+  "consumer_id": "",
+  "model_id": "",
+  "extracted_id": "",
+  "schema": "http://xxx.eadran.com/qod/v1",
+  "data_conf": {
+    "read_info": {
+      "method": "local",
+      "location": "",
+      "access_key": ""
+    },
+    "reader_module": {
+      "storage_ref_id": "",
+      "module_name": "",
+      "function_map": ""
+    }
+  }
+}

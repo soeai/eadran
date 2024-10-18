@@ -45,7 +45,35 @@
         "end_point":"128.214.255.226",
         "exchange_name": "fml_model_report",
         "exchange_type": "topic",
-        "out_routing_key": "receiver.edge03"
+        "out_routing_key": "service.edge03",
+        "health_check_disable": true
       }
-    }
+    },
+  "qoa_client": {
+    "client": {
+      "username": "edge_orchestration",
+      "instance_name": "hjkafhakfakfhaflalflflalj"
+    },
+    "connector": [
+      {
+        "name": "amqp_connector",
+        "connector_class": "AMQP",
+        "config": {
+          "end_point": "128.214.255.226",
+          "exchange_name": "fml_model_report",
+          "exchange_type": "topic",
+          "out_routing_key": "service.edge02",
+          "health_check_disable": true
+        }
+      }
+    ],
+    "probes": [{
+        "probe_type": "docker",
+        "frequency": 60,
+        "require_register": false,
+        "log_latency_flag": false,
+        "environment": "Edge",
+        "container_name": ["rabbitmq"]
+      }]
+  }
 }

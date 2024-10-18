@@ -3,12 +3,13 @@ We assume that the data for training is available that can be accessed through a
 note that other tasks have been done to prepare such a data for the training task
 '''
 import argparse
+import json
 import time
 from urllib.request import urlretrieve
 import flwr as fl
 import qoa4ml.utils.qoa_utils as utils
 from qoa4ml.qoa_client import QoaClient
-from qoa4ml.config.configs import ClientInfo, ClientConfig
+from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
 import numpy as np
 # from qoa4ml.reports.rohe_reports import RoheReport
 # from qoa4ml.config.configs import MetricConfig
@@ -66,11 +67,14 @@ class FedMarkClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):  # type: ignore
         start_time = time.time()
+        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+            json.dump({"train_round": config['fit_round'],
+                       "status": "start"}, f)
         # train
         self.model_set_weights(parameters)
         # get performance of first time
-        if self.pre_train_performance == 0:
-            self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
+        # if self.pre_train_performance == 0:
+        self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
         self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
 
         weight = self.model_get_weights()
@@ -82,9 +86,16 @@ class FedMarkClient(fl.client.NumPyClient):
                       'pre_train_performance': self.pre_train_performance,
                       'pre_loss_value': self.pre_train_loss,
                       'post_loss_value': self.post_train_loss,
-                      'train_round': config['fit_round'],
+                      'test_performance': self.test_performance,
+                      'test_loss': self.test_loss,
+                      'evaluate_on_test': self.x_eval is not None,
                       'train_duration': np.round(self.total_time, 0)}
-            self.qoa_monitor.report(report=report,submit=True)
+            self.qoa_monitor.report(report={'train_round': config['fit_round'],
+                                            "quality_of_model": report}, submit=True)
+
+        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+            json.dump({"train_round": config['fit_round'],
+                       "status": "end"}, f)
 
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
@@ -104,14 +115,14 @@ class FedMarkClient(fl.client.NumPyClient):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Client Federated Learning")
-    parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
-    parser.add_argument('--conf', help='Client config file', default="./conf/client.json")
+    parser.add_argument('--service', help='http://ip:port of storage service')
     parser.add_argument('--sessionid', help='The request Id from orchestrator')
+    parser.add_argument('--conf', help='Client config file')
 
     args = parser.parse_args()
 
-    url_service = args.service + "/storage/obj?id="
-    client_conf = utils.load_config(args.conf)
+    url_service = args.service + "/storage/obj?key="
+    client_conf = utils.load_config("/conf/" + args.conf)
 
     print(client_conf)
 
@@ -144,14 +155,20 @@ if __name__ == '__main__':
         stage_id="eadran:" + client_conf['edge_id'],
         functionality=client_conf['dataset_id'],
         application_name=client_conf['model_id'],
-        role='eadran:edge',
+        role='eadran:mlm_performance',
         run_id=str(client_conf['run_id']),
         custom_info=""
     )
 
+    connector_config = ConnectorConfig(
+        name=client_conf['amqp_connector']['name'],
+        connector_class=client_conf['amqp_connector']['connector_class'],
+        config=AMQPConnectorConfig(**client_conf['amqp_connector']['config'])
+    )
+
     cconfig = ClientConfig(
         client=client_info,
-        connector=client_conf['amqp_connector']
+        connector=[connector_config]
         )
 
     qoa_client = QoaClient(
@@ -162,6 +179,6 @@ if __name__ == '__main__':
                                custom_module=mcs_custom_module,
                                x_train=X,
                                y_train=y,
-                               qoa_monitor=qoa_client)
+                               qoa_monitor=qoa_client).to_client()
 
-    fl.client.start_numpy_client(server_address=client_conf['fed_server'], client=fed_client)
+    fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)

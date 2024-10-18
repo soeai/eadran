@@ -1,0 +1,10 @@
+pymongo
+minio
+qoa4ml==0.3.15
+flask_restful
+flask
+flask_cors
+werkzeug
+jwt
+docker
+kafka-python

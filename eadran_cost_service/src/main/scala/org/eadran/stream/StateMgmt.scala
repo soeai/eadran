@@ -11,7 +11,7 @@ class StateMgmt() extends Serializable {
 
   //    log.info("spot interval set to " + interval)
 
-  def computeCost( keyId: (String, String, String, Long),
+  def computeCost( keyId: (String, String, String, Int),
                    inputs:    Iterator[Message],
                    oldState:  GroupState[CostState]): CostState = {
 
@@ -56,19 +56,24 @@ class StateMgmt() extends Serializable {
 
         //          store duration in miliseconds
         state.resourceDuration += (input.timestamp.getTime - state.timestamp.getTime)
-        state.maxCpu = state.maxCpu > input.resource_monitor.cpu ? state.maxCpu : input.resource_monitor.cpu
-        state.maxMemory = state.maxMemory > input.resource_monitor.memory? state.maxMemory: input.resource_monitor.memory
+        if (input.resource_monitor != null) {
+          if (state.maxCpu < input.resource_monitor.cpu_percentage) {
+            state.maxCpu = input.resource_monitor.cpu_percentage
+          }
+          if (state.maxMemory < input.resource_monitor.memory_usage) {
+            state.maxMemory = input.resource_monitor.memory_usage
+          }
+          //        compute memory by Mb
+          val eval_resource = input.resource_function
+            .replace("$cpu_percentage", state.maxCpu.toString)
+            .replace("$memory_usage", (state.maxMemory / 1024 / 1024).toString)
+            //          .replace("$gpu",input.resource_monitor.gpu.toString)
+            //          .replace("$network",input.resource_monitor.network.toString)
+            //          .replace("$storage",input.resource_monitor.storage.toString)
+            .replace("$train_duration", (state.resourceDuration / 60000 / 60).toString) // convert duration to hour
 
-//        compute memory by Mb
-        val eval_resource = input.resource_function
-          .replace("$cpu",state.maxCpu.toString)
-          .replace("$memory",(state.maxMemory/1024/1024).toString)
-          .replace("$gpu",input.resource_monitor.gpu.toString)
-          .replace("$network",input.resource_monitor.network.toString)
-          .replace("$storage",input.resource_monitor.storage.toString)
-          .replace("$duration",(state.resourceDuration/60000/60).toString)  // convert duration to hour
-
-        state.costResource = Util.eval(eval_resource)
+          state.costResource = Util.eval(eval_resource)
+        }
 
         if (state.costQoD == 0.0){
           state.costQoD = input.cost_qod
@@ -88,17 +93,17 @@ class StateMgmt() extends Serializable {
 
         if (input.quality_of_model != null) {
           val eval_qom = input.qom_function
-            .replace("$train_performance_after",input.quality_of_model.train_performance_after.toString)
-            .replace("$train_performance_before", input.quality_of_model.train_performance_before.toString)
-            .replace("$test_performance_after",input.quality_of_model.test_performance_after.toString)
-            .replace("$test_performance_before",input.quality_of_model.test_performance_before.toString)
-            .replace("$loss_value_after",input.quality_of_model.loss_value_after.toString)
-            .replace("$loss_value_before",input.quality_of_model.loss_value_before.toString)
-            .replace("$duration",input.quality_of_model.duration.toString)
+            .replace("$post_train_performance",input.quality_of_model.post_train_performance.toString)
+            .replace("$pre_train_performance", input.quality_of_model.pre_train_performance.toString)
+            .replace("$test_performance",input.quality_of_model.test_performance.toString)
+            .replace("$test_loss",input.quality_of_model.test_loss.toString)
+            .replace("$post_loss_value",input.quality_of_model.post_loss_value.toString)
+            .replace("$pre_loss_value",input.quality_of_model.pre_loss_value.toString)
+            .replace("$train_duration",input.quality_of_model.train_duration.toString)
 
           state.costQoM =  Util.eval(eval_qom)
-          state.improvementDiff = input.quality_of_model.train_performance_after - input.quality_of_model.train_performance_before
-          state.performancePost = input.quality_of_model.train_performance_after
+          state.improvementDiff = input.quality_of_model.post_train_performance - input.quality_of_model.pre_train_performance
+          state.performancePost = input.quality_of_model.post_train_performance
           state.done = true
         }
         oldState.update(state)

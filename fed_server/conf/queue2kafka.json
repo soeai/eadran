@@ -1,15 +1,15 @@
 {
-    "amqp_connector":{
+    "amqp_collector":{
         "conf":{
-            "end_point": "XYZ_TOBE_FILLED",
-            "exchange_name": "fedmarketplace",
+            "end_point": "128.214.255.226",
+            "exchange_name": "fml_model_report",
             "exchange_type": "topic",
-            "in_routing_key": "fmml.client.report",
-            "in_queue": "frauddetection"
+            "in_queue": "service.queue",
+            "in_routing_key": "service.#"
         }
     },
     "kafka_connector": {
-        "bootstrap_servers": "XYZ_TOBE_FILLED",
-        "topic": "fedmarketplace-spark"
+        "bootstrap_servers": "localhost:9092",
+        "topic": "eadran_water_leak"
     }
 }

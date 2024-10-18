@@ -21,7 +21,8 @@ FROM tensorflow/tensorflow
 
 RUN mkdir -p /app
 RUN mkdir -p /data
-RUN mkdir -p /app/conf
+RUN mkdir -p /conf
+RUN mkdir -p /share_volume
 
 WORKDIR /app
 
@@ -31,15 +32,15 @@ COPY . .
 RUN apt update
 RUN apt install -y git wget make build-essential manpages-dev python-pip
 
-RUN pip3 install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip setuptools wheel
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chmod 755 ./start.sh
 
 # Run the application.
-#ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["./start.sh"]
 
 # ENTRYPOINT ["tail", "-f", "/dev/null"]  # DEUBUG MODE
 
-ENTRYPOINT ["./start.sh", "storage_service", "config_file_id", "session_id"]
+CMD ["storage_service", "session_id", "config_file"]

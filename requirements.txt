@@ -1,8 +1,0 @@
-pymongo
-minio
-qoa4ml==0.3.10
-flask_restful
-flask
-flask_cors
-werkzeug
-jwt

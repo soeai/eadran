@@ -69,18 +69,18 @@ class StorageService(Resource):
         if len(req_args) > 0:
             # get param from args here
             query = req_args[0].split("=")
-            if query[0] == 'id':
-                storage_id = query[1]
+            if query[0] == 'key':
+                key = query[1]
                 # check if it exists in database
-                result = list(self.collection.find({"_id": ObjectId(storage_id)}))
+                result = list(self.collection.find({"key": key}))
                 if len(result) < 0:
-                    return jsonify({"message": "The \'{}\' object is not managed!".format(storage_id)}), 404
+                    return jsonify({"message": "The object key [{}] is not managed!".format(key)}), 404
 
-                return Response(self.storage.get(storage_id),
+                return Response(self.storage.get(key),
                                 mimetype=result[0]['mimetype'],
                                 headers={"Content-Disposition":
                                              "attachment;filename={}".format(result[0]['filename'])})
-        return {"message": "missing query: id=???"}, 404
+        return {"message": "missing query: key=???"}, 404
 
     def post(self):
         req_params = post_parser.parse_args()
@@ -88,33 +88,36 @@ class StorageService(Resource):
         if file:
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            key = req_params.key if req_params.key is not None else req_params.user + "_" + \
+                                                                    now.strftime("%d%m%Y%H%M%S") + "_" +\
+                                                                    secure_filename(file.filename)
             msg = {"filename": secure_filename(file.filename),
                    "mimetype": file.mimetype,
                    "owner": req_params.user,
+                   "key": key,
                    "create_at": dt_string}
             # put info into database
             storage_id = str(self.collection.insert_one(msg).inserted_id)
             # put file to storage
             data = file.stream.read()
-            self.storage.put(storage_id, data)
+            self.storage.put(key, data)
 
-            return {'storage_id': storage_id}
+            return {'storage_id': storage_id, "key": key}
 
     def delete(self):
         req_args = request.query_string.decode("utf-8").split("&")
         if len(req_args) > 0:
             # get param from args here
             query = req_args[0].split("=")
-            if query[0] == 'id':
-                storage_id = query[1]
+            if query[0] == 'key':
+                key = query[1]
 
-                if len(self.collection.find_one_and_delete({"_id": ObjectId(storage_id)})) < 0:
-                    return jsonify({"status": False}), 401
+                if len(self.collection.find_one_and_delete({"key": key})) < 0:
+                    return jsonify({"code": 1}), 401
 
-                self.storage.delete(storage_id)
-                return jsonify({'status': True})
-
-        return jsonify({"message": "missing query: id=???"}), 404
+                self.storage.delete(key)
+                return jsonify({'code': 0})
+        return jsonify({"message": "missing query: key=???"}), 404
 
 
 class StorageInfo(Resource):
@@ -130,7 +133,7 @@ class StorageInfo(Resource):
         if len(req_args) > 0:
             # get param from args here
             query = req_args[0].split("=")
-            if query[0] == 'id':
+            if query[0] == 'user':
                 user_id = query[1]
                 # check if it exists in database
                 result = list(self.collection.find({"owner": user_id}))
@@ -142,7 +145,7 @@ class StorageInfo(Resource):
 
                 return jsonify({"objects": result})
 
-        return jsonify({"message": "missing query: id=???"}), 404
+        return jsonify({"message": "missing query: user=???"}), 404
 
     # utility function
     def obj2string(obj):
@@ -158,6 +161,7 @@ if __name__ == '__main__':
     # parser.add_argument('data', type=list, location='json')
     post_parser.add_argument('file', type=werkzeug.datastructures.FileStorage, required=True, location='files')
     post_parser.add_argument('user', type=str, required=True, location='form')
+    post_parser.add_argument('key', type=str, location='form')
 
     parser = argparse.ArgumentParser(description="Argument for Storage Service")
     parser.add_argument('--conf', help='configuration file', default="./conf/storage_config.json")

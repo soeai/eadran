@@ -109,7 +109,12 @@ object StreamProcessing {
       .load()
       .selectExpr( /**"timestamp",**/ "CAST(key AS STRING)", "CAST(value AS STRING)")
       .select(from_json($"value", schema).alias("json"))
-      .select("json.*")
+      .select("json.metadata.name",
+        "json.metadata.run_id",
+        "json.metadata.functionality",
+        "json.metadata.application_name",
+        "json.timestamp",
+        "json.report.*")
 
 //    eventsStream.writeStream
 //      .trigger(Trigger.ProcessingTime("10 seconds"))
@@ -118,12 +123,13 @@ object StreamProcessing {
 //      .outputMode("update")
 //      .start()
 
-//    val staticStream = spark.sqlContext.read.option("header",true).csv(staticFile)
+    val staticStream = spark.sqlContext.read.option("header",true).csv(json_url)
 //    val staticStream = spark.sqlContext.read.option("header", true).csv("file://" + SparkFiles.get(csv_file))
-      val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
-      .select($"model_id".alias("model_id_"),
-        $"dataset_id".alias("dataset_id_"),
+//      val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
+      .select($"model_id".alias("model_id"),
+        $"data_source_id".alias("dataset_id"),
         $"qom_function", $"resource_function",
+        $"resource_function", $"resource_function",
         $"cost_qod".cast("double").alias("cost_qod"),
         $"cost_context".cast("double").alias("cost_context"))
 
@@ -135,12 +141,20 @@ object StreamProcessing {
     //        .load()
 
     //      join two streams
-    val joinStream = eventsStream.join(staticStream, eventsStream("model_id")===staticStream("model_id_") &&
-      eventsStream("dataset_id")===staticStream("dataset_id_"), "inner")
-      .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"edge_id",$"train_round",
+    val joinStream = eventsStream.join(staticStream, eventsStream("application_name")===staticStream("model_id") &&
+      eventsStream("functionality")===staticStream("dataset_id"), "inner")
+      .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"name".alias("edge_id"),$"train_round",
         $"quality_of_model",$"resource_monitor",$"qom_function", $"resource_function",$"cost_qod",$"cost_context"
       ).as[Message]
 
+//    joinStream.writeStream
+//      .trigger(Trigger.ProcessingTime("10 seconds"))
+//      .format("console")
+//      .option("checkpointLocation", checkpoint)
+//      .outputMode("update")
+//      .start()
+
+//
     val finalStream = joinStream
       .groupByKey(x => (x.model_id, x.run_id, x.dataset_id, x.train_round))
       .mapGroupsWithState(GroupStateTimeout.ProcessingTimeTimeout())(stateMgmt.computeCost)

@@ -6,8 +6,8 @@
         "end_point": "128.214.255.226",
         "exchange_name": "fml_model_report",
         "exchange_type": "topic",
-        "in_queue": "receiver.queue",
-        "in_routing_key": "receiver.#"
+        "in_queue": "service.queue",
+        "in_routing_key": "service.#"
       }
     }
   }

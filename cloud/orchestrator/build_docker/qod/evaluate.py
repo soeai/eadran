@@ -9,10 +9,14 @@ from urllib.request import urlretrieve
 import numpy as np
 import pandas as pd
 import qoa4ml.utils.qoa_utils as utils
+import requests
 from cleanlab.filter import find_label_issues
 from imblearn.under_sampling import TomekLinks
 from sklearn.ensemble import RandomForestClassifier
 
+logging.basicConfig(level=logging.INFO)
+
+# from imblearn.over_sampling import SMOTE
 
 # def tomek_links(X,y):
 #     tomek_links = []
@@ -176,26 +180,19 @@ def label_purity(X, y):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="QoD Evaluation Plugin")
-    parser.add_argument('--service', help='http://ip:port of storage service', default='http://127.0.0.1:8081')
-    parser.add_argument('--conf', help='Client config file', default="./conf/qod.json")
-    # parser.add_argument('--connector', help='Connector config file', default="./conf/connector.json")
-    # parser.add_argument('--metric', help='Connector config file', default="./conf/metrics.json")
+    parser.add_argument('--sessionid', help='The request Id from orchestrator')
+    parser.add_argument('--conf', help='Client config file')
     args = parser.parse_args()
-    # print(args.)
-    # print(args.conf)
-    url_service = args.service + "/storage/obj?id="
-    client_conf = utils.load_config(args.conf)
 
-    print(client_conf)
+    client_conf = utils.load_config("/conf/" + args.conf)
+    logging.info(client_conf)
+
+    url_service = client_conf['storage_service'] + "/storage/obj?key="
 
     # download code of DPs to read data
     urlretrieve(url_service + client_conf['data_conf']['reader_module']['storage_ref_id'],
                 client_conf['data_conf']['reader_module']['module_name'] + ".py")
 
-    # import custom code of market consumer
-    # dps_custom_reader_module = __import__(client_conf['model_conf']['module_name'])
-
-    # logging.info("Load data reader module successfully -->: " + str(dps_custom_reader_module))
     # import code of data provider to read data
     dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
                                    client_conf['data_conf']['reader_module']["function_map"])
@@ -211,5 +208,15 @@ if __name__ == '__main__':
                    "completeness": completeness(X)}
 
     # report this metric to data service
-    print(qod_metrics)
-
+    r = requests.post(url=client_conf['mgt_service'] + "/service/report",
+                      json={"type": "qod_report",
+                            "code": 0,
+                            "request_id": args.sessionid,
+                            "qod": {"dataset_id": client_conf['dataset_id'],
+                                    "metric": qod_metrics
+                                    }
+                            }
+                      )
+    logging.info("Post QoD request [{}] --result [{}]: status {}".format(args.sessionid,
+                                                                         qod_metrics,
+                                                                         r.status_code))

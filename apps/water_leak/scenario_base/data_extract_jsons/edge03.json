@@ -1,0 +1,39 @@
+{
+    "edge_id": "edge03",
+    "model_id": "leak_case1",
+    "data_request":
+      {
+        "owner_id": "ttu_water_leak",
+        "dataset_id": "water_leak_03",
+        "__comment": "access key is saved in .env of local edge.",
+        "access_info": {
+          "type": "file",
+          "location": "data_samples/fraudTrain_processed_SMOTE_1.csv",
+          "access_key": "env"
+        },
+        "features": [],
+        "label": {
+          "name": "is_fraud",
+          "index": 4,
+          "dtype": "categorical"
+        },
+        "filters": {
+          "operator": "",
+          "constraints": [
+            {
+              "feature_name": "gender_",
+              "from": 1,
+              "to": "*"
+            }
+          ]
+        },
+        "sample_limit": {
+          "number": 1000,
+          "method": "random"
+        },
+        "qod": {
+          "evaluate": false,
+          "schema": "http://eadran.github.com/v1"
+        }
+      }
+}

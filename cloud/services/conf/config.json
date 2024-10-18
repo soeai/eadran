@@ -12,6 +12,10 @@
         "db_name": "db_health_log",
         "db_col": "col_health_log"
     },
+    "service_log":{
+        "db_name": "db_service_log",
+        "db_col": "col_service_log"
+    },
     "model_management":{
         "db_name": "db_model_management",
         "db_col": "col_model_management"
@@ -46,7 +50,8 @@
                     "end_point": "128.214.254.113",
                     "exchange_name": "fedmarketplace",
                     "exchange_type": "topic",
-                    "out_routing_key": "orchestrator.service"
+                    "out_routing_key": "orchestrator.service",
+                    "health_check_disable": true
                 }
             }
         }

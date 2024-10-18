@@ -19,25 +19,25 @@
         "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "orchestrator.edge01"
+        "out_routing_key": "orchestrator.edge01",
+        "health_check_disable": true
       }
     }
   },
-  "data": {
-    "owner_id": "dp001",
-    "dataset_id": "leak-base-case",
-    "dest_path": "../../data_samples",
+  "extracted_data_conf": {
+    "owner_id": "ttu_water_leak",
+    "dataset_id": "water_leak_01",
+    "dest_path": "apps/water_leak/extracted_data",
     "method": "local",
     "reader_module": {
       "storage_ref_id": "storage id of module",
       "module_name": "data_reader",
       "function_map": "read_data"
+    },
+    "extract_module": {
+      "command": "python3",
+      "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py"
     }
-  },
-  "extract_data_module": {
-    "command": "python3",
-    "module_name": "../data_extraction_module/simple_data_extraction.py",
-    "params": "--request"
   },
   "amqp_health_report": "healthreport.edge01",
   "report_delay_time": 120,
@@ -59,7 +59,8 @@
           "end_point": "localhost",
           "exchange_name": "test_qoa4ml",
           "exchange_type": "topic",
-          "out_routing_key": "test.client1"
+          "out_routing_key": "test.client1",
+          "health_check_disable": true
         }
       }
     ],

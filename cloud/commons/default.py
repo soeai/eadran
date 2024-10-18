@@ -14,3 +14,5 @@ class Protocol:
     ACTOR_TRAINING_SERVICE = "training_ws"
     ACTOR_DATA_SERVICE = "data_ws"
     ACTOR_ORCHESTRATOR = "orchestrator"
+    DOCKER_COMMAND = "docker"
+    QOT_COLLECTOR_COMMAND = "start_qot_collector"
