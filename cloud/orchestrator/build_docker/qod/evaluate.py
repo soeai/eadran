@@ -212,8 +212,11 @@ if __name__ == '__main__':
                       json={"type": "qod_report",
                             "code": 0,
                             "request_id": args.sessionid,
-                            "dataset_id": client_conf['dataset_id'],
-                            "qod": qod_metrics})
+                            "qod": {"dataset_id": client_conf['dataset_id'],
+                                    "metric": qod_metrics
+                                    }
+                            }
+                      )
     logging.info("Post QoD request [{}] --result [{}]: status {}".format(args.sessionid,
                                                                          qod_metrics,
                                                                          r.status_code))
