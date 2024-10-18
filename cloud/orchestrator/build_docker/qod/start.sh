@@ -12,4 +12,4 @@ echo "QoD Evaluation Module with: --sessionid=$1 --conf=$2"
 #  wget $1/storage/obj?id=$2 -O ./conf/qod.json
 #fi
 
-python evaluate.py ---sessionid=$1 --conf=$2
+python3 evaluate.py ---sessionid=$1 --conf=$2
