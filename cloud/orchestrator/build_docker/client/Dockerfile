@@ -32,9 +32,9 @@ COPY . .
 RUN apt update
 RUN apt install -y git wget make build-essential manpages-dev python-pip
 
-RUN pip3 install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip setuptools wheel
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chmod 755 ./start.sh
 
