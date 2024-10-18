@@ -184,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--conf', help='Client config file')
     args = parser.parse_args()
 
-    client_conf = utils.load_config(args.conf)
+    client_conf = utils.load_config("/conf/" + args.conf)
     logging.info(client_conf)
 
     url_service = client_conf['storage_service'] + "/storage/obj?key="
