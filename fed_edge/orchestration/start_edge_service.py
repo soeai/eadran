@@ -80,10 +80,12 @@ class EdgeOrchestrator(HostObject):
         self.amqp_thread = Thread(target=self.start)
         Thread(target=self.health_report).start()
 
-        if not os.path.isdir("conf_{}".format(self.edge_id)):
-            os.mkdir("conf_{}".format(self.edge_id))
-        if not os.path.isdir("share_{}".format(self.edge_id)):
-            os.mkdir("share_{}".format(self.edge_id))
+        if not os.path.isdir("working"):
+            os.mkdir("working")
+        if not os.path.isdir("working/{}_conf".format(self.edge_id)):
+            os.mkdir("working/{}_conf".format(self.edge_id))
+        if not os.path.isdir("working/{}_share".format(self.edge_id)):
+            os.mkdir("working/{}_share".format(self.edge_id))
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
@@ -99,7 +101,7 @@ class EdgeOrchestrator(HostObject):
             if req_msg["command"].lower() == Protocol.DOCKER_COMMAND:
                 if req_msg["params"].lower() == "start":
                     if "config" in req_msg.keys():
-                        file_config_name = "conf_{}/{}_config_{}.json".format(self.edge_id, self.edge_id, req_msg["request_id"])
+                        file_config_name = "working/{}_conf/config_{}.json".format(self.edge_id, req_msg["request_id"])
                         with open(file_config_name, 'w') as f:
                             json.dump(req_msg['config'], f)
                         status = []
@@ -194,13 +196,14 @@ class EdgeOrchestrator(HostObject):
                         command.extend([k, v])
                 else:
                     command.append(k)
-            folder_path, filename = conf_file.split("/")
-            folder_path = os.path.abspath(folder_path)
+            folder_path = conf_file.split("/")[:-1]
+            filename = conf_file.split("/")[-1]
+            folder_path = os.path.abspath("/".join(folder_path))
             mount_conf = "type=bind,source={},target={}".format(
                 folder_path, "/conf/"
             )
             command.extend(["--mount", mount_conf])
-            command.extend(["-v", os.path.abspath("share_{}".format(self.edge_id)) + ":/share_volume"])
+            command.extend(["-v", os.path.abspath("working/{}_share:/share_volume".format(self.edge_id))])
 
             command.append(config["image"])
 
@@ -260,16 +263,17 @@ class EdgeOrchestrator(HostObject):
 
     # this module is implemented by DP and install on edge
     def extract_data(self, req_msg):
-        if not os.path.isdir("temp"):
-            os.mkdir("temp")
+        if not os.path.isdir("working/{}_data".format(self.edge_id)):
+            os.mkdir("working/{}_data".format(self.edge_id))
+
         uuids = uuid.uuid4()
         # save request command to file
-        request_filename = "temp/request_{}.json".format(uuids)
+        request_filename = "working/{}_data/request_{}.json".format(self.edge_id,uuids)
         with open(request_filename, "w") as f:
             json.dump(req_msg["data_request"], f)
 
         # save data config to file
-        data_conf_filename = "temp/data_conf_{}.json".format(uuids)
+        data_conf_filename = "working/{}_data/conf_{}.json".format(self.edge_id, uuids)
         with open(data_conf_filename, "w") as f:
             json.dump(self.config['extracted_data_conf'], f)
 
@@ -367,8 +371,8 @@ class EdgeOrchestrator(HostObject):
                     cpu_percentage = (usage_delta / system_delta) * len_cpu * 100
 
                     share_variables = None
-                    if os.path.exists("share_{}/{}.json".format(self.edge_id, self.edge_id)):
-                        with open("share_{}/{}.json".format(self.edge_id, self.edge_id)) as f:
+                    if os.path.exists("working/{}_share/{}.json".format(self.edge_id, self.edge_id)):
+                        with open("working/{}_share/{}.json".format(self.edge_id, self.edge_id)) as f:
                             share_variables = json.load(f)
 
                     if share_variables is not None and share_variables['status'] == 'start':

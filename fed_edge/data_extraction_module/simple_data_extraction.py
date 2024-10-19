@@ -1,5 +1,4 @@
 import argparse
-import uuid
 import pandas as pd
 from abc_tabular import ABCTabular
 from utils import build_filter_exp_pandas
@@ -118,4 +117,5 @@ if __name__ == '__main__':
                                                                         sample)
                 print(response_json)
             else:
-                raise Exception('Opp! Request is not for me!!!!')
+                print('Opp! Request is not for me!!!!')
+                raise Exception()

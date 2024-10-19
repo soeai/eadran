@@ -4,8 +4,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 import time
 # "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_1/ALL.csv"
-# X,y = read_data("../apps/water_leak/data_preprocessing/preprocessData/scenario_2/split_1.csv")
-X,y = read_data("../apps/water_leak/data_preprocessing/preprocessData/scenario_1/ALL_1s.csv")
+X,y = read_data("https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_1/ALL_1s.csv")
+# X,y = read_data("../apps/water_leak/data_preprocessing/preprocessData/scenario_1/ALL_1s.csv")
 # print(np.isnan(X).sum())
 # y = y.reshape()
 # create_model((32, 36))
