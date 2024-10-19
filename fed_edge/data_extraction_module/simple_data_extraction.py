@@ -61,6 +61,8 @@ class TabularHandle(ABCTabular):
                 pass
             return json.dumps(self.__build_response(full_path, row, col, method))
 
+        return {"code":1, "message": "cannot read data..."}
+
     def __build_response(self, filename_url, row, col, method):
         # {
         #     "dataset_id": "uuid of dataset",
