@@ -1,10 +1,10 @@
 # send this message to /service/qod
 {
   "consumer_id": "dungcao",
-  "model_id": "leak_case1",
+  "model_id": "fraud_case1",
   "datasets": [
     {
-      "dataset_id": "water_leak_01",
+      "dataset_id": "fraud_01",
       "edge_id": "edge01",
       "read_info": {
         "method": "local",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "dataset_id": "water_leak_02",
+      "dataset_id": "fraud_02",
       "edge_id": "edge02",
       "read_info": {
         "method": "local",
