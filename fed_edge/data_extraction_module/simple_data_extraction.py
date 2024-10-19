@@ -35,7 +35,6 @@ class TabularHandle(ABCTabular):
         if df is not None:
             if _filters is not None:
                 _filters = build_filter_exp_pandas(_filters)
-                print(_filters)
                 if len(_filters.strip())>0:
                     df.query(_filters, inplace=True)
 
