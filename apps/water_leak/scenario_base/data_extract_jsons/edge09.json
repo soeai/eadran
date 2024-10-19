@@ -1,10 +1,10 @@
 {
-    "edge_id": "edge02",
+    "edge_id": "edge09",
     "model_id": "leak_case1",
     "data_request":
       {
         "owner_id": "ttu_water_leak",
-        "dataset_id": "water_leak_02",
+        "dataset_id": "water_leak_09",
         "__comment": "access key is saved in .env of local edge.",
         "access_info": {
           "type": "file",

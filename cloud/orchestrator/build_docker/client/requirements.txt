@@ -2,4 +2,3 @@ flwr==1.10.0
 psutil
 paho-mqtt==1.6.1
 qoa4ml==0.3.15
-pandas

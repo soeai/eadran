@@ -10,9 +10,14 @@ import flwr as fl
 import qoa4ml.utils.qoa_utils as utils
 from qoa4ml.qoa_client import QoaClient
 from qoa4ml.config.configs import ClientInfo, ClientConfig, ConnectorConfig, AMQPConnectorConfig
-import numpy as np
-# from qoa4ml.reports.rohe_reports import RoheReport
-# from qoa4ml.config.configs import MetricConfig
+import subprocess
+import sys
+
+
+def install_missing(package):
+    command = [sys.executable, "-m", "pip", "install"]
+    command.extend(package)
+    subprocess.call(command)
 
 
 class FedMarkClient(fl.client.NumPyClient):
@@ -89,7 +94,7 @@ class FedMarkClient(fl.client.NumPyClient):
                       'test_performance': self.test_performance,
                       'test_loss': self.test_loss,
                       'evaluate_on_test': self.x_eval is not None,
-                      'train_duration': np.round(self.total_time, 0)}
+                      'train_duration': round(self.total_time, 0)}
             self.qoa_monitor.report(report={'train_round': config['fit_round'],
                                             "quality_of_model": report}, submit=True)
 
@@ -124,61 +129,65 @@ if __name__ == '__main__':
     url_service = args.service + "/storage/obj?key="
     client_conf = utils.load_config("/conf/" + args.conf)
 
-    print(client_conf)
+    if client_conf is not None:
+        print(client_conf)
 
-    # download code of DPs to read data
-    urlretrieve(url_service + client_conf['data_conf']['reader_module']['storage_ref_id'],
-                client_conf['data_conf']['reader_module']['module_name'] + ".py")
+        if len(client_conf['requirement_libs']) > 0:
+            install_missing(client_conf['requirement_libs'])
 
-    # model
-    urlretrieve(url_service + client_conf['model_conf']['storage_ref_id'],
-                client_conf['model_conf']['module_name'] + ".py")
+        # download code of DPs to read data
+        urlretrieve(url_service + client_conf['data_conf']['reader_module']['storage_ref_id'],
+                    client_conf['data_conf']['reader_module']['module_name'] + ".py")
 
-    # import custom code of market consumer -- model
-    mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
+        # model
+        urlretrieve(url_service + client_conf['model_conf']['storage_ref_id'],
+                    client_conf['model_conf']['module_name'] + ".py")
 
-    print("OK-->: " + str(mcs_custom_module))
-    # import code of data provider to read data
-    dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
-                                   client_conf['data_conf']['reader_module']["function_map"])
+        # import custom code of market consumer -- model
+        mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
 
-    filename = client_conf['data_conf']['location'].split('/')[-1]
-    X, y = dps_read_data_module("/data/" + filename)
+        print("OK-->: " + str(mcs_custom_module))
+        # import code of data provider to read data
+        dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
+                                       client_conf['data_conf']['reader_module']["function_map"])
 
-    # # Create reporter
+        filename = client_conf['data_conf']['location'].split('/')[-1]
+        X, y = dps_read_data_module("/data/" + filename)
 
-    client_info = ClientInfo(
-        name=client_conf['edge_id'],
-        user_id=client_conf['consumer_id'],
-        username="edge_container",
-        instance_name=args.sessionid,
-        stage_id="eadran:" + client_conf['edge_id'],
-        functionality=client_conf['dataset_id'],
-        application_name=client_conf['model_id'],
-        role='eadran:mlm_performance',
-        run_id=str(client_conf['run_id']),
-        custom_info=""
-    )
+        # # Create reporter
 
-    connector_config = ConnectorConfig(
-        name=client_conf['amqp_connector']['name'],
-        connector_class=client_conf['amqp_connector']['connector_class'],
-        config=AMQPConnectorConfig(**client_conf['amqp_connector']['config'])
-    )
-
-    cconfig = ClientConfig(
-        client=client_info,
-        connector=[connector_config]
+        client_info = ClientInfo(
+            name=client_conf['edge_id'],
+            user_id=client_conf['consumer_id'],
+            username="edge_container",
+            instance_name=args.sessionid,
+            stage_id="eadran:" + client_conf['edge_id'],
+            functionality=client_conf['dataset_id'],
+            application_name=client_conf['model_id'],
+            role='eadran:mlm_performance',
+            run_id=str(client_conf['run_id']),
+            custom_info=""
         )
 
-    qoa_client = QoaClient(
-        config_dict=cconfig
-    )
+        connector_config = ConnectorConfig(
+            name=client_conf['amqp_connector']['name'],
+            connector_class=client_conf['amqp_connector']['connector_class'],
+            config=AMQPConnectorConfig(**client_conf['amqp_connector']['config'])
+        )
 
-    fed_client = FedMarkClient(client_profile=client_conf,
-                               custom_module=mcs_custom_module,
-                               x_train=X,
-                               y_train=y,
-                               qoa_monitor=qoa_client).to_client()
+        cconfig = ClientConfig(
+            client=client_info,
+            connector=[connector_config]
+            )
 
-    fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)
+        qoa_client = QoaClient(
+            config_dict=cconfig
+        )
+
+        fed_client = FedMarkClient(client_profile=client_conf,
+                                   custom_module=mcs_custom_module,
+                                   x_train=X,
+                                   y_train=y,
+                                   qoa_monitor=qoa_client).to_client()
+
+        fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)

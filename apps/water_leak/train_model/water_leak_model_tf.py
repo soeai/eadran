@@ -1,5 +1,13 @@
+import random
+import time
+
 import tensorflow as tf
 from tensorflow.keras import layers, models
+import os
+
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+os.environ["OMP_NUM_THREADS"] = "1"
 
 model = None
 
@@ -34,7 +42,7 @@ class SelfAttention(layers.Layer):
         return context_vector
 
 
-def create_model(input_shape, numclass):
+def create_model(input_shape, num_class):
     global model
     inputs = layers.Input(shape=(input_shape,))
 
@@ -43,23 +51,24 @@ def create_model(input_shape, numclass):
 
     # Flatten and add dense layers
     x = layers.Flatten()(x)
+    x = layers.Dense(512, activation='relu')(x)
+    x = layers.Dense(256, activation='relu')(x)
     x = layers.Dense(128, activation='relu')(x)
-    x = layers.Dense(64, activation='relu')(x)
-    x = layers.Dense(32, activation='relu')(x)
-    outputs = layers.Dense(numclass, activation='softmax')(x)
+    outputs = layers.Dense(num_class, activation='softmax')(x)
 
     model = models.Model(inputs, outputs)
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=["accuracy"])
 
 
-def fit(x, y, epoch=1, batch_size = 32):
+def fit(x, y, epoch=20, batch_size=32):
     history = model.fit(x, y, epochs=epoch, batch_size=batch_size)
-    return history.history["accuracy"][0], history.history["loss"][0]
+    time.sleep(random.randint(5, 10))
+    return history.history["accuracy"][-1], history.history["loss"][-1]
 
 
 def evaluate(x, y, batch_size=32):
-    loss, precision = model.evaluate(x, y, batch_size)
-    return precision, loss
+    loss, acc = model.evaluate(x, y, batch_size)
+    return acc, loss
 
 
 def get_weights():
@@ -70,4 +79,4 @@ def set_weights(params):
     model.set_weights(params)
 
 
-create_model(36, 5)  # (features_size, numclass)
+create_model(99, 5)  # (features_size, numclass)

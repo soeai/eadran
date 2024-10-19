@@ -8,27 +8,27 @@
         "__comment": "access key is saved in .env of local edge.",
         "access_info": {
           "type": "file",
-          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/fraudTrain_processed_SMOTE_1.csv",
-          "access_key": "env"
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_1/ALL_1s.csv",
+          "access_key": ".env"
         },
         "features": [],
         "label": {
-          "name": "is_fraud",
-          "index": 4,
+          "name": "target",
+          "index": 100,
           "dtype": "categorical"
         },
         "filters": {
           "operator": "",
           "constraints": [
             {
-              "feature_name": "gender_",
-              "from": 1,
+              "feature_name": "topology",
+              "from": "*",
               "to": "*"
             }
           ]
         },
         "sample_limit": {
-          "number": 1000,
+          "number": 3000,
           "method": "random"
         }
       }

@@ -35,7 +35,7 @@
     }
   ],
   "platform": "tensorflow_cpu",
-  "requirement_libs": [],
+  "requirement_libs": ["pandas","scikit-learn"],
   "model_conf": {
     "storage_ref_id": "dungcao_fraud_model_tf_v1",
     "module_name": "model_tf",
