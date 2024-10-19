@@ -60,9 +60,9 @@ def create_model(input_shape, num_class):
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=["accuracy"])
 
 
-def fit(x, y, epoch=20, batch_size=32):
+def fit(x, y, epoch=25, batch_size=32):
     history = model.fit(x, y, epochs=epoch, batch_size=batch_size)
-    time.sleep(random.randint(5, 10))
+    time.sleep(random.randint(10, 15))
     return history.history["accuracy"][-1], history.history["loss"][-1]
 
 
