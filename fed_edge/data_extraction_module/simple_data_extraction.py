@@ -6,6 +6,13 @@ import json
 import os
 import random as rd
 import datetime as dt
+import logging
+
+logging.basicConfig(
+    filename='eadran_edge.logs',  # The file where logs will be saved
+    filemode='a',  # 'a' to append, 'w' to overwrite
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log message format
+    level=logging.INFO)
 
 
 class TabularHandle(ABCTabular):
@@ -39,7 +46,7 @@ class TabularHandle(ABCTabular):
             else:
                 # get all features
                 pass
-
+            logging.info(df.shape)
             row, col = df.shape
 
             if _sample_limit is not None:
@@ -61,7 +68,7 @@ class TabularHandle(ABCTabular):
                 pass
             return json.dumps(self.__build_response(full_path, row, col, method))
 
-        return {"code":1, "message": "cannot read data..."}
+        return {"code": 1, "message": "cannot read data..."}
 
     def __build_response(self, filename_url, row, col, method):
         # {
@@ -114,10 +121,10 @@ if __name__ == '__main__':
                 response_json = TabularHandle(dataset_id=req['dataset_id'],
                                               access_info=access_info,
                                               reader_module=conf).extract(features,
-                                                                        label,
-                                                                        filters,
-                                                                        sample)
+                                                                          label,
+                                                                          filters,
+                                                                          sample)
                 print(response_json)
             else:
-                print('Opp! Request is not for me!!!!')
+                logging.info('Opp! Request is not for me!!!!')
                 raise Exception()
