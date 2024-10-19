@@ -36,7 +36,8 @@ class TabularHandle(ABCTabular):
             if _filters is not None:
                 _filters = build_filter_exp_pandas(_filters)
                 print(_filters)
-                df.query(_filters, inplace=True)
+                if len(_filters.strip())>0:
+                    df.query(_filters, inplace=True)
 
             if len(_features) > 0:
                 _features.sort(key=lambda x: x['index'])
