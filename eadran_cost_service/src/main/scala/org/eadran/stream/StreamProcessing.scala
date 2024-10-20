@@ -59,7 +59,7 @@ object StreamProcessing {
     //      val cassandra_save_table = "tbl_cost_streaming"
 //    val url_csv = ""
 //    val csv_file = url_csv.split("/").last
-//    val staticFile = "/Users/dungcao/IdeaProjects/FedMarket/fraud_cost_formula.csv"
+//    val staticFile = "/Users/dungcao/IdeaProjects/FedMarket/cost_formula.csv"
     /**
      * init state management module
      */
@@ -141,8 +141,9 @@ object StreamProcessing {
     //        .load()
 
     //      join two streams
-    val joinStream = eventsStream.join(staticStream, eventsStream("application_name")===staticStream("model_id") &&
-      eventsStream("functionality")===staticStream("dataset_id"), "inner")
+    val joinStream = eventsStream.join(staticStream,
+          eventsStream("application_name")===staticStream("model_id") &&
+          eventsStream("functionality")===staticStream("dataset_id"), "inner")
       .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"name".alias("edge_id"),$"train_round",
         $"quality_of_model",$"resource_monitor",$"qom_function", $"resource_function",$"cost_qod",$"cost_context"
       ).as[Message]
@@ -225,6 +226,6 @@ object StreamProcessing {
      */
     spark.streams.awaitAnyTermination()
 
-//    spark.stop()
+    spark.stop()
   }
 }
