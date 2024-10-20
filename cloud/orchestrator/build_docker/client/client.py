@@ -93,7 +93,7 @@ class FedMarkClient(fl.client.NumPyClient):
                       'post_loss_value': self.post_train_loss,
                       'test_performance': self.test_performance,
                       'test_loss': self.test_loss,
-                      'evaluate_on_test': self.x_eval is not None,
+                      # 'evaluate_on_test': self.x_eval is not None,
                       'train_duration': round(self.total_time, 0)}
             self.qoa_monitor.report(report={'train_round': config['fit_round'],
                                             "quality_of_model": report}, submit=True)
@@ -105,14 +105,14 @@ class FedMarkClient(fl.client.NumPyClient):
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
     def evaluate(self, parameters, config):  # type: ignore
-        datasize = len(self.x_train)
+        datasize = 0
         start_time = time.time()
         self.model_set_weights(parameters)
         if self.x_eval is not None:
             self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
             datasize = len(self.x_eval)
-        else:
-            self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
+        # else:
+        #     self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
         end_time = time.time()
         self.total_time = end_time - start_time
         return self.test_loss, datasize, {"performance": self.test_performance}
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                                        client_conf['data_conf']['reader_module']["function_map"])
 
         filename = client_conf['data_conf']['location'].split('/')[-1]
-        X, y = dps_read_data_module("/data/" + filename)
+        X, y, X_val, y_val = dps_read_data_module("/data/" + filename)
 
         # # Create reporter
 
@@ -188,6 +188,8 @@ if __name__ == '__main__':
                                    custom_module=mcs_custom_module,
                                    x_train=X,
                                    y_train=y,
+                                   x_eval=X_val,
+                                   y_eval=y_val,
                                    qoa_monitor=qoa_client).to_client()
 
         fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)

@@ -10,4 +10,5 @@ def read_data(data_file):
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
     np.nan_to_num(X, copy=False)
-    return X, y
+    X_test, y_test = None, None
+    return X, y, X_test, y_test

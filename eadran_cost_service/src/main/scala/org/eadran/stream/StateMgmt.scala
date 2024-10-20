@@ -39,6 +39,7 @@ class StateMgmt() extends Serializable {
         0.0,
         0.0,
         0.0,
+        0.0,
         null,
         false
       )
@@ -104,6 +105,7 @@ class StateMgmt() extends Serializable {
           state.costQoM =  Util.eval(eval_qom)
           state.improvementDiff = input.quality_of_model.post_train_performance - input.quality_of_model.pre_train_performance
           state.performancePost = input.quality_of_model.post_train_performance
+          state.performanceTest = input.quality_of_model.test_performance
           state.done = true
         }
         oldState.update(state)

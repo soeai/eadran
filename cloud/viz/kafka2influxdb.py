@@ -3,21 +3,22 @@ from datetime import datetime, timedelta
 
 from kafka import KafkaConsumer
 import json
-from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client_3 import InfluxDBClient3, Point
+# from influxdb_client_3.client.write_api import SYNCHRONOUS
 
-with open("./conf/kafka_influxdb_conf.json") as f:
+with open("conf/kafka_influxdb_conf.json") as f:
     connector_conf = json.load(f)
 
 influxdb_conf = connector_conf["influxdb_connector"]
 kafka_conf = connector_conf["kafka_connector"]
-client = InfluxDBClient(
-    url=influxdb_conf["url"],
+client = InfluxDBClient3(
+    host=influxdb_conf["url"],
     token=influxdb_conf["token"],
-    org=influxdb_conf["org"]
+    org=influxdb_conf["org"],
+    database=influxdb_conf["bucket"]
 )
 
-write_api = client.write_api(write_options=SYNCHRONOUS)
+# write_api = client.write_api(write_options=SYNCHRONOUS)
 
 consumer = KafkaConsumer(bootstrap_servers=kafka_conf["bootstrap_servers"])
 consumer.subscribe(kafka_conf["topic"])
@@ -33,6 +34,7 @@ logging.info("Subscribe topic [{}] from [{}]".format(kafka_conf["topic"], kafka_
 
 for msg in consumer:
     json_obj = json.loads(msg.value)
+    print(json_obj)
     dt = datetime.fromisoformat(json_obj["timestamp"])
     p = Point(json_obj["model_id"]).time(dt) \
         .tag("dataset_id", json_obj["dataset_id"]) \
@@ -43,6 +45,7 @@ for msg in consumer:
         .field("cost_qod", json_obj["cost_qod"]) \
         .field("cost_context", json_obj["cost_context"]) \
         .field("improvement_diff", json_obj["improvement_diff"]) \
-        .field("performance", json_obj["performance"])
-
-    write_api.write(bucket=influxdb_conf["bucket"], org=influxdb_conf["org"], record=p)
+        .field("performance_post", json_obj["performance_post"]) \
+        .field("performance_test", json_obj["performance_test"])
+    client.write(p)
+    # write_api.write(bucket=influxdb_conf["bucket"], org=influxdb_conf["org"], record=p)

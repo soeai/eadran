@@ -22,7 +22,8 @@ case class QualityOfModel(
                            post_loss_value:   Double  =1,
                            test_performance:   Double = -1,
                            test_loss:   Double  =1,
-                           train_duration: Double = 0
+                           train_duration: Double = 0,
+//                           evaluate_on_test: Integer = 0
                          )
 case class ResourceMonitor(
                             cpu_percentage:   Double = 0,
@@ -48,6 +49,7 @@ case class CostState(
                       var costContext: Double,
                       var improvementDiff: Double,
                       var performancePost: Double,
+                      var performanceTest: Double,
                       var edgeId: String,
                       var done: Boolean
                     )

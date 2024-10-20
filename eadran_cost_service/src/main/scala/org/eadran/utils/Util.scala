@@ -45,7 +45,8 @@ object Util {
           StructField("post_loss_value", DoubleType, true),
           StructField("train_duration", DoubleType, true),
           StructField("test_performance", DoubleType, true),
-          StructField("test_loss", DoubleType, true)
+          StructField("test_loss", DoubleType, true),
+//          StructField("evaluate_on_test", IntegerType, true)
         )),true),
         StructField("resource_monitor",StructType(Array(
           StructField("cpu_percentage", DoubleType, true),

@@ -170,30 +170,31 @@ object StreamProcessing {
         $"costQoD".alias("cost_qod"),
         $"costContext".alias("cost_context"),
         $"improvementDiff".alias("improvement_diff"),
-        $"performancePost".alias("performance")
+        $"performancePost".alias("performance_post"),
+        $"performanceTest".alias("performance_test"),
         )
 
 
     //    ========= TO KAFKA ========
-//    finalStream
-//      .selectExpr("to_json(struct(*)) AS value")
-//      .writeStream
-//      .trigger(Trigger.ProcessingTime("10 seconds"))
-//      .format("kafka")
-//      .option("checkpointLocation", checkpoint)
-//      .option("kafka.bootstrap.servers", kafkaBrokers)
-//      .option("topic", kafkaTopic_out)
-//      .outputMode("update")
-//      .start()
-
-    //    ========= TO CONSOLE ========
     finalStream
+      .selectExpr("to_json(struct(*)) AS value")
       .writeStream
       .trigger(Trigger.ProcessingTime("10 seconds"))
-      .format("console")
+      .format("kafka")
       .option("checkpointLocation", checkpoint)
+      .option("kafka.bootstrap.servers", kafkaBrokers)
+      .option("topic", kafkaTopic_out)
       .outputMode("update")
       .start()
+
+    //    ========= TO CONSOLE ========
+//    finalStream
+//      .writeStream
+//      .trigger(Trigger.ProcessingTime("10 seconds"))
+//      .format("console")
+//      .option("checkpointLocation", checkpoint)
+//      .outputMode("update")
+//      .start()
 
     //    ========= TO CASSANDRA ========
 //    finalStream
