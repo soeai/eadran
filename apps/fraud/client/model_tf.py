@@ -16,13 +16,13 @@ def init(in_shape=10):
 
 def fit(x, y):
     history = model.fit(x, y, epochs=1, batch_size=32)
-    time.sleep(rd.randint(1,5))
+    time.sleep(rd.randint(5,10))
     return history.history["precision"][0], history.history["loss"][0]
 
 
 def evaluate(x, y):
     loss, precision = model.evaluate(x, y, 32)
-    time.sleep(rd.randint(1,5))
+    time.sleep(rd.randint(2,5))
     return precision, loss
 
 

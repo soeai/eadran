@@ -1,5 +1,5 @@
 d1 = from(bucket: "fraud")
-	|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
   |> filter(fn: (r) => r["_measurement"] == "C001_M01_Fraud")
   |> filter(fn: (r) => r["_field"] == "cost_resource")
   |> cumulativeSum()

@@ -1,10 +1,9 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from kafka import KafkaConsumer
 import json
 from influxdb_client_3 import InfluxDBClient3, Point
-# from influxdb_client_3.client.write_api import SYNCHRONOUS
 
 with open("conf/kafka_influxdb_conf.json") as f:
     connector_conf = json.load(f)
@@ -18,19 +17,9 @@ client = InfluxDBClient3(
     database=influxdb_conf["bucket"]
 )
 
-# write_api = client.write_api(write_options=SYNCHRONOUS)
-
 consumer = KafkaConsumer(bootstrap_servers=kafka_conf["bootstrap_servers"])
 consumer.subscribe(kafka_conf["topic"])
 logging.info("Subscribe topic [{}] from [{}]".format(kafka_conf["topic"], kafka_conf["bootstrap_servers"]))
-# with open("../CostService/cost_from_spark.txt") as f:
-#    for line in f:
-#       line = line.replace("\'", "\"")
-#       json_obj = json.loads(line)
-#       print(json_obj)
-#       .tag("run_id", json_obj["run_id"])\
-#       .tag("task_id","{:03}".format(json_obj["train_round"]))\
-#      + timedelta(days=223)
 
 for msg in consumer:
     json_obj = json.loads(msg.value)
@@ -48,4 +37,3 @@ for msg in consumer:
         .field("performance_post", json_obj["performance_post"]) \
         .field("performance_test", json_obj["performance_test"])
     client.write(p)
-    # write_api.write(bucket=influxdb_conf["bucket"], org=influxdb_conf["org"], record=p)
