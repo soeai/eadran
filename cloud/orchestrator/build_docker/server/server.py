@@ -33,13 +33,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Server Federated Learning")
     parser.add_argument('--port', help='federated server port', default="8080")
     parser.add_argument('--epochs', help='training epochs', default=5)
+    parser.add_argument('--clients', help='training epochs', default=5)
 
     params = parser.parse_args()
 
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
-        min_fit_clients=1,
-        min_evaluate_clients=1,
+        min_fit_clients=params.clients,
+        min_evaluate_clients=params.clients,
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         evaluate_metrics_aggregation_fn=weighted_average)

@@ -1,9 +1,14 @@
 import logging
 from datetime import datetime
-
-from kafka import KafkaConsumer
+import sys
 import json
 from influxdb_client_3 import InfluxDBClient3, Point
+
+if sys.version_info >= (3, 12, 0):
+    import six
+    sys.modules['kafka.vendor.six.moves'] = six.moves
+
+from kafka import KafkaConsumer
 
 with open("conf/kafka_influxdb_conf.json") as f:
     connector_conf = json.load(f)

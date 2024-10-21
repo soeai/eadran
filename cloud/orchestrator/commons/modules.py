@@ -62,11 +62,8 @@ class FedServerContainer(Generic):
                                     },
                                     "arguments": [
                                         str(self.fed_server_image_port),
-                                        str(
-                                            params["model_conf"]["train_hyper_param"][
-                                                "epochs"
-                                            ]
-                                        ),
+                                        str(params["model_conf"]["train_hyper_param"]["epochs"]),
+                                        str(len(params["datasets"]))
                                     ],
                                 },
                                 {

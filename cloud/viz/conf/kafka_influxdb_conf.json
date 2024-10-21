@@ -6,7 +6,7 @@
         "bucket":"water-leak"
     },
     "kafka_connector": {
-        "bootstrap_servers": "192.168.1.3:9092",
+        "bootstrap_servers": "localhost:9092",
         "topic": "eadran_influxdb"
     }
 }
