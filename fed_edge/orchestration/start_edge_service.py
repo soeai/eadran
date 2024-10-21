@@ -289,8 +289,8 @@ class EdgeOrchestrator(HostObject):
             if rep_msg.returncode == 0:
                 response = json.loads(rep_msg.stdout)
             # cleanup
-            os.remove(request_filename)
-            os.remove(data_conf_filename)
+            # os.remove(request_filename)
+            # os.remove(data_conf_filename)
             return response
         except:
             logging.error(rep_msg.stderr)
