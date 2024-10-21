@@ -105,17 +105,18 @@ class FedMarkClient(fl.client.NumPyClient):
         return weight, len(self.x_train), {"performance": self.post_train_performance}
 
     def evaluate(self, parameters, config):  # type: ignore
-        datasize = 0
-        start_time = time.time()
-        self.model_set_weights(parameters)
         if self.x_eval is not None:
+            start_time = time.time()
+            self.model_set_weights(parameters)
             self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
             datasize = len(self.x_eval)
-        # else:
-        #     self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
-        end_time = time.time()
-        self.total_time = end_time - start_time
-        return self.test_loss, datasize, {"performance": self.test_performance}
+            end_time = time.time()
+            self.total_time = end_time - start_time
+            return self.test_loss, datasize, {"performance": self.test_performance}
+        else:
+            return 0.0, 0, {"performance": 0}
+            # self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
+
 
 
 if __name__ == '__main__':
