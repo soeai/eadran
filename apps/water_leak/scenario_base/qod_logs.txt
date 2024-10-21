@@ -1,0 +1,288 @@
+{
+    "code": 0,
+    "result": [
+        {
+            "command": "data_qod_evaluation",
+            "request_id": "0135aee4-6087-4d37-8d8b-af2a13bd239e",
+            "content": {
+                "consumer_id": "ttu_water_leak",
+                "model_id": "leak_case1",
+                "datasets": [
+                    {
+                        "dataset_id": "water_leak_01",
+                        "edge_id": "edge01",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_01_20241019142709.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_02",
+                        "edge_id": "edge02",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/student02/dungcao/eadran/apps/water_leak/extracted_data/water_leak_02_20241019072851.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_03",
+                        "edge_id": "edge03",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_03_20241021093051.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_05",
+                        "edge_id": "edge05",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_05_20241021092209.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_04",
+                        "edge_id": "edge04",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_04_20241021092510.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_06",
+                        "edge_id": "edge06",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_06_20241021092834.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_07",
+                        "edge_id": "edge07",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_07_20241021134036.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_08",
+                        "edge_id": "edge08",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_08_20241021134143.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_09",
+                        "edge_id": "edge09",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_09_20241021145127.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    },
+                    {
+                        "dataset_id": "water_leak_10",
+                        "edge_id": "edge10",
+                        "read_info": {
+                            "method": "local",
+                            "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_10_20241021145305.csv",
+                            "format": "csv",
+                            "params": "",
+                            "reader_module": {
+                                "storage_ref_id": "ttu_water_leak_data_reader_v1",
+                                "module_name": "data_reader",
+                                "function_map": "read_data"
+                            }
+                        }
+                    }
+                ]
+            },
+            "status": "finished",
+            "init_at": 1729497276.8027174,
+            "result": {
+                "edge_id": "edge01",
+                "status": 0,
+                "detail": [
+                    0
+                ]
+            },
+            "start_at": 1729497282.438272,
+            "finish_at": 1729497489.2567976,
+            "qod": [
+                {
+                    "dataset_id": "water_leak_01",
+                    "metric": {
+                        "class_overlap": 0.9556666666666667,
+                        "class_parity": 0.9999,
+                        "label_purity": 0.296,
+                        "feature_correlation": 0.8644,
+                        "feature_relevance": 0.9054,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_04",
+                    "metric": {
+                        "class_overlap": 0.9576666666666667,
+                        "class_parity": 0.9999,
+                        "label_purity": 0.313,
+                        "feature_correlation": 0.8661,
+                        "feature_relevance": 0.9054,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_08",
+                    "metric": {
+                        "class_overlap": 0.9683333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.2853,
+                        "feature_correlation": 0.866,
+                        "feature_relevance": 0.9056,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_10",
+                    "metric": {
+                        "class_overlap": 0.9583333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.3063,
+                        "feature_correlation": 0.8663,
+                        "feature_relevance": 0.9051,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_03",
+                    "metric": {
+                        "class_overlap": 0.9506666666666667,
+                        "class_parity": 1.0,
+                        "label_purity": 0.3157,
+                        "feature_correlation": 0.8608,
+                        "feature_relevance": 0.9052,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_05",
+                    "metric": {
+                        "class_overlap": 0.9583333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.2977,
+                        "feature_correlation": 0.8599,
+                        "feature_relevance": 0.9051,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_07",
+                    "metric": {
+                        "class_overlap": 0.9573333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.296,
+                        "feature_correlation": 0.8619,
+                        "feature_relevance": 0.9051,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_09",
+                    "metric": {
+                        "class_overlap": 0.9563333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.3103,
+                        "feature_correlation": 0.8619,
+                        "feature_relevance": 0.9054,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_02",
+                    "metric": {
+                        "class_overlap": 0.9626666666666667,
+                        "class_parity": 1.0,
+                        "label_purity": 0.2987,
+                        "feature_correlation": 0.8607,
+                        "feature_relevance": 0.9055,
+                        "completeness": 1.0
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_06",
+                    "metric": {
+                        "class_overlap": 0.9513333333333334,
+                        "class_parity": 1.0,
+                        "label_purity": 0.306,
+                        "feature_correlation": 0.8551,
+                        "feature_relevance": 0.9051,
+                        "completeness": 1.0
+                    }
+                }
+            ]
+        }
+    ]
+}
