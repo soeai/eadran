@@ -198,7 +198,7 @@ if __name__ == '__main__':
                                    client_conf['data_conf']['reader_module']["function_map"])
 
     filename = client_conf['data_conf']['location'].split('/')[-1]
-    X, y = dps_read_data_module("/data/" + filename)
+    X, y, _, _ = dps_read_data_module("/data/" + filename)
 
     qod_metrics = {"class_overlap": class_overlap(X,y),
                    "class_parity": class_parity(y),
