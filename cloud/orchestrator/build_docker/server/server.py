@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
-        min_fit_clients=params.clients,
-        min_evaluate_clients=params.clients,
+        min_fit_clients=int(params.clients),
+        min_evaluate_clients=int(params.clients),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         evaluate_metrics_aggregation_fn=weighted_average)
