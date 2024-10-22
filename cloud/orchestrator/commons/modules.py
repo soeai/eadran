@@ -363,7 +363,7 @@ class QoDContainer(Generic):
                         {
                             "image": self.orchestrator.config["eadran_qod_image_name"],
                             "options": {
-                                "--name": f"data_qod_container_{params['consumer_id']}_{params['model_id']}",
+                                "--name": f"qod_container_{params['consumer_id']}_{params['model_id']}_{ds['edge_id']}"
                             },
                             "arguments": [],
                         }

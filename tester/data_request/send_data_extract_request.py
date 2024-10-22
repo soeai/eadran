@@ -30,7 +30,7 @@ class DataService_Simulation(object):
 
 
 client = DataService_Simulation()
-with open('../../apps/water_leak/scenario_base/data_extract_jsons/edge01.json') as f:
+with open('../../apps/water_leak/scenario_1/data_extract_jsons/edge01.json') as f:
     req = json.load(f)
     # add message header
     msg = {"type": Protocol.MSG_REQUEST,

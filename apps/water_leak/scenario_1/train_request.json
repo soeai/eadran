@@ -1,0 +1,175 @@
+{
+  "consumer_id": "ttu_water_leak",
+  "model_id": "leak_case1",
+  "run_id": 1,
+  "datasets": [
+    {
+      "dataset_id": "water_leak_01",
+      "edge_id": "edge01",
+      "read_info": {
+        "method": "local",
+        "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_01_20241019142709.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_02",
+      "edge_id": "edge02",
+      "read_info": {
+        "method": "local",
+        "location": "/home/student02/dungcao/eadran/apps/water_leak/extracted_data/water_leak_02_20241019072851.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_03",
+      "edge_id": "edge03",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_03_20241021093051.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_05",
+      "edge_id": "edge05",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_05_20241021092209.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_04",
+      "edge_id": "edge04",
+      "read_info": {
+        "method": "local",
+        "location": "/home/asus/dungcao/eadran/apps/water_leak/extracted_data/water_leak_04_20241021092510.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_06",
+      "edge_id": "edge06",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_06_20241021092834.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+{
+      "dataset_id": "water_leak_07",
+      "edge_id": "edge07",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_07_20241021134036.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_08",
+      "edge_id": "edge08",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_08_20241021134143.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+      {
+      "dataset_id": "water_leak_09",
+      "edge_id": "edge09",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_09_20241021145127.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+      {
+      "dataset_id": "water_leak_10",
+      "edge_id": "edge10",
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_10_20241021145305.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    }
+  ],
+  "platform": "tensorflow_cpu",
+  "requirement_libs": ["pandas", "scikit-learn"],
+  "model_conf": {
+    "storage_ref_id": "ttu_water_leak_model_tf_v1",
+    "module_name": "water_leak_model_tf",
+    "function_map": {
+      "train": "fit",
+      "evaluate": "evaluate",
+      "set_weights": "set_weights",
+      "get_weights": "get_weights"
+    },
+    "train_hyper_param": {
+      "epochs": 20
+    }
+  },
+  "pre_train_model": {
+    "storage_ref_id": ""
+  }
+}

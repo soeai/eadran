@@ -1,0 +1,145 @@
+{
+  "consumer_id": "ttu_water_leak",
+  "model_id": "leak_case2",
+  "run_id": 1,
+  "datasets": [
+    {
+      "dataset_id": "water_leak_01",
+      "edge_id": "edge01",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_1.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_02",
+      "edge_id": "edge02",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_2.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_03",
+      "edge_id": "edge03",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_3.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_04",
+      "edge_id": "edge04",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_4.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_05",
+      "edge_id": "edge05",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_5.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_06",
+      "edge_id": "edge06",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_6.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+{
+      "dataset_id": "water_leak_07",
+      "edge_id": "edge07",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_7.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_08",
+      "edge_id": "edge08",
+      "read_info": {
+        "method": "wget",
+        "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/scenario_2/split_8.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_data"
+        }
+      }
+    }
+  ],
+  "platform": "tensorflow_cpu",
+  "requirement_libs": ["pandas", "scikit-learn"],
+  "model_conf": {
+    "storage_ref_id": "ttu_water_leak_model_tf_v1",
+    "module_name": "water_leak_model_tf",
+    "function_map": {
+      "train": "fit",
+      "evaluate": "evaluate",
+      "set_weights": "set_weights",
+      "get_weights": "get_weights"
+    },
+    "train_hyper_param": {
+      "epochs": 20
+    }
+  },
+  "pre_train_model": {
+    "storage_ref_id": ""
+  }
+}
