@@ -1,5 +1,6 @@
 import argparse
 import json
+from datetime import datetime
 # import time
 # import uuid
 
@@ -31,6 +32,7 @@ class Receiver(HostObject):
 
     def message_processing(self, ch, method, props, body):
         req_msg = json.loads(str(body.decode("utf-8")).replace("'", '"'))
+        req_msg['timestamp'] = datetime.fromtimestamp(req_msg['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
         print(req_msg)
 
     def start_receive(self):

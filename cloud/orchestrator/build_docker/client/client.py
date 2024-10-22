@@ -151,8 +151,11 @@ if __name__ == '__main__':
         dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
                                        client_conf['data_conf']['reader_module']["function_map"])
 
-        filename = client_conf['data_conf']['location'].split('/')[-1]
-        X, y, X_val, y_val = dps_read_data_module("/data/" + filename)
+        if client_conf['data_conf']['method'] == 'local':
+            filename = client_conf['data_conf']['location'].split('/')[-1]
+            X, y, X_val, y_val = dps_read_data_module("/data/" + filename)
+        else:
+            X, y, X_val, y_val = dps_read_data_module(client_conf['data_conf']['location'])
 
         # # Create reporter
 
