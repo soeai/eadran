@@ -78,7 +78,7 @@ def class_parity(y):
     counts = counts/max_count
     mean_count = counts.mean()
     counts = counts - mean_count
-    return np.around(1 - np.absolute(counts).sum()/len(y),4)
+    return np.around(np.absolute(counts).sum()/len(counts),4)
 
 
 def feature_correlation(X):

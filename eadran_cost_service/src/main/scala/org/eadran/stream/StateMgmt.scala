@@ -56,7 +56,7 @@ class StateMgmt() extends Serializable {
 //        val avgMem = (state.avgMemory * state.msgCount + input.resource_monitor.memory)/(state.msgCount + 1)
 
         //          store duration in miliseconds
-        state.resourceDuration += (input.timestamp.getTime - state.timestamp.getTime)
+//        state.resourceDuration += (input.timestamp.getTime - state.timestamp.getTime)
         if (input.resource_monitor != null) {
           if (state.maxCpu < input.resource_monitor.cpu_percentage) {
             state.maxCpu = input.resource_monitor.cpu_percentage
@@ -64,16 +64,6 @@ class StateMgmt() extends Serializable {
           if (state.maxMemory < input.resource_monitor.memory_usage) {
             state.maxMemory = input.resource_monitor.memory_usage
           }
-          //        compute memory by Mb
-          val eval_resource = input.resource_function
-            .replace("$cpu_percentage", state.maxCpu.toString)
-            .replace("$memory_usage", (state.maxMemory / 1024 / 1024).toString)
-            //          .replace("$gpu",input.resource_monitor.gpu.toString)
-            //          .replace("$network",input.resource_monitor.network.toString)
-            //          .replace("$storage",input.resource_monitor.storage.toString)
-            .replace("$train_duration", (state.resourceDuration / 60000 / 60).toString) // convert duration to hour
-
-          state.costResource = Util.eval(eval_resource)
         }
 
         if (state.costQoD == 0.0){
@@ -93,6 +83,17 @@ class StateMgmt() extends Serializable {
         }
 
         if (input.quality_of_model != null) {
+          //        compute memory by Mb
+          val eval_resource = input.resource_function
+            .replace("$cpu_percentage", state.maxCpu.toString)
+            .replace("$memory_usage", (state.maxMemory / 1024 / 1024).toString)
+            //          .replace("$gpu",input.resource_monitor.gpu.toString)
+            //          .replace("$network",input.resource_monitor.network.toString)
+            //          .replace("$storage",input.resource_monitor.storage.toString)
+            .replace("$train_duration", (input.quality_of_model.train_duration / 60).toString) // convert duration to minute
+
+          state.costResource = Util.eval(eval_resource)
+
           val eval_qom = input.qom_function
             .replace("$post_train_performance",input.quality_of_model.post_train_performance.toString)
             .replace("$pre_train_performance", input.quality_of_model.pre_train_performance.toString)

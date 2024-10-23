@@ -836,8 +836,8 @@ class EADRANService(Resource):
                 if json_msg['type'] == "response":
                     self.collection.find_one_and_update(
                         {"request_id": json_msg["request_id"]},
-                        {"$set": {
-                            "result": json_msg['result'],
+                        {"$push": {"result": json_msg['result']},
+                         "$set": {
                             "status": "started" if json_msg['code'] == 0 else "error",
                             "start_at": time.time()}}
                     )

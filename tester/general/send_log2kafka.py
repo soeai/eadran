@@ -1,6 +1,12 @@
 import json
 import time
 from datetime import datetime
+import sys
+
+if sys.version_info >= (3, 12, 0):
+    import six
+    sys.modules['kafka.vendor.six.moves'] = six.moves
+
 
 from kafka import KafkaProducer
 
@@ -14,5 +20,5 @@ with open("../../data_samples/log_water_leak_case1.txt") as f:
         # mess['timestamp'] = datetime.fromtimestamp(mess['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
         print(mess)
         producer.send("eadran_water_leak", mess)
-        time.sleep(2)
+        time.sleep(1)
 # print("/".join(["1","2"]))

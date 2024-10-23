@@ -114,7 +114,9 @@ class Orchestrator(HostObject):
             # }
 
             request_id = req_msg['request_id']
-            self.processing_tasks[request_id] = (time.time(), req_msg['content'], req_msg["requester"])
+            self.processing_tasks[request_id] = (req_msg['content'],
+                                                 req_msg["requester"],
+                                                 req_msg["command"])
             if req_msg["command"] == Protocol.TRAIN_MODEL_COMMAND:
                 Thread(target=start_training_process, args=(req_msg["content"], request_id, self)).start()
             elif req_msg["command"] == Protocol.START_CONTAINER_COMMAND:
@@ -142,16 +144,17 @@ class Orchestrator(HostObject):
                 self.handling_edges[req_msg["response_id"]].remove(req_msg["responder"])
 
             if req_msg["response_id"] in self.processing_tasks.keys():
-                _, msg_task, requestor = self.processing_tasks.pop(req_msg["response_id"])
+                _, requestor, command = self.processing_tasks.pop(req_msg["response_id"])
                 # CALL POST TO SERVICE HERE
-                r = requests.post(url=self.url_mgt_service + "/service/report",
-                                  json={"type": "response",
-                                        "code": 0,
-                                        "request_id": req_msg["response_id"],
-                                        "result": req_msg['content']})
-                logging.info("Respond request [{}] of [{}]: {}".format(req_msg["response_id"],
-                                                                       requestor,
-                                                                       r.status_code))
+                if command != Protocol.DATA_QOD_COMMAND:
+                    r = requests.post(url=self.url_mgt_service + "/service/report",
+                                      json={"type": "response",
+                                            "code": 0,
+                                            "request_id": req_msg["response_id"],
+                                            "result": req_msg['content']})
+                    logging.info("Respond request [{}] of [{}]: {}".format(req_msg["response_id"],
+                                                                           requestor,
+                                                                           r.status_code))
                 # self.send({"code": 0,
                 #            "timestamp": str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')),
                 #            "request_id": req_msg["response_id"]},
