@@ -63,7 +63,7 @@ class FedServerContainer(Generic):
                                     "arguments": [
                                         str(self.fed_server_image_port),
                                         str(params["model_conf"]["train_hyper_param"]["epochs"]),
-                                        str(len(params["datasets"]))
+                                        str(params["model_conf"]["train_hyper_param"]["min_workers"])
                                     ],
                                 },
                                 {
@@ -92,7 +92,7 @@ class FedServerContainer(Generic):
                                 )
                             )
                             response["start_fed_resp"] = {
-                                "ip": fed_server_ip,
+                                "fed_server_ip": fed_server_ip,
                                 "fed_server_port": self.fed_server_image_port,
                                 "rabbit_port": self.rabbit_image_port,
                             }
@@ -173,7 +173,7 @@ class Config4Edge(Generic):
                 "run_id": params['run_id'],
                 "dataset_id": dataset["dataset_id"],
                 "edge_id": dataset["edge_id"],
-                "fed_server": f"{params['start_fed_resp']['ip']}:{params['start_fed_resp']['fed_server_port']}",
+                "fed_server": f"{params['start_fed_resp']['fed_server_ip']}:{params['start_fed_resp']['fed_server_port']}",
                 "data_conf": dataset["read_info"],
                 "model_conf": params["model_conf"],
                 "requirement_libs": params["requirement_libs"],
@@ -182,7 +182,7 @@ class Config4Edge(Generic):
                     "name": "amqp_connector",
                     "connector_class": "AMQP",
                     "config": {
-                        "end_point": params['start_fed_resp']['ip'],
+                        "end_point": params['start_fed_resp']['fed_server_ip'],
                         "exchange_name": "fml_model_report",
                         "exchange_type": "topic",
                         "out_routing_key": "service." + params["model_id"] + "." + dataset["edge_id"],
@@ -254,7 +254,7 @@ class EdgeContainer(Generic):
             command_template = {
                 "edge_id": "",
                 "request_id": params["request_id"],
-                "command": "docker",
+                "command": Protocol.DOCKER_COMMAND,
                 "params": "start",
                 "docker": [
                     {

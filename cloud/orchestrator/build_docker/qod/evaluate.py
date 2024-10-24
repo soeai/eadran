@@ -16,6 +16,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 logging.basicConfig(level=logging.INFO)
 
+
 # from imblearn.over_sampling import SMOTE
 
 # def tomek_links(X,y):
@@ -66,8 +67,8 @@ def predict_prob(X, y):
 def class_overlap(x, y, classify=True):
     if classify:
         tkl = TomekLinks()
-        _, ry = tkl.fit_resample(x,y)
-        return len(ry)/len(y)
+        _, ry = tkl.fit_resample(x, y)
+        return len(ry) / len(y)
     else:
         return 1
 
@@ -75,10 +76,10 @@ def class_overlap(x, y, classify=True):
 def class_parity(y):
     values, counts = np.unique(y, return_counts=True)
     max_count = max(counts)
-    counts = counts/max_count
+    counts = counts / max_count
     mean_count = counts.mean()
     counts = counts - mean_count
-    return np.around(np.absolute(counts).sum()/len(counts),4)
+    return np.around(np.absolute(counts).sum() / len(counts), 4)
 
 
 def feature_correlation(X):
@@ -175,7 +176,7 @@ def label_purity(X, y):
     intersection = len(set(tomek_indices) & set(label_issue_indices))
 
     # Compute the label purity as per the formula
-    return np.around(1 - (intersection / len(y)),4)
+    return np.around(1 - (intersection / len(y)), 4)
 
 
 if __name__ == '__main__':
@@ -203,9 +204,9 @@ if __name__ == '__main__':
     else:
         X, y, _, _ = dps_read_data_module(client_conf['data_conf']['location'])
 
-    qod_metrics = {"class_overlap": class_overlap(X,y),
+    qod_metrics = {"class_overlap": class_overlap(X, y),
                    "class_parity": class_parity(y),
-                   "label_purity": label_purity(X,y),
+                   "label_purity": label_purity(X, y),
                    "feature_correlation": feature_correlation(X),
                    "feature_relevance": feature_relevance(X, y, 0.9),
                    "completeness": completeness(X)}

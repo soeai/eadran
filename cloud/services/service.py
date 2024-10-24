@@ -270,9 +270,9 @@ class ResourceHealthReport(HostObject):
         elif req_msg['type'] == "service":
             req_msg.pop('type', None)
             self.collection_service.find_one_and_update(
-                    {"request_id": req_msg["request_id"]},
-                    {"$set": {"status": "finished" if req_msg['code'] == 0 else "error", "finish_at": time.time()}}
-                )
+                {"request_id": req_msg["request_id"]},
+                {"$set": {"status": "finished" if req_msg['code'] == 0 else "error", "finish_at": time.time()}}
+            )
 
     def start_amqp(self):
         self.amqp_collector.start_collecting()
@@ -724,7 +724,7 @@ class EADRANService(Resource):
         )
         self.collection = self.db[kwargs["service_log"]["db_col"]]
 
-    def get(self,op):
+    def get(self, op):
         req_args = request.query_string.decode("utf-8").split("&")
 
         # get param from args here
@@ -793,10 +793,10 @@ class EADRANService(Resource):
         # ============== END OF MESSAGE
         if request.is_json:
             json_msg = request.get_json(force=True)
-            if op in ['trainml', 'data', 'qod']:
+            if op in ['train_ml', 'data_ext', 'qod', "container_start", "container_stop"]:
                 request_id = str(uuid.uuid4())
                 # send the command to orchestrator
-                if op == "trainml":
+                if op == "train_ml":
                     orchestrator_command = {
                         "type": Protocol.MSG_REQUEST,
                         "requester": Protocol.ACTOR_TRAINING_SERVICE,
@@ -805,7 +805,7 @@ class EADRANService(Resource):
                         "content": json_msg,
                     }
 
-                elif op == "data":
+                elif op == "data_ext":
                     orchestrator_command = {
                         "type": Protocol.MSG_REQUEST,
                         "requester": Protocol.ACTOR_DATA_SERVICE,
@@ -818,6 +818,22 @@ class EADRANService(Resource):
                         "type": Protocol.MSG_REQUEST,
                         "requester": Protocol.ACTOR_DATA_SERVICE,
                         "command": Protocol.DATA_QOD_COMMAND,
+                        "request_id": request_id,
+                        "content": json_msg,
+                    }
+                elif op == "container_start":
+                    orchestrator_command = {
+                        "type": Protocol.MSG_REQUEST,
+                        "requester": Protocol.ACTOR_TRAINING_SERVICE,
+                        "command": Protocol.START_CONTAINER_COMMAND,
+                        "request_id": request_id,
+                        "content": json_msg,
+                    }
+                elif op == "container_stop":
+                    orchestrator_command = {
+                        "type": Protocol.MSG_REQUEST,
+                        "requester": Protocol.ACTOR_TRAINING_SERVICE,
+                        "command": Protocol.STOP_CONTAINER_COMMAND,
                         "request_id": request_id,
                         "content": json_msg,
                     }
@@ -838,8 +854,8 @@ class EADRANService(Resource):
                         {"request_id": json_msg["request_id"]},
                         {"$push": {"result": json_msg['result']},
                          "$set": {
-                            "status": "started" if json_msg['code'] == 0 else "error",
-                            "start_at": time.time()}}
+                             "status": "started" if json_msg['code'] == 0 else "error",
+                             "start_at": time.time()}}
                     )
                     return {"code": 0, "message": "updated"}
                 elif json_msg['type'] == 'qod_report':
@@ -856,34 +872,34 @@ class EADRANService(Resource):
 
 
 # in case of client want to start more edges/datasets
-class ControlEdge(Resource):
-    def __init__(self, queue):
-        self.queue = queue
-
-    def get(self):
-        return {"code": 0}
-
-    def post(self, op):
-        # get param from args here
-        msg = "starting" if op == "start" else "stopping"
-        cmd = (
-            Protocol.START_CONTAINER_COMMAND
-            if op == "start"
-            else Protocol.STOP_CONTAINER_COMMAND
-        )
-        if request.is_json:
-            json_msg = request.get_json(force=True)
-            request_id = str(uuid.uuid4())
-            orchestrator_command = {
-                "type": Protocol.MSG_REQUEST,
-                "requester": Protocol.ACTOR_TRAINING_SERVICE,
-                "command": cmd,
-                "request_id": request_id,
-                "content": json_msg,
-            }
-            self.queue.send(orchestrator_command)
-            return {"code": 0, "message": msg, "request_id": request_id}
-        return {"code": 1, "message": "request must enclose a json object"}, 400
+# class ControlEdge(Resource):
+#     def __init__(self, queue):
+#         self.queue = queue
+#
+#     def get(self):
+#         return {"code": 0}
+#
+#     def post(self, op):
+#         # get param from args here
+#         msg = "starting" if op == "start" else "stopping"
+#         cmd = (
+#             Protocol.START_CONTAINER_COMMAND
+#             if op == "start"
+#             else Protocol.STOP_CONTAINER_COMMAND
+#         )
+#         if request.is_json:
+#             json_msg = request.get_json(force=True)
+#             request_id = str(uuid.uuid4())
+#             orchestrator_command = {
+#                 "type": Protocol.MSG_REQUEST,
+#                 "requester": Protocol.ACTOR_TRAINING_SERVICE,
+#                 "command": cmd,
+#                 "request_id": request_id,
+#                 "content": json_msg,
+#             }
+#             self.queue.send(orchestrator_command)
+#             return {"code": 0, "message": msg, "request_id": request_id}
+#         return {"code": 1, "message": "request must enclose a json object"}, 400
 
 
 def required_auth():
@@ -933,9 +949,9 @@ if __name__ == "__main__":
     # two main services of eadran: data service, training service and control edges
     api.add_resource(EADRANService, "/service/<string:op>", resource_class_args=(queue,),
                      resource_class_kwargs=config)
-    api.add_resource(
-        ControlEdge, "/control/edge/<string:op>", resource_class_args=(queue,)
-    )
+    # api.add_resource(
+    #     ControlEdge, "/control/edge/<string:op>", resource_class_args=(queue,)
+    # )
     # service to check health of edge and federated server
     api.add_resource(ComputingResourceHealth, "/health", resource_class_kwargs=config)
 

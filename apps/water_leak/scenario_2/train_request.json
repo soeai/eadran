@@ -120,6 +120,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": ""
         }
       }
     }
@@ -136,7 +140,8 @@
       "get_weights": "get_weights"
     },
     "train_hyper_param": {
-      "epochs": 20
+      "epochs": 20,
+      "min_workers": 5
     }
   },
   "pre_train_model": {

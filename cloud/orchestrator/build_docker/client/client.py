@@ -93,7 +93,7 @@ class FedMarkClient(fl.client.NumPyClient):
                       'post_loss_value': self.post_train_loss,
                       'test_performance': self.test_performance,
                       'test_loss': self.test_loss,
-                      # 'evaluate_on_test': self.x_eval is not None,
+                      'evaluate_on_test': 1 if self.x_eval is not None else 0,
                       'train_duration': round(self.total_time, 0)}
             self.qoa_monitor.report(report={'train_round': config['fit_round'],
                                             "quality_of_model": report}, submit=True)
@@ -151,11 +151,17 @@ if __name__ == '__main__':
         dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
                                        client_conf['data_conf']['reader_module']["function_map"])
 
+        validate_file = None
+        if "validate_data" in client_conf['data_conf'].keys():
+            validate_file = client_conf['data_conf']['validate_data']
+
         if client_conf['data_conf']['method'] == 'local':
             filename = client_conf['data_conf']['location'].split('/')[-1]
-            X, y, X_val, y_val = dps_read_data_module("/data/" + filename)
+            X, y, X_val, y_val = dps_read_data_module("/data/" + filename,
+                                                      validate_file)
         else:
-            X, y, X_val, y_val = dps_read_data_module(client_conf['data_conf']['location'])
+            X, y, X_val, y_val = dps_read_data_module(client_conf['data_conf']['location'],
+                                                      validate_file)
 
         # # Create reporter
 

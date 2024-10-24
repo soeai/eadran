@@ -13,7 +13,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -28,7 +28,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -43,7 +43,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -58,7 +58,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -73,7 +73,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -88,7 +88,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -103,7 +103,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -118,7 +118,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -133,7 +133,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     },
@@ -148,7 +148,7 @@
         "reader_module": {
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
-          "function_map": "read_data"
+          "function_map": "read_data_without_process"
         }
       }
     }

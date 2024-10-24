@@ -117,7 +117,7 @@ class EdgeOrchestrator(HostObject):
                                     ),
                                     name="monitor_edge_container_process"
                                 ).start()
-                            status.append(r)
+                            status.append({config["options"]["--name"]: r})
                         response = {
                             "edge_id": self.edge_id,
                             "status": int(sum(status)),
@@ -129,7 +129,7 @@ class EdgeOrchestrator(HostObject):
                 elif req_msg["params"].lower() == "stop":
                     status = []
                     for container in req_msg["containers"]:
-                        status.append(self.stop_container(container))
+                        status.append({"container": self.stop_container(container)})
                     response = {
                         "edge_id": self.edge_id,
                         "status": int(sum(status)),

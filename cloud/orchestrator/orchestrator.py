@@ -39,8 +39,14 @@ def start_training_process(params, request_id, _orchestrator=None):
     pipeline.exec()
 
 
-def start_container_at_edge(params, request_id, _orchestrator=None):
+def start_container_at_edge(params, request_id, _orchestrator=None, fed_server_info=None):
     params["request_id"] = request_id
+    params["start_fed_resp"] = fed_server_info
+    # {
+    #     "ip": fed_server_ip,
+    #     "fed_server_port": self.fed_server_image_port,
+    #     "rabbit_port": self.rabbit_image_port,
+    # }
     pipeline = Pipeline(
         task_list=[Config4Edge(_orchestrator),
                    EdgeContainer(_orchestrator, config=_orchestrator.docker_image_conf)],
@@ -49,8 +55,31 @@ def start_container_at_edge(params, request_id, _orchestrator=None):
 
 
 def stop_container_at_edge(params, request_id, _orchestrator=None):
-    params["request_id"] = request_id
-    pass
+    if _orchestrator is not None:
+        count = 0
+        while True:
+            url_mgt_service = (
+                    _orchestrator.url_mgt_service + "/health?id=" + params["edge_id"]
+            )
+            edge_check = requests.get(url_mgt_service).json()
+            if edge_check["code"] == 0:
+                routing = edge_check["result"]["routing_key"]
+                params["request_id"] = request_id
+                params["command"] = Protocol.DOCKER_COMMAND
+                params["params"] = "stop"
+                logging.info(
+                    "Sending a stop container request [{}] to [{}]: {}".format(
+                        request_id, params["edge_id"],
+                    )
+                )
+                _orchestrator.send(params, routing_key=routing)
+                _orchestrator.handling_edges[request_id] = [params["edge_id"]]
+                break
+            elif count < 5:
+                logging.info("Edge is not available, sleeping 5 minutes to retry.")
+                time.sleep(5 * 60)
+            else:
+                break
 
 
 def start_qod_container_at_edge(params, request_id, _orchestrator=None):
