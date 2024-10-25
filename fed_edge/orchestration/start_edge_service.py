@@ -120,7 +120,7 @@ class EdgeOrchestrator(HostObject):
                             status.append({config["options"]["--name"]: r})
                         response = {
                             "edge_id": self.edge_id,
-                            "status": int(sum(status)),
+                            "status": int(sum(status.values())),
                             "detail": status,
                         }
                         # clean config
