@@ -139,7 +139,7 @@ class FedMarkClient(fl.client.NumPyClient):
             #                "status": "end"}, f)
             return self.test_loss, datasize, {"performance": self.test_performance}
         else:
-            return None
+            return 0, 0, {}
 
 
 if __name__ == '__main__':
