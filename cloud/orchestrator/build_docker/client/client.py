@@ -34,7 +34,7 @@ class FedMarkClient(fl.client.NumPyClient):
                  x_train, y_train,
                  x_eval=None, y_eval=None,
                  qoa_monitor=None,
-                 tester=False):
+                 is_tester=False):
 
         self.model_train = getattr(custom_module, client_profile['model_conf']['function_map']['train'])
         self.model_evaluate = getattr(custom_module, client_profile['model_conf']['function_map']['evaluate'])
@@ -42,7 +42,7 @@ class FedMarkClient(fl.client.NumPyClient):
         self.model_get_weights = getattr(custom_module, client_profile['model_conf']['function_map']['get_weights'])
 
         self.client_profile = client_profile
-        self.is_tester = tester
+        self.is_tester = is_tester
         self.x_train = x_train
         self.y_train = y_train
         self.x_eval = x_eval
@@ -187,8 +187,7 @@ if __name__ == '__main__':
             X, y, X_val, y_val = dps_read_data_module(client_conf['data_conf']['location'],
                                                       validate_file)
 
-        # # Create reporter
-
+        # Create reporter
         client_info = ClientInfo(
             name=client_conf['edge_id'],
             user_id=client_conf['consumer_id'],
@@ -217,12 +216,17 @@ if __name__ == '__main__':
             config_dict=cconfig
         )
 
+        tester = False
+        if "tester" in client_conf.keys():
+            tester = bool(client_conf['tester'])
+
         fed_client = FedMarkClient(client_profile=client_conf,
                                    custom_module=mcs_custom_module,
                                    x_train=X,
                                    y_train=y,
                                    x_eval=X_val,
                                    y_eval=y_val,
-                                   qoa_monitor=qoa_client).to_client()
+                                   qoa_monitor=qoa_client,
+                                   is_tester=tester).to_client()
 
         fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)
