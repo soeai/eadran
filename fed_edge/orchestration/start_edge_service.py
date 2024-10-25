@@ -105,8 +105,10 @@ class EdgeOrchestrator(HostObject):
                         with open(file_config_name, 'w') as f:
                             json.dump(req_msg['config'], f)
                         status = []
+                        run_code = 0
                         for config in req_msg["docker"]:
                             r = self.start_container(config, req_msg["request_id"], file_config_name)
+                            run_code += r
                             if r == 0 and req_msg['monitor']:
                                 Thread(
                                     target=self.container_monitor,
@@ -120,7 +122,7 @@ class EdgeOrchestrator(HostObject):
                             status.append({config["options"]["--name"]: r})
                         response = {
                             "edge_id": self.edge_id,
-                            "status": int(sum(status.values())),
+                            "status": int(run_code),
                             "detail": status,
                         }
                         # clean config
