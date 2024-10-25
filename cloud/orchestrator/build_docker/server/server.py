@@ -43,8 +43,9 @@ if __name__ == "__main__":
         # min_evaluate_clients=int(params.clients),
         min_available_clients=int(params.clients),
         on_fit_config_fn=fit_config,
-        on_evaluate_config_fn=evaluate_config,
-        evaluate_metrics_aggregation_fn=weighted_average)
+        on_evaluate_config_fn=evaluate_config
+        # evaluate_metrics_aggregation_fn=weighted_average
+    )
 
     # Start Flower server
     fl.server.start_server(

@@ -194,6 +194,9 @@ class Config4Edge(Generic):
             if dataset.get("create_qod"):
                 generated_config["create_qod"] = dataset["create_qod"]
 
+            if dataset.get("tester"):
+                generated_config["tester"] = dataset['tester']
+
             # Upload generated config to storage
             config_id[dataset["edge_id"]] = generated_config
             # config_id[dataset["edge_id"]] = upload_config(

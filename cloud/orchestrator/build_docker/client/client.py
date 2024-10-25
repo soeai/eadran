@@ -33,7 +33,8 @@ class FedMarkClient(fl.client.NumPyClient):
     def __init__(self, client_profile, custom_module,
                  x_train, y_train,
                  x_eval=None, y_eval=None,
-                 qoa_monitor=None):
+                 qoa_monitor=None,
+                 tester=False):
 
         self.model_train = getattr(custom_module, client_profile['model_conf']['function_map']['train'])
         self.model_evaluate = getattr(custom_module, client_profile['model_conf']['function_map']['evaluate'])
@@ -41,6 +42,7 @@ class FedMarkClient(fl.client.NumPyClient):
         self.model_get_weights = getattr(custom_module, client_profile['model_conf']['function_map']['get_weights'])
 
         self.client_profile = client_profile
+        self.is_tester = tester
         self.x_train = x_train
         self.y_train = y_train
         self.x_eval = x_eval
@@ -71,51 +73,73 @@ class FedMarkClient(fl.client.NumPyClient):
         pass
 
     def fit(self, parameters, config):  # type: ignore
-        start_time = time.time()
-        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
-            json.dump({"train_round": config['fit_round'],
-                       "status": "start"}, f)
-        # train
-        self.model_set_weights(parameters)
-        # get performance of first time
-        # if self.pre_train_performance == 0:
-        self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
-        self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
+        if not self.is_tester:
+            start_time = time.time()
+            with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+                json.dump({"train_round": config['fit_round'],
+                           "status": "start"}, f)
+            # train
+            self.model_set_weights(parameters)
+            # get performance of first time
+            # if self.pre_train_performance == 0:
+            self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
+            self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
 
-        weight = self.model_get_weights()
-        end_time = time.time()
+            # evaluate local model on testset
+            if self.x_eval is not None:
+                self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
 
-        if self.qoa_monitor is not None:
-            self.total_time += end_time - start_time
-            report = {'post_train_performance': self.post_train_performance,
-                      'pre_train_performance': self.pre_train_performance,
-                      'pre_loss_value': self.pre_train_loss,
-                      'post_loss_value': self.post_train_loss,
-                      'test_performance': self.test_performance,
-                      'test_loss': self.test_loss,
-                      'evaluate_on_test': 1 if self.x_eval is not None else 0,
-                      'train_duration': round(self.total_time, 0)}
-            self.qoa_monitor.report(report={'train_round': config['fit_round'],
-                                            "quality_of_model": report}, submit=True)
+            weight = self.model_get_weights()
+            end_time = time.time()
 
-        with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
-            json.dump({"train_round": config['fit_round'],
-                       "status": "end"}, f)
+            if self.qoa_monitor is not None:
+                self.total_time += end_time - start_time
+                report = {'post_train_performance': self.post_train_performance,
+                          'pre_train_performance': self.pre_train_performance,
+                          'pre_loss_value': self.pre_train_loss,
+                          'post_loss_value': self.post_train_loss,
+                          'test_performance': self.test_performance,
+                          'test_loss': self.test_loss,
+                          'evaluate_on_test': 1 if self.x_eval is not None else 0,
+                          'train_duration': round(self.total_time, 0)}
+                self.qoa_monitor.report(report={'train_round': config['fit_round'],
+                                                "quality_of_model": report}, submit=True)
 
-        return weight, len(self.x_train), {"performance": self.post_train_performance}
+            with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+                json.dump({"train_round": config['fit_round'],
+                           "status": "end"}, f)
+
+            return weight, len(self.x_train), {"performance": self.post_train_performance}
+        else:   # client is tester => without training
+            return parameters, 0, {}
 
     def evaluate(self, parameters, config):  # type: ignore
-        datasize = len(self.x_train)
-        start_time = time.time()
-        self.model_set_weights(parameters)
-        if self.x_eval is not None:
+        if self.is_tester and self.x_eval is not None:
+            with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+                json.dump({"train_round": config['val_round'],
+                           "status": "end"}, f)
+            self.model_set_weights(parameters)
             self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
             datasize = len(self.x_eval)
+
+            report = {'post_train_performance': 0,
+                      'pre_train_performance': 0,
+                      'pre_loss_value': 0,
+                      'post_loss_value': 0,
+                      'test_performance': self.test_performance,
+                      'test_loss': self.test_loss,
+                      'evaluate_on_test': 1,
+                      'train_duration': 0}
+
+            self.qoa_monitor.report(report={'train_round': config['val_round'],
+                                            "quality_of_model": report}, submit=True)
+
+            # with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+            #     json.dump({"train_round": config['val_round'],
+            #                "status": "end"}, f)
+            return self.test_loss, datasize, {"performance": self.test_performance}
         else:
-            self.test_performance, self.test_loss = self.model_evaluate(self.x_train, self.y_train)
-        end_time = time.time()
-        self.total_time = end_time - start_time
-        return self.test_loss, datasize, {"performance": self.test_performance}
+            return None
 
 
 if __name__ == '__main__':
