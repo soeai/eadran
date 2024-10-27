@@ -204,12 +204,16 @@ if __name__ == '__main__':
     else:
         X, y, _, _ = dps_read_data_module(client_conf['data_conf']['location'])
 
+    _com = completeness(X)
+    if _com < 1:
+        np.nan_to_num(X, copy=False)
+
     qod_metrics = {"class_overlap": class_overlap(X, y),
                    "class_parity": class_parity(y),
                    "label_purity": label_purity(X, y),
                    "feature_correlation": feature_correlation(X),
                    "feature_relevance": feature_relevance(X, y, 0.9),
-                   "completeness": completeness(X)}
+                   "completeness": _com}
 
     # report this metric to data service
     r = requests.post(url=client_conf['mgt_service'] + "/service/report",

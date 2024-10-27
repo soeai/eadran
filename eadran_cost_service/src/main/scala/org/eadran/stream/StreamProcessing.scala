@@ -143,7 +143,7 @@ object StreamProcessing {
     //      join two streams
     val joinStream = eventsStream.join(staticStream,
           eventsStream("application_name")===staticStream("model_id") &&
-          eventsStream("functionality")===staticStream("dataset_id"), "inner")
+          eventsStream("functionality")===staticStream("dataset_id"), "leftOuter")
       .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"name".alias("edge_id"),$"train_round",
         $"quality_of_model",$"resource_monitor",$"qom_function", $"resource_function",$"cost_qod",$"cost_context"
       ).as[Message]

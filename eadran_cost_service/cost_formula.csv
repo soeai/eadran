@@ -27,3 +27,4 @@ leak_case2,water_leak_05,19.9 * ($post_train_performance - $pre_train_performanc
 leak_case2,water_leak_06,29.9 * ($post_train_performance - $pre_train_performance) * $pre_train_performance,0.01 * $train_duration * (0.1 * $cpu_percentage + 0.001 * $memory_usage),10.64,2.99
 leak_case2,water_leak_07,19.9 * ($post_train_performance - $pre_train_performance) * $pre_train_performance,0.01 * $train_duration * (0.1 * $cpu_percentage + 0.001 * $memory_usage),9.8,2.99
 leak_case2,water_leak_08,19.9 * ($post_train_performance - $pre_train_performance) * $pre_train_performance,0.01 * $train_duration * (0.1 * $cpu_percentage + 0.001 * $memory_usage),9.74,2.99
+leak_case2,water_leak_tester,0,0,9.74,2.99

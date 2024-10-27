@@ -1,5 +1,5 @@
 {
-  "edge_id": "edge11",
+  "edge_id": "edge_tester",
   "amqp_in": {
     "amqp_collector": {
       "class": "amqp",
@@ -8,7 +8,7 @@
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_routing_key": "edge.#",
-        "in_queue": "queue_edge11"
+        "in_queue": "queue_edge_tester"
       }
     }
   },
@@ -19,7 +19,7 @@
         "end_point": "128.214.254.113",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
-        "out_routing_key": "orchestrator.edge11",
+        "out_routing_key": "orchestrator.edge_tester",
         "health_check_disable": true
       }
     }
@@ -39,8 +39,8 @@
       "module_name": "fed_edge/data_extraction_module/simple_data_extraction.py"
     }
   },
-  "amqp_health_report": "healthreport.edge11",
+  "amqp_health_report": "healthreport.edge_tester",
   "report_delay_time": 120,
-  "monitor_frequency": 10
+  "monitor_frequency": 5
 }
 

@@ -1,7 +1,7 @@
 {
   "consumer_id": "ttu_water_leak",
   "model_id": "leak_case2",
-  "run_id": 1,
+  "run_id": 2,
   "datasets": [
     {
       "dataset_id": "water_leak_01",
@@ -15,6 +15,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -30,6 +34,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -45,6 +53,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -60,6 +72,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -75,6 +91,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -90,6 +110,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -105,6 +129,10 @@
           "storage_ref_id": "ttu_water_leak_data_reader_v1",
           "module_name": "data_reader",
           "function_map": "read_data"
+        },
+        "validate_data": {
+          "method": "wget",
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
         }
       }
     },
@@ -123,7 +151,23 @@
         },
         "validate_data": {
           "method": "wget",
-          "location": ""
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
+        }
+      }
+    },
+    {
+      "dataset_id": "water_leak_tester",
+      "edge_id": "edge11",
+      "tester": true,
+      "read_info": {
+        "method": "local",
+        "location": "/home/labsoe/eadran/apps/water_leak/extracted_data/water_leak_tester_20241026154837.csv",
+        "format": "csv",
+        "params": "",
+        "reader_module": {
+          "storage_ref_id": "ttu_water_leak_data_reader_v1",
+          "module_name": "data_reader",
+          "function_map": "read_test_data"
         }
       }
     }
@@ -141,7 +185,7 @@
     },
     "train_hyper_param": {
       "epochs": 20,
-      "min_workers": 5
+      "min_workers": 9
     }
   },
   "pre_train_model": {

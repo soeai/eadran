@@ -41,6 +41,6 @@
   },
   "amqp_health_report": "healthreport.edge06",
   "report_delay_time": 120,
-  "monitor_frequency": 10
+  "monitor_frequency": 5
 }
 

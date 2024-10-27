@@ -39,9 +39,9 @@ def start_training_process(params, request_id, _orchestrator=None):
     pipeline.exec()
 
 
-def start_container_at_edge(params, request_id, _orchestrator=None, fed_server_info=None):
+def start_container_at_edge(params, request_id, _orchestrator=None):
     params["request_id"] = request_id
-    params["start_fed_resp"] = fed_server_info
+    params["start_fed_resp"] = params['fed_server']
     # {
     #     "ip": fed_server_ip,
     #     "fed_server_port": self.fed_server_image_port,
