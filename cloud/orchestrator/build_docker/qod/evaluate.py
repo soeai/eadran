@@ -206,6 +206,7 @@ if __name__ == '__main__':
 
     _com = completeness(X)
     if _com < 1:
+        logging.info("Fill NULL to zero...")
         np.nan_to_num(X, copy=False)
 
     qod_metrics = {"class_overlap": class_overlap(X, y),
