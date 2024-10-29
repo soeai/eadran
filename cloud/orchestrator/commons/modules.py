@@ -317,7 +317,7 @@ class EdgeContainer(Generic):
                 # WAIT 5 MINUTES FOR EDGE TO BE AVAILABLE
                 logging.info("Waiting to receive {} response(s) from edges".format(
                     len(self.orchestrator.handling_edges[params["request_id"]])))
-                time.sleep(5 * 60)
+                time.sleep(60)
 
             logging.info("Sent command to all edges.")
         except:

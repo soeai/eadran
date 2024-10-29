@@ -13,7 +13,7 @@ from kafka import KafkaProducer
 producer = KafkaProducer(bootstrap_servers="localhost:9092",
                          value_serializer=lambda m: json.dumps(m).encode('ascii'))
 
-with open("../../data_samples/log_water_leak_case2.txt") as f:
+with open("../../data_samples/log_water_leak_case1.txt") as f:
     for line in f.readlines():
         body = line.replace("\'", "\"")
         mess = json.loads(body)
