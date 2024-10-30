@@ -132,7 +132,9 @@
         },
         "validate_data": {
           "method": "wget",
-          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv",
+          "format": "csv",
+          "params": ""
         }
       }
     },
@@ -151,7 +153,9 @@
         },
         "validate_data": {
           "method": "wget",
-          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv"
+          "location": "https://raw.githubusercontent.com/dungcao/eadran-data/refs/heads/main/data-waterLeak/water_leak_tester_1s_500.csv",
+          "format": "csv",
+          "params": ""
         }
       }
     },

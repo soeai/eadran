@@ -66,11 +66,11 @@ class StateMgmt() extends Serializable {
           }
         }
 
-        if (state.costQoD == 0.0){
+        if (state.costQoD == 0.0 && input.cost_qod != null){
           state.costQoD = input.cost_qod
         }
 
-        if (state.costContext == 0.0){
+        if (state.costContext == 0.0 && input.cost_context != null){
           state.costContext = input.cost_context
         }
 

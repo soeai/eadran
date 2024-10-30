@@ -30,31 +30,51 @@ class FedMarkClient(fl.client.NumPyClient):
     #       get/set_weights
     #
 
-    def __init__(self, client_profile, custom_module,
-                 x_train, y_train,
-                 x_eval=None, y_eval=None,
-                 qoa_monitor=None,
-                 is_tester=False):
+    def __init__(self, client_profile,
+                 ml_model_module,
+                 read_data_fn,
+                 qoa_monitor=None):
 
-        self.model_train = getattr(custom_module, client_profile['model_conf']['function_map']['train'])
-        self.model_evaluate = getattr(custom_module, client_profile['model_conf']['function_map']['evaluate'])
-        self.model_set_weights = getattr(custom_module, client_profile['model_conf']['function_map']['set_weights'])
-        self.model_get_weights = getattr(custom_module, client_profile['model_conf']['function_map']['get_weights'])
+        self.model_train = getattr(ml_model_module, client_profile['model_conf']['function_map']['train'])
+        self.model_evaluate = getattr(ml_model_module, client_profile['model_conf']['function_map']['evaluate'])
+        self.model_set_weights = getattr(ml_model_module, client_profile['model_conf']['function_map']['set_weights'])
+        self.model_get_weights = getattr(ml_model_module, client_profile['model_conf']['function_map']['get_weights'])
 
         self.client_profile = client_profile
-        self.is_tester = is_tester
-        self.x_train = x_train
-        self.y_train = y_train
-        self.x_eval = x_eval
-        self.y_eval = y_eval
+        self.read_data_fn = read_data_fn
         self.qoa_monitor = qoa_monitor
-        self.post_train_performance = 0
-        self.post_train_loss = 0
-        self.pre_train_performance = 0
-        self.pre_train_loss = 0
-        self.test_performance = 0
-        self.test_loss = 0
-        self.total_time = 0
+        self.train_data_file = None
+        self.test_data_file = None
+        self.is_tester = False
+        self.static_data = True
+        self.x_train = None
+        self.y_train = None
+        self.x_eval = None
+        self.y_eval = None
+
+        if "tester" in client_conf.keys():
+            self.is_tester = bool(client_conf['tester'])
+
+        if "is_change" in client_conf['data_conf'].keys():
+            self.static_data = not bool(client_conf['data_conf']['is_change'])
+
+        self.train_data_file = client_conf['data_conf'].copy()
+        self.train_data_file.pop("reader_module", None)
+
+        if client_conf['data_conf']['method'] == 'local':
+            # extract only file name from the absolute path
+            self.train_data_file['location'] = "/data/" + client_conf['data_conf']['location'].split('/')[-1]
+
+        if "validate_data" in client_conf['data_conf'].keys():
+            self.test_data_file = client_conf['data_conf']['validate_data'].copy()
+            if client_conf['data_conf']['validate_data']['method'] == 'local':
+                # extract only file name from the absolute path
+                self.test_data_file['location'] = "/data/" + \
+                                                  client_conf['data_conf']['validate_data']['location'].split('/')[-1]
+
+        if self.static_data:
+            self.x_train, self.y_train, self.x_eval, self.y_eval = \
+                self.read_data_fn(self.train_data_file, self.test_data_file)
 
     def get_parameters(self, config):
 
@@ -78,40 +98,43 @@ class FedMarkClient(fl.client.NumPyClient):
             with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
                 json.dump({"train_round": config['fit_round'],
                            "status": "start"}, f)
-            # train
-            self.model_set_weights(parameters)
-            # get performance of first time
-            # if self.pre_train_performance == 0:
-            self.pre_train_performance, self.pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
-            self.post_train_performance, self.post_train_loss = self.model_train(self.x_train, self.y_train)
+            # read data
+            if not self.static_data:
+                self.x_train, self.y_train, self.x_eval, self.y_eval = \
+                    self.read_data_fn(self.train_data_file, self.test_data_file)
 
-            # evaluate local model on testset
-            if self.x_eval is not None:
-                self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
+            if self.x_train is not None:
+                # train
+                self.model_set_weights(parameters)
+                # evaluate global model before training
+                pre_train_performance, pre_train_loss = self.model_evaluate(self.x_train, self.y_train)
 
-            weight = self.model_get_weights()
-            end_time = time.time()
+                post_train_performance, post_train_loss, test_performance, test_loss = \
+                    self.model_train(self.x_train, self.y_train, self.x_eval, self.y_eval)
 
-            if self.qoa_monitor is not None:
-                self.total_time += end_time - start_time
-                report = {'post_train_performance': self.post_train_performance,
-                          'pre_train_performance': self.pre_train_performance,
-                          'pre_loss_value': self.pre_train_loss,
-                          'post_loss_value': self.post_train_loss,
-                          'test_performance': self.test_performance,
-                          'test_loss': self.test_loss,
-                          'evaluate_on_test': 1 if self.x_eval is not None else 0,
-                          'train_duration': round(self.total_time, 0)}
-                self.qoa_monitor.report(report={'train_round': config['fit_round'],
-                                                "quality_of_model": report}, submit=True)
+                weight = self.model_get_weights()
+                end_time = time.time()
 
-            with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
-                json.dump({"train_round": config['fit_round'],
-                           "status": "end"}, f)
+                if self.qoa_monitor is not None:
+                    report = {'post_train_performance': post_train_performance,
+                              'pre_train_performance': pre_train_performance,
+                              'pre_loss_value': pre_train_loss,
+                              'post_loss_value': post_train_loss,
+                              'test_performance': test_performance,
+                              'test_loss': test_loss,
+                              'evaluate_on_test': 1 if self.x_eval is not None else 0,
+                              'train_duration': round(end_time - start_time, 0)}
+                    self.qoa_monitor.report(report={'train_round': config['fit_round'],
+                                                    "quality_of_model": report}, submit=True)
 
-            return weight, len(self.x_train), {"performance": self.post_train_performance}
-        else:   # client is tester => without training
-            return parameters, 0, {}
+                with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
+                    json.dump({"train_round": config['fit_round'],
+                               "status": "end"}, f)
+
+                return weight, len(self.x_train), {"performance": post_train_performance}
+
+        # client is tester or cannot read data=> without training
+        return parameters, 0, {}
 
     def evaluate(self, parameters, config):  # type: ignore
         if self.is_tester and self.x_eval is not None:
@@ -119,15 +142,15 @@ class FedMarkClient(fl.client.NumPyClient):
                 json.dump({"train_round": config['val_round'],
                            "status": "end"}, f)
             self.model_set_weights(parameters)
-            self.test_performance, self.test_loss = self.model_evaluate(self.x_eval, self.y_eval)
+            test_performance, test_loss = self.model_evaluate(self.x_eval, self.y_eval)
             datasize = len(self.x_eval)
 
             report = {'post_train_performance': 0,
                       'pre_train_performance': 0,
                       'pre_loss_value': 0,
                       'post_loss_value': 0,
-                      'test_performance': self.test_performance,
-                      'test_loss': self.test_loss,
+                      'test_performance': test_performance,
+                      'test_loss': test_loss,
                       'evaluate_on_test': 1,
                       'train_duration': 0}
 
@@ -137,7 +160,7 @@ class FedMarkClient(fl.client.NumPyClient):
             # with open("/share_volume/{}.json".format(self.client_profile['edge_id']), "w") as f:
             #     json.dump({"train_round": config['val_round'],
             #                "status": "end"}, f)
-            return self.test_loss, datasize, {"performance": self.test_performance}
+            return test_loss, datasize, {"performance": test_performance}
         else:
             return 0.0, 1, {"performance": 0.0}
 
@@ -168,24 +191,12 @@ if __name__ == '__main__':
                     client_conf['model_conf']['module_name'] + ".py")
 
         # import custom code of market consumer -- model
-        mcs_custom_module = __import__(client_conf['model_conf']['module_name'])
+        mcs_model_module = __import__(client_conf['model_conf']['module_name'])
 
-        print("OK-->: " + str(mcs_custom_module))
+        # print("OK-->: " + str(mcs_model_module))
         # import code of data provider to read data
         dps_read_data_module = getattr(__import__(client_conf['data_conf']['reader_module']['module_name']),
                                        client_conf['data_conf']['reader_module']["function_map"])
-
-        validate_file = None
-        if "validate_data" in client_conf['data_conf'].keys():
-            validate_file = client_conf['data_conf']['validate_data']
-
-        if client_conf['data_conf']['method'] == 'local':
-            filename = client_conf['data_conf']['location'].split('/')[-1]
-            X, y, X_val, y_val = dps_read_data_module("/data/" + filename,
-                                                      validate_file)
-        else:
-            X, y, X_val, y_val = dps_read_data_module(client_conf['data_conf']['location'],
-                                                      validate_file)
 
         # Create reporter
         client_info = ClientInfo(
@@ -210,23 +221,15 @@ if __name__ == '__main__':
         cconfig = ClientConfig(
             client=client_info,
             connector=[connector_config]
-            )
+        )
 
         qoa_client = QoaClient(
             config_dict=cconfig
         )
 
-        tester = False
-        if "tester" in client_conf.keys():
-            tester = bool(client_conf['tester'])
-
         fed_client = FedMarkClient(client_profile=client_conf,
-                                   custom_module=mcs_custom_module,
-                                   x_train=X,
-                                   y_train=y,
-                                   x_eval=X_val,
-                                   y_eval=y_val,
-                                   qoa_monitor=qoa_client,
-                                   is_tester=tester).to_client()
+                                   ml_model_module=mcs_model_module,
+                                   read_data_fn=dps_read_data_module,
+                                   qoa_monitor=qoa_client).to_client()
 
         fl.client.start_client(server_address=client_conf['fed_server'], client=fed_client)

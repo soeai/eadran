@@ -59,12 +59,28 @@ def create_model(input_shape, num_class):
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=["accuracy"])
 
 
-def fit(x, y, epoch=10, batch_size=128):
-    history = model.fit(x, y, epochs=epoch, batch_size=batch_size)
-    time.sleep(random.randint(10, 15))
-    return history.history["accuracy"][-1], history.history["loss"][-1]
+# return 4 values: performance, loss, val_performance, val_loss
+def fit(x, y, x_val=None, y_val=None, epoch=10, batch_size=128):
+    if x_val is not None:
+        history = model.fit(x, y,
+                            validation_data=(x_val, y_val),
+                            epochs=epoch,
+                            batch_size=batch_size)
+        time.sleep(random.randint(10, 15))
+        return history.history["accuracy"][-1], \
+               history.history["loss"][-1], \
+               history.history["val_accuracy"][-1], \
+               history.history["val_loss"][-1]
+    else:
+        history = model.fit(x, y,
+                            epochs=epoch,
+                            batch_size=batch_size)
+        time.sleep(random.randint(10, 15))
+        return history.history["accuracy"][-1], \
+               history.history["loss"][-1], 0, 0
 
 
+# return performance, loss
 def evaluate(x, y, batch_size=128):
     loss, acc = model.evaluate(x, y, batch_size)
     return acc, loss

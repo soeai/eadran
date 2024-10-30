@@ -205,9 +205,7 @@ if __name__ == '__main__':
         X, y, _, _ = dps_read_data_module(client_conf['data_conf']['location'])
 
     _com = completeness(X)
-    if _com < 1:
-        logging.info("Fill NULL to zero...")
-        np.nan_to_num(X, copy=False)
+    np.nan_to_num(X, copy=False)
 
     qod_metrics = {"class_overlap": class_overlap(X, y),
                    "class_parity": class_parity(y),
