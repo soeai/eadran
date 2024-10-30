@@ -168,77 +168,110 @@
                     "dataset_id": "water_leak_10",
                     "metric": {
                         "class_overlap": 0.9388,
-                        "class_parity": 0.035,
+                        "class_parity": 0.965,
                         "label_purity": 0.3196,
                         "feature_correlation": 0.857,
                         "feature_relevance": 0.9052,
-                        "completeness": 1.0
+                        "completeness": 0.7762
                     }
                 },
                 {
                     "dataset_id": "water_leak_09",
                     "metric": {
                         "class_overlap": 0.9492,
-                        "class_parity": 0.0056,
+                        "class_parity": 0.9944,
                         "label_purity": 0.3108,
                         "feature_correlation": 0.849,
                         "feature_relevance": 0.9052,
-                        "completeness": 1.0
+                        "completeness": 0.7628
                     }
                 },
                 {
                     "dataset_id": "water_leak_01",
                     "metric": {
                         "class_overlap": 0.9528,
-                        "class_parity": 0.0202,
+                        "class_parity": 0.9798,
                         "label_purity": 0.3272,
                         "feature_correlation": 0.8547,
                         "feature_relevance": 0.9048,
-                        "completeness": 1.0
+                        "completeness": 0.7676
                     }
                 },
                 {
                     "dataset_id": "water_leak_02",
                     "metric": {
-                        "class_overlap": 0.9464,
-                        "class_parity": 0.0133,
+                        "class_overlap": 0.963,
+                        "class_parity": 0.9867,
                         "label_purity": 0.34,
                         "feature_correlation": 0.8578,
                         "feature_relevance": 0.9051,
-                        "completeness": 1.0
+                        "completeness": 0.7794
                     }
                 },
                 {
                     "dataset_id": "water_leak_05",
                     "metric": {
-                        "class_overlap": 0.95,
-                        "class_parity": 0.0391,
-                        "label_purity": 0.3132,
-                        "feature_correlation": 0.8568,
-                        "feature_relevance": 0.9052,
-                        "completeness": 1.0
+                        "class_overlap": 0.958,
+                        "class_parity": 0.9609,
+                        "label_purity": 0.297,
+                        "feature_correlation": 0.859,
+                        "feature_relevance": 0.905,
+                        "completeness": 0.7783
                     }
                 },
                 {
                     "dataset_id": "water_leak_03",
                     "metric": {
-                        "class_overlap": 0.9428,
-                        "class_parity": 0.0298,
-                        "label_purity": 0.3372,
-                        "feature_correlation": 0.8603,
+                        "class_overlap": 0.951,
+                        "class_parity": 0.9702,
+                        "label_purity": 0.316,
+                        "feature_correlation": 0.861,
                         "feature_relevance": 0.9049,
-                        "completeness": 1.0
+                        "completeness": 0.7708
                     }
                 },
                 {
                     "dataset_id": "water_leak_04",
                     "metric": {
+                        "class_overlap": 0.958,
+                        "class_parity": 0.982,
+                        "label_purity": 0.313,
+                        "feature_correlation": 0.86,
+                        "feature_relevance": 0.905,
+                        "completeness": 0.782
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_06",
+                    "metric": {
                         "class_overlap": 0.9504,
-                        "class_parity": 0.018,
-                        "label_purity": 0.3184,
-                        "feature_correlation": 0.8544,
+                        "class_parity": 0.97,
+                        "label_purity": 0.306,
+                        "feature_correlation": 0.855,
                         "feature_relevance": 0.9053,
-                        "completeness": 1.0
+                        "completeness": 0.775
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_07",
+                    "metric": {
+                        "class_overlap": 0.957,
+                        "class_parity": 0.986,
+                        "label_purity": 0.296,
+                        "feature_correlation": 0.862,
+                        "feature_relevance": 0.905,
+                        "completeness": 0.771
+                    }
+                },
+                {
+                    "dataset_id": "water_leak_08",
+                    "metric": {
+                        "class_overlap": 0.968,
+                        "class_parity": 0.978,
+                        "label_purity": 0.285,
+                        "feature_correlation": 0.866,
+                        "feature_relevance": 0.906,
+                        "completeness": 0.766
                     }
                 }
             ]

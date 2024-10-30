@@ -24,14 +24,26 @@
 
 import pandas as pd
 import numpy as np
+# from cloud.orchestrator.build_docker.qod.evaluate import completeness, class_parity, label_purity
 
-df = pd.read_csv("../../apps/water_leak/data_preprocessing/preprocessData/scenario_2/split_8.csv")
+# df = pd.read_csv("/Users/dungcao/Desktop/water_leak/water_leak_10_20241027132623.csv")
+df = pd.read_csv("../../apps/water_leak/data_preprocessing/preprocessData/scenario_2/split_5.csv")
+
 # null_count = df.isnull().sum().sum()
 # total_count = np.prod(df.shape)
 #
 # print(np.around(1 - null_count / total_count, 4))
 print(df['target'].value_counts())
 y = df['target']
+X = df.drop(['target'], axis=1)
+
+df = pd.DataFrame(X)
+null_count = df.isnull().sum().sum()
+total_count = np.prod(df.shape)
+
+print(np.around(1 - null_count / total_count, 4))
+
+# print(completeness(X))
 values, counts = np.unique(y, return_counts=True)
 max_count = max(counts)
 # print(max_count)
@@ -41,6 +53,6 @@ mean_count = counts.mean()
 # print(mean_count)
 counts = counts - mean_count
 # print(counts)
-print(np.around(np.absolute(counts).sum()/len(counts),4))
+print(np.around(1 - np.absolute(counts).sum()/len(counts),4))
 
 

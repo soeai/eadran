@@ -166,7 +166,8 @@
       "get_weights": "get_weights"
     },
     "train_hyper_param": {
-      "epochs": 20
+      "epochs": 20,
+      "min_workers": 9
     }
   },
   "pre_train_model": {
