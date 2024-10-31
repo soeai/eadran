@@ -122,7 +122,7 @@ class EdgeOrchestrator(HostObject):
                             status.append({config["options"]["--name"]: r})
                         response = {
                             "edge_id": self.edge_id,
-                            "status": int(run_code),
+                            "status": run_code,
                             "detail": status,
                         }
                         # clean config
@@ -130,11 +130,14 @@ class EdgeOrchestrator(HostObject):
 
                 elif req_msg["params"].lower() == "stop":
                     status = []
+                    run_code = 0
                     for container in req_msg["containers"]:
-                        status.append({"container": self.stop_container(container)})
+                        r = self.stop_container(container)
+                        status.append({"container_{}".format(container): r})
+                        run_code += r
                     response = {
                         "edge_id": self.edge_id,
-                        "status": int(sum(status)),
+                        "status": run_code,
                         "detail": status,
                     }
             elif req_msg["command"].lower() == Protocol.DATA_EXTRACTION_COMMAND:
@@ -249,7 +252,7 @@ class EdgeOrchestrator(HostObject):
                 logging.info("Stopping the running container...")
                 subprocess.run(["docker", "stop", container_name])
                 subprocess.run(["docker", "remove", container_name])
-                self.containers.pop(container_name)
+                self.containers.remove(container_name)
                 logging.info(
                     "The container [{}] has been stopped...".format(container_name)
                 )
