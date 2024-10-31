@@ -68,8 +68,8 @@ def stop_container_at_edge(params, request_id, _orchestrator=None):
                 params["command"] = Protocol.DOCKER_COMMAND
                 params["params"] = "stop"
                 logging.info(
-                    "Sending a stop container request [{}] to [{}]: {}".format(
-                        request_id, params["edge_id"],
+                    "Sending a stop container request [{}] to [{}]".format(
+                        request_id, params["edge_id"]
                     )
                 )
                 _orchestrator.send(params, routing_key=routing)
