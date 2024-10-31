@@ -391,15 +391,16 @@ class EdgeOrchestrator(HostObject):
                         # print(f"Memory Limit: {stats['memory_stats']['limit']} bytes")
                         # print(f"Network I/O: {stats['networks']}")
                 else:
+                    self.containers.remove(container_name)
                     break
                 time.sleep(self.config['monitor_frequency'])  # Wait before getting stats again
 
         except docker.errors.NotFound:
-            print(f"Container '{container_name}' not found.")
+            logging.error(f"Container '{container_name}' not found.")
         except KeyboardInterrupt:
-            print("Monitoring stopped.")
+            logging.error("Monitoring stopped.")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logging.error(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
