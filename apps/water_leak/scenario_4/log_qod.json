@@ -1,0 +1,6 @@
+{
+"RUN1_EXT": {"class_overlap": 0.892, "class_parity": 0.9286, "feature_correlation": 0.7934, "feature_relevance": 0.9038, "completeness": 0.7779},
+"RUN2-Split1": {"class_overlap": 0.9187358916478555, "class_parity": 0.7045, "feature_correlation": 0.7667, "feature_relevance": 0.9069, "completeness": 0.7941},
+"RUN3-SMOTE": {"class_overlap": 0.9975757575757576, "class_parity": 1.0, "feature_correlation": 0.7357, "feature_relevance": 0.904, "completeness": 1.0},
+"RUN4_MICE": {"class_overlap": 0.8397291196388262, "class_parity": 0.7045, "feature_correlation": 0.1745, "feature_relevance": 0.9052, "completeness": 1.0}
+}
