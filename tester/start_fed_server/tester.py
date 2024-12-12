@@ -16,7 +16,7 @@ class Simulation(object):
         # self.thread = Thread(target=self.start_receive)
         # self.thread.start()
         self.config = {
-                "end_point":"192.168.10.235",
+                "end_point":"...",
                 "exchange_name": "fedmarketplace",
                 "exchange_type": "topic",
                 "out_routing_key": "edge.fedserver001"

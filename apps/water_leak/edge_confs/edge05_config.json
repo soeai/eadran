@@ -4,7 +4,7 @@
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "128.214.254.113",
+        "end_point": "...",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_routing_key": "edge.#",
@@ -16,7 +16,7 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point": "128.214.254.113",
+        "end_point": "...",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "out_routing_key": "orchestrator.edge05",
