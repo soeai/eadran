@@ -43,7 +43,7 @@ class MessageProxy(HostObject):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Receive from edge")
-    parser.add_argument("--proxy", type=str, default="128.214.255.226")
+    parser.add_argument("--proxy", type=str, default="...")
     parser.add_argument("--topic", type=str, default="eadran_water_leak")
     args = parser.parse_args()
 

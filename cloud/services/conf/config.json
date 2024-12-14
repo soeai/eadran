@@ -1,5 +1,5 @@
 {
-    "mongo_url": "mongodb://128.214.254.113:27017/",
+    "mongo_url": "mongodb://<IP>:<PORT>/",
     "metadata":{
         "db_name": "db_metadata",
         "db_col": "col_metadata"
@@ -33,7 +33,7 @@
              "amqp_collector": {
                  "class": "amqp",
                  "conf": {
-                     "end_point": "128.214.254.113",
+                     "end_point": "...",
                      "exchange_name": "fedmarketplace",
                      "exchange_type": "topic",
                      "in_routing_key": "healthreport.#",
@@ -47,7 +47,7 @@
             "amqp_connector": {
                 "class": "amqp",
                 "conf": {
-                    "end_point": "128.214.254.113",
+                    "end_point": "...",
                     "exchange_name": "fedmarketplace",
                     "exchange_type": "topic",
                     "out_routing_key": "orchestrator.service",
@@ -56,5 +56,5 @@
             }
         }
     },
-    "secret_key": "PRIVATE-KEY-ENCRYPT-EADRAN-2024"
+    "secret_key": "..."
 }

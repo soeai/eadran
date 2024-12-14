@@ -3,7 +3,7 @@
     "amqp_collector": {
       "class": "amqp",
       "conf": {
-        "end_point": "128.214.254.113",
+        "end_point": "...",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "in_queue": "orchestrator.queue",
@@ -15,7 +15,7 @@
     "amqp_connector": {
       "class": "amqp",
       "conf": {
-        "end_point":"128.214.254.113",
+        "end_point":"...",
         "exchange_name": "fedmarketplace",
         "exchange_type": "topic",
         "out_routing_key": "edge",
@@ -26,15 +26,15 @@
   "database": {
     "collection": "registration",
     "db_name": "rohe_observation",
-    "url": "mongodb://128.214.254.113:27017/"
+    "url": "mongodb://<IP>:<PORT>/"
   },
   "false_rate": 3,
   "output_folder": "/results/",
   "sample_rate": 50,
   "timer": 10,
 
-  "url_mgt_service": "http://128.214.254.113:8080",
-  "url_storage_service": "http://128.214.254.113:8081",
+  "url_mgt_service": "http://<IP>:<PORT>",
+  "url_storage_service": "http://<IP>:<PORT>",
   "server_id": "fedserver001",
   "fed_server_image_name": "dungcao1979/eadran-fed-server",
   "fed_server_image_port": 8080,
