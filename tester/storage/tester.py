@@ -1,9 +1,9 @@
 from cloud.services.storage import MinioStorage
 
 conf = {
-    "minio_server": "192.168.10.235:9000",
-    "minio_access": "rofavfHE2cXiAmpnYRVm",
-    "minio_secret": "Foj8xObF2k1OQHDQ2qkB6tqEjQFJJyFqYgA8kMv9"
+    "minio_server": "...",
+    "minio_access": "...",
+    "minio_secret": "..."
   }
 
 st = MinioStorage(conf)

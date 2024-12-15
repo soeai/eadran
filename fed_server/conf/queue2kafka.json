@@ -1,7 +1,7 @@
 {
     "amqp_collector":{
         "conf":{
-            "end_point": "128.214.255.226",
+            "end_point": "...",
             "exchange_name": "fml_model_report",
             "exchange_type": "topic",
             "in_queue": "service.queue",
@@ -9,7 +9,7 @@
         }
     },
     "kafka_connector": {
-        "bootstrap_servers": "localhost:9092",
+        "bootstrap_servers": "...",
         "topic": "eadran_water_leak"
     }
 }

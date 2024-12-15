@@ -1,6 +1,6 @@
 {
     "kafka_connector": {
-        "bootstrap_servers": "localhost:9092",
-        "topic": "eadran_influxdb"
+        "bootstrap_servers": "...",
+        "topic": "..."
     }
 }

@@ -1,12 +1,12 @@
 {
-  "mongo_url": "mongodb://128.214.254.113:27017/",
+  "mongo_url": "mongodb://...",
   "storage":{
         "db_name": "storage_db_name",
         "db_col": "storage_db_collection"
     },
   "minio_conf": {
-    "minio_server": "128.214.254.113:9000",
-      "minio_access": "root",
-    "minio_secret": "pwd12345"
+    "minio_server": "...",
+      "minio_access": "...",
+    "minio_secret": "..."
   }
 }
