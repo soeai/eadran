@@ -9,8 +9,10 @@ case class Message(
                     edge_id:  String  = "",
                     quality_of_model:  QualityOfModel  = new QualityOfModel,
                     resource_monitor: ResourceMonitor = new ResourceMonitor,
-                    qom_function: String = "",
-                    resource_function: String = "",
+                    qom_function_name: String = "",
+                    unit_cost_qom: String = "",
+                    resource_function_name: String = "",
+                    unit_cost_resource: String = "",
                     cost_qod: Double = 0.0,
                     cost_context: Double = 0.0
                   )

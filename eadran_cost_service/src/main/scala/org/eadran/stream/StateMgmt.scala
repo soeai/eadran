@@ -1,7 +1,8 @@
 package org.eadran.stream
 
 import org.apache.spark.sql.streaming.GroupState
-import org.eadran.utils.{CostState, Message, Util}
+import org.eadran.utils.{CostState, Message, Util, ResourceMonitor, QualityOfModel}
+import org.eadran.cost.Functions
 
 class StateMgmt() extends Serializable {
 
@@ -84,29 +85,17 @@ class StateMgmt() extends Serializable {
 
         if (input.quality_of_model != null) {
           //        compute memory by Mb
-          if (input.resource_function != null) {
-            val eval_resource = input.resource_function
-              .replace("$cpu_percentage", state.maxCpu.toString)
-              .replace("$memory_usage", (state.maxMemory / 1024 / 1024).toString)
-              //          .replace("$gpu",input.resource_monitor.gpu.toString)
-              //          .replace("$network",input.resource_monitor.network.toString)
-              //          .replace("$storage",input.resource_monitor.storage.toString)
-              .replace("$train_duration", (input.quality_of_model.train_duration / 60).toString) // convert duration to minute
-
-            state.costResource = Util.eval(eval_resource)
+          if (input.unit_cost_resource != null) {
+            var resource_m: ResourceMonitor = ResourceMonitor(state.maxCpu,
+                                                              state.maxMemory / 1024 / 1024)
+            state.costResource = Functions.functionMap(input.resource_function_name)(Seq(resource_m,
+                                                                  input.quality_of_model.train_duration / 60,
+                                                                  input.unit_cost_resource))
           }
 
-          if (input.qom_function != null) {
-            val eval_qom = input.qom_function
-              .replace("$post_train_performance", input.quality_of_model.post_train_performance.toString)
-              .replace("$pre_train_performance", input.quality_of_model.pre_train_performance.toString)
-              .replace("$test_performance", input.quality_of_model.test_performance.toString)
-              .replace("$test_loss", input.quality_of_model.test_loss.toString)
-              .replace("$post_loss_value", input.quality_of_model.post_loss_value.toString)
-              .replace("$pre_loss_value", input.quality_of_model.pre_loss_value.toString)
-              .replace("$train_duration", input.quality_of_model.train_duration.toString)
-
-            state.costQoM = Util.eval(eval_qom)
+          if (input.unit_cost_qom != null) {
+            state.costQoM = Functions.functionMap(input.qom_function_name)(Seq(input.quality_of_model,
+                                                        input.unit_cost_qom))
           }
           state.improvementDiff = input.quality_of_model.post_train_performance - input.quality_of_model.pre_train_performance
           state.performancePost = input.quality_of_model.post_train_performance

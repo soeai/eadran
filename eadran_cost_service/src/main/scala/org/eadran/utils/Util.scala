@@ -10,18 +10,13 @@ import scala.tools.reflect.ToolBox
 import java.lang.Double
 
 object Util {
-  val toolbox = currentMirror.mkToolBox()
+//  val toolbox = currentMirror.mkToolBox()
   def uuid = java.util.UUID.randomUUID.toString
   def localToGMT() = {
 
     val utc = LocalDateTime.now(ZoneOffset.UTC)
     Timestamp.valueOf(utc)
 
-  }
-  def eval(exp: String) ={
-    val compe = toolbox.eval(toolbox.parse(exp))
-    val value = math.max(0.0, Double.parseDouble(compe.toString))
-    value
   }
 
   def mesageSchema(spark: SparkSession) = {

@@ -128,8 +128,10 @@ object StreamProcessing {
 //      val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
       .select($"model_id".alias("model_id"),
         $"data_source_id".alias("dataset_id"),
-        $"qom_function", $"resource_function",
-        $"resource_function", $"resource_function",
+        $"qom_function_name",
+        $"unit_cost_qom",
+        $"resource_function_name",
+        $"unit_cost_resource",
         $"cost_qod".cast("double").alias("cost_qod"),
         $"cost_context".cast("double").alias("cost_context"))
 
@@ -145,7 +147,7 @@ object StreamProcessing {
           eventsStream("application_name")===staticStream("model_id") &&
           eventsStream("functionality")===staticStream("dataset_id"), "leftOuter")
       .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"name".alias("edge_id"),$"train_round",
-        $"quality_of_model",$"resource_monitor",$"qom_function", $"resource_function",$"cost_qod",$"cost_context"
+        $"quality_of_model",$"resource_monitor", $"qom_function_name", $"unit_cost_qom", $"resource_function_name", $"unit_cost_resource",$"cost_qod",$"cost_context"
       ).as[Message]
 
 //    joinStream.writeStream
