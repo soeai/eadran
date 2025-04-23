@@ -128,11 +128,11 @@ object StreamProcessing {
 //      val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
       .select($"model_id".alias("model_id"),
         $"data_source_id".alias("dataset_id"),
-        $"qom_function_name",
-        $"unit_cost_qom",
-        $"resource_function_name",
-        $"unit_cost_resource",
-        $"cost_qod".cast("double").alias("cost_qod"),
+        $"qom_cost_function",
+        $"qom_base_cost",
+        $"resource_cost_function",
+        $"resource_base_cost",
+        $"cost_quantity_quality".cast("double").alias("cost_quantity_quality"),
         $"cost_context".cast("double").alias("cost_context"))
 
     //      load static info from cassandra
@@ -147,7 +147,8 @@ object StreamProcessing {
           eventsStream("application_name")===staticStream("model_id") &&
           eventsStream("functionality")===staticStream("dataset_id"), "leftOuter")
       .select($"model_id",$"run_id",$"dataset_id",$"timestamp",$"name".alias("edge_id"),$"train_round",
-        $"quality_of_model",$"resource_monitor", $"qom_function_name", $"unit_cost_qom", $"resource_function_name", $"unit_cost_resource",$"cost_qod",$"cost_context"
+        $"quality_of_model",$"resource_monitor", $"qom_cost_function", $"qom_base_cost",
+        $"resource_cost_function", $"resource_base_cost",$"cost_quantity_quality",$"cost_context"
       ).as[Message]
 
 //    joinStream.writeStream
@@ -179,25 +180,25 @@ object StreamProcessing {
 
 
     //    ========= TO KAFKA ========
-    finalStream
-      .selectExpr("to_json(struct(*)) AS value")
-      .writeStream
-      .trigger(Trigger.ProcessingTime("10 seconds"))
-      .format("kafka")
-      .option("checkpointLocation", checkpoint)
-      .option("kafka.bootstrap.servers", kafkaBrokers)
-      .option("topic", kafkaTopic_out)
-      .outputMode("update")
-      .start()
-
-    //    ========= TO CONSOLE ========
 //    finalStream
+//      .selectExpr("to_json(struct(*)) AS value")
 //      .writeStream
 //      .trigger(Trigger.ProcessingTime("10 seconds"))
-//      .format("console")
+//      .format("kafka")
 //      .option("checkpointLocation", checkpoint)
+//      .option("kafka.bootstrap.servers", kafkaBrokers)
+//      .option("topic", kafkaTopic_out)
 //      .outputMode("update")
 //      .start()
+
+    //    ========= TO CONSOLE ========
+    finalStream
+      .writeStream
+      .trigger(Trigger.ProcessingTime("10 seconds"))
+      .format("console")
+      .option("checkpointLocation", checkpoint)
+      .outputMode("update")
+      .start()
 
     //    ========= TO CASSANDRA ========
 //    finalStream

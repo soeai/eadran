@@ -9,11 +9,11 @@ case class Message(
                     edge_id:  String  = "",
                     quality_of_model:  QualityOfModel  = new QualityOfModel,
                     resource_monitor: ResourceMonitor = new ResourceMonitor,
-                    qom_function_name: String = "",
-                    unit_cost_qom: String = "",
-                    resource_function_name: String = "",
-                    unit_cost_resource: String = "",
-                    cost_qod: Double = 0.0,
+                    qom_cost_function: String = "",
+                    qom_base_cost: String = "",
+                    resource_cost_function: String = "",
+                    resource_base_cost: String = "",
+                    cost_quantity_quality: Double = 0.0,
                     cost_context: Double = 0.0
                   )
 
@@ -55,3 +55,17 @@ case class CostState(
                       var edgeId: String,
                       var done: Boolean
                     )
+
+case class BaseCostResource(
+                             by_minute: Double = 0.0,
+                             cpu: Option[Double],
+                             memory: Option[Double],
+                             gpu: Option[Double],
+                             network: Option[Double],
+                             storage: Option[Double]
+                           )
+
+case class BaseCostQoM(
+                      performance: Double = 0.0,
+                      loss: Option[Double]
+                      )

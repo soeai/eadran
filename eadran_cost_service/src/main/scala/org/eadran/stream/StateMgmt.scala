@@ -67,8 +67,8 @@ class StateMgmt() extends Serializable {
           }
         }
 
-        if (state.costQoD == 0.0 && input.cost_qod != null){
-          state.costQoD = input.cost_qod
+        if (state.costQoD == 0.0 && input.cost_quantity_quality != null){
+          state.costQoD = input.cost_quantity_quality
         }
 
         if (state.costContext == 0.0 && input.cost_context != null){
@@ -85,17 +85,17 @@ class StateMgmt() extends Serializable {
 
         if (input.quality_of_model != null) {
           //        compute memory by Mb
-          if (input.unit_cost_resource != null) {
+          if (input.resource_base_cost != null) {
             var resource_m: ResourceMonitor = ResourceMonitor(state.maxCpu,
                                                               state.maxMemory / 1024 / 1024)
-            state.costResource = Functions.functionMap(input.resource_function_name)(Seq(resource_m,
+            state.costResource = Functions.functionMap(input.resource_cost_function)(Seq(resource_m,
                                                                   input.quality_of_model.train_duration / 60,
-                                                                  input.unit_cost_resource))
+                                                                  input.resource_base_cost))
           }
 
-          if (input.unit_cost_qom != null) {
-            state.costQoM = Functions.functionMap(input.qom_function_name)(Seq(input.quality_of_model,
-                                                        input.unit_cost_qom))
+          if (input.qom_base_cost != null) {
+            state.costQoM = Functions.functionMap(input.qom_cost_function)(Seq(input.quality_of_model,
+                                                        input.qom_base_cost))
           }
           state.improvementDiff = input.quality_of_model.post_train_performance - input.quality_of_model.pre_train_performance
           state.performancePost = input.quality_of_model.post_train_performance

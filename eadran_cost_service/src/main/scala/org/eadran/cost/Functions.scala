@@ -3,35 +3,46 @@ package org.eadran.cost
 import org.eadran.utils.{QualityOfModel, ResourceMonitor}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.eadran.utils.{BaseCostResource, BaseCostQoM}
 object Functions {
 
   implicit val formats: Formats = DefaultFormats
 
   val functionMap: Map[String, Seq[Any] => Double] = Map(
-    "ucc_qom_cost_eval" -> { args =>
-      val model = args(0).asInstanceOf[QualityOfModel]
-      val str = args(1).asInstanceOf[String]
-      ucc_qom_cost_eval(model, str)
+    "qom_cost_by_train_performance" -> { args =>
+      val qom = args(0).asInstanceOf[QualityOfModel]
+      val cost = args(1).asInstanceOf[String]
+      qom_cost_by_train_performance(qom, cost)
     },
-    "ucc_resource_cost_eval" -> { args =>
-      val model = args(0).asInstanceOf[ResourceMonitor]
-      val time = args(1).asInstanceOf[Double]
+    "resource_cost_by_cpu_mem" -> { args =>
+      val resource = args(0).asInstanceOf[ResourceMonitor]
+      val training_time = args(1).asInstanceOf[Double]
       val cost = args(2).asInstanceOf[String]
-      ucc_resource_cost_eval(model, time, cost)
+      resource_cost_by_cpu_memory(resource, training_time, cost)
     }
   )
 
-  def ucc_qom_cost_eval(input: QualityOfModel, unit_costs: String) ={
-    var ucosts: JValue = parse(unit_costs)
-    val value = math.max(0.0,
-      (ucosts\"performance").extract[Double] * (input.post_train_performance - input.pre_train_performance) * input.pre_train_performance)
+  def qom_cost_by_train_performance(measurement: QualityOfModel, unit_costs: String) ={
+    var value = 0.0
+    try {
+      var ucosts = parse(unit_costs).extract[BaseCostQoM]
+      value = math.max(0.0, (ucosts.performance * (measurement.post_train_performance
+          - measurement.pre_train_performance) * measurement.pre_train_performance))
+    }catch {
+      case e: Exception => println("JSON object of unit cost is not correct!")
+    }
     value
   }
 
-  def ucc_resource_cost_eval(input: ResourceMonitor, time_duration: Double, unit_cost: String) ={
-    val ucosts = parse(unit_cost)
-    val value = (ucosts\"time").extract[Double] * time_duration * ((ucosts\"cpu").extract[Double] * input.cpu_percentage
-      + (ucosts\"ram").extract[Double] * input.memory_usage)
+  def resource_cost_by_cpu_memory(measurement: ResourceMonitor, training_time: Double, unit_costs: String) ={
+    var value = 0.0
+    try {
+      var basecosts = parse(unit_costs).extract[BaseCostResource]
+      value = basecosts.by_minute * training_time *
+        (basecosts.cpu.getOrElse(0.0) * measurement.cpu_percentage + basecosts.memory.getOrElse(0.0) * measurement.memory_usage)
+    }catch {
+      case e: Exception => println("JSON object of unit cost is not correct!")
+    }
     value
   }
 }
