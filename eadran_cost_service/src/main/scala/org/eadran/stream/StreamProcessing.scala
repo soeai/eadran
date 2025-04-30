@@ -52,14 +52,12 @@ object StreamProcessing {
     /**
      * init cassandra host and port
      */
-    //      val cassandraHost = args(4) // "127.0.0.1"
-    //      val cassandraPort = args(5) //"9042"
-    //      val cassandra_keyspace = "fedmarket"
-    //      val cassandra_tablename = "tbl_cost_formula_streaming"
-    //      val cassandra_save_table = "tbl_cost_streaming"
-//    val url_csv = ""
-//    val csv_file = url_csv.split("/").last
-//    val staticFile = "/Users/dungcao/IdeaProjects/FedMarket/cost_formula.csv"
+//      val cassandraHost = args(4) // "127.0.0.1"
+//      val cassandraPort = args(5) //"9042"
+//      val cassandra_keyspace = "eadran"
+//      val cassandra_tablename = "tbl_cost_formula_streaming"
+//      val cassandra_save_table = "tbl_cost_streaming"
+
     /**
      * init state management module
      */
@@ -89,10 +87,11 @@ object StreamProcessing {
     spark.conf.set("spark.sql.streaming.metricsEnabled", "true")
     spark.conf.set("spark.streaming.stopGracefullyOnShutdown", "true")
     spark.sparkContext.setLogLevel("ERROR")
-    //      spark.setCassandraConf(Map(
-    //        "spark.cassandra.connection.host" -> cassandraHost,
-    //        "spark.cassandra.connection.port" -> cassandraPort
-    //      ))
+//    spark.setCassandraConf(Map(
+//      "spark.cassandra.connection.host" -> cassandraHost,
+//      "spark.cassandra.connection.port" -> cassandraPort
+//    ))
+
 //    spark.sparkContext.addFile(url_csv)
     val schema = Util.mesageSchema(spark)
 
@@ -123,9 +122,10 @@ object StreamProcessing {
 //      .outputMode("update")
 //      .start()
 
-    val staticStream = spark.sqlContext.read.option("header",true).csv(json_url)
+//    load static info from json/csv file
+    val staticStream = spark.sqlContext.read.option("multiline", "true").json(json_url)
 //    val staticStream = spark.sqlContext.read.option("header", true).csv("file://" + SparkFiles.get(csv_file))
-//      val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
+//    val staticStream = spark.sqlContext.read.json("file://" + SparkFiles.get(json_url))
       .select($"model_id".alias("model_id"),
         $"data_source_id".alias("dataset_id"),
         $"qom_cost_function",
@@ -135,14 +135,14 @@ object StreamProcessing {
         $"cost_quantity_quality".cast("double").alias("cost_quantity_quality"),
         $"cost_context".cast("double").alias("cost_context"))
 
-    //      load static info from cassandra
-    //      val staticStream = spark.read
-    //        .format("org.apache.spark.sql.cassandra")
-    //        .option("keyspace", cassandra_keyspace)
-    //        .option("table", cassandra_tablename)
-    //        .load()
+//    load static info from cassandra
+//    val staticStream = spark.read
+//      .format("org.apache.spark.sql.cassandra")
+//      .option("keyspace", cassandra_keyspace)
+//      .option("table", cassandra_tablename)
+//      .load()
 
-    //      join two streams
+//    join two streams
     val joinStream = eventsStream.join(staticStream,
           eventsStream("application_name")===staticStream("model_id") &&
           eventsStream("functionality")===staticStream("dataset_id"), "leftOuter")
@@ -158,7 +158,7 @@ object StreamProcessing {
 //      .outputMode("update")
 //      .start()
 
-//
+//  Compute the cost using stateful functionality of Spark
     val finalStream = joinStream
       .groupByKey(x => (x.model_id, x.run_id, x.dataset_id, x.train_round))
       .mapGroupsWithState(GroupStateTimeout.ProcessingTimeTimeout())(stateMgmt.computeCost)
@@ -179,7 +179,7 @@ object StreamProcessing {
         )
 
 
-    //    ========= TO KAFKA ========
+//    ========= TO KAFKA ========
 //    finalStream
 //      .selectExpr("to_json(struct(*)) AS value")
 //      .writeStream
@@ -191,7 +191,7 @@ object StreamProcessing {
 //      .outputMode("update")
 //      .start()
 
-    //    ========= TO CONSOLE ========
+//    ========= TO CONSOLE ========
     finalStream
       .writeStream
       .trigger(Trigger.ProcessingTime("10 seconds"))
@@ -200,7 +200,7 @@ object StreamProcessing {
       .outputMode("update")
       .start()
 
-    //    ========= TO CASSANDRA ========
+//    ========= TO CASSANDRA ========
 //    finalStream
 //        .writeStream
 //        .trigger(Trigger.ProcessingTime("60 seconds"))
@@ -213,16 +213,16 @@ object StreamProcessing {
 //        .outputMode("update")
 //        .start()
 
-    //    ========= TO ELASTICSEARCH ========
-    //    finalStream.writeStream
-    //      .foreachBatch{(batchDF: DataFrame, batchId: Long) =>
-    //      batchDF.write.format("org.elasticsearch.spark.sql")
-    //        .option(ConfigurationOptions.ES_NODES, es_host)
-    //        .option(ConfigurationOptions.ES_PORT, es_port)
-    //        .mode("append")
-    //        .save(ES_keystore)
-    //    }.outputMode("update")
-    //      .start()
+//    ========= TO ELASTICSEARCH ========
+//    finalStream.writeStream
+//      .foreachBatch{(batchDF: DataFrame, batchId: Long) =>
+//      batchDF.write.format("org.elasticsearch.spark.sql")
+//        .option(ConfigurationOptions.ES_NODES, es_host)
+//        .option(ConfigurationOptions.ES_PORT, es_port)
+//        .mode("append")
+//        .save(ES_keystore)
+//    }.outputMode("update")
+//      .start()
 
     /**
      * Wait until any of the queries on the associated SQLContext has terminated
