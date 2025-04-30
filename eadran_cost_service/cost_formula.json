@@ -1,332 +1,530 @@
 [
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_01",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.32,
-        "cost_context":2.99
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_01",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_02",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.44,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_03",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.29,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.32,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_02",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_04",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.36,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_05",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.25,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.44,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_03",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_06",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.26,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_07",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.30,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.29,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_04",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_08",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.28,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_09",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.28,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.36,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_05",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_10",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.26,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case1",
-        "data_source_id":"water_leak_tester",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":0}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0, \"cpu\": 0, \"memory\": 0}",
-        "cost_quantity_quality":0,
-        "cost_context":0.0
+    "cost_quantity_quality": 14.25,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_06",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_01",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.32,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_02",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.44,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.26,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_07",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_03",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.29,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_04",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.36,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.30,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_08",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_05",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.25,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_06",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.26,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.28,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_09",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_07",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":14.30,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_08",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":11.72,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.28,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_10",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_09",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.66,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_10",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.88,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.26,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case1",
+    "data_source_id": "water_leak_tester",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 0
     },
-    {
-        "model_id":"leak_case2",
-        "data_source_id":"water_leak_tester",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":0}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0, \"cpu\": 0, \"memory\": 0}",
-        "cost_quantity_quality":0,
-        "cost_context":0.0
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0,
+      "cpu": 0,
+      "memory": 0
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_01",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.76,
-        "cost_context":2.99
+    "cost_quantity_quality": 0,
+    "cost_context": 0.0
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_01",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_02",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":24.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":11.59,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_03",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.88,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.32,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_02",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_04",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":24.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":11.71,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_05",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.8,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.44,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_03",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_06",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":29.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":10.64,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_07",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":19.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.8,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.29,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_04",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_08",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.74,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_09",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.66,
-        "cost_context":2.99
+    "cost_quantity_quality": 14.36,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_05",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_10",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":9.9}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0.01, \"cpu\": 0.01, \"memory\": 0.001}",
-        "cost_quantity_quality":9.88,
-        "cost_context":2.99
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
     },
-    {
-        "model_id":"leak_case3",
-        "data_source_id":"water_leak_tester",
-        "qom_cost_function":"qom_cost_by_train_performance",
-        "qom_base_cost":"{\"performance\":0}",
-        "resource_cost_function":"resource_cost_by_cpu_mem",
-        "resource_base_cost":"{\"by_minute\":0, \"cpu\": 0, \"memory\": 0}",
-        "cost_quantity_quality":0,
-        "cost_context":0.0
-    }
+    "cost_quantity_quality": 14.25,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_06",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 14.26,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_07",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 14.30,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_08",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 11.72,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_09",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.66,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_10",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.88,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case2",
+    "data_source_id": "water_leak_tester",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 0
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0,
+      "cpu": 0,
+      "memory": 0
+    },
+    "cost_quantity_quality": 0,
+    "cost_context": 0.0
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_01",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.76,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_02",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 24.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 11.59,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_03",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.88,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_04",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 24.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 11.71,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_05",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.8,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_06",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 29.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 10.64,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_07",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 19.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.8,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_08",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.74,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_09",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.66,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_10",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 9.9
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0.01,
+      "cpu": 0.01,
+      "memory": 0.001
+    },
+    "cost_quantity_quality": 9.88,
+    "cost_context": 2.99
+  },
+  {
+    "model_id": "leak_case3",
+    "data_source_id": "water_leak_tester",
+    "qom_cost_function": "qom_cost_by_train_performance",
+    "qom_base_cost": {
+      "performance": 0
+    },
+    "resource_cost_function": "resource_cost_by_cpu_mem",
+    "resource_base_cost": {
+      "by_minute": 0,
+      "cpu": 0,
+      "memory": 0
+    },
+    "cost_quantity_quality": 0,
+    "cost_context": 0.0
+  }
 ]

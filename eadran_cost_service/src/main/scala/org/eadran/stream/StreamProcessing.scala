@@ -129,9 +129,9 @@ object StreamProcessing {
       .select($"model_id".alias("model_id"),
         $"data_source_id".alias("dataset_id"),
         $"qom_cost_function",
-        $"qom_base_cost",
+        to_json($"qom_base_cost").alias("qom_base_cost"),
         $"resource_cost_function",
-        $"resource_base_cost",
+        to_json($"resource_base_cost").alias("resource_base_cost"),
         $"cost_quantity_quality".cast("double").alias("cost_quantity_quality"),
         $"cost_context".cast("double").alias("cost_context"))
 
