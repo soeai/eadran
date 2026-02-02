@@ -315,8 +315,9 @@ This research has resulted in four peer-reviewed publications covering different
 
 **A.Prof. Binh T. Nguyen, PhD**
 🏛️ Faculty of Mathematics, University of Science, VNU-HCMC, Vietnam  
-🔬 **Research Interests**: Machine Learning, Computer Vision, and Scientific Computing
+🔬 **Research Interests**: Machine Learning, Computer Vision, and Scientific Computing  
 **Contribution**: Statistical analysis, methodology
+
 ---
 
 ### Graduate Students & Research Assistants
