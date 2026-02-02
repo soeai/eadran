@@ -203,8 +203,6 @@ This research has resulted in four peer-reviewed publications covering different
 > **DOI**: [10.1109/TETC.2025.3609004](https://doi.org/10.1109/TETC.2025.3609004)  
 > **Pages**: 1618-1632
 
-**Abstract**: In federated learning, the models can be trained synchronously or asynchronously. Many existing works have focused on developing an aggregation method for the server to aggregate multiple local models into the global model with improved performance. They ignore the heterogeneity of the training workers, which causes the delay in the training of the local models, leading to the obsolete information issue. In this paper, we design and develop ASYN2F, an ASYNchronous Federated learning Framework with bidirectional model aggregation. By bidirectional aggregation, ASYN2F, on one hand, allows the server to asynchronously aggregate multiple local models and generate a new global model. On the other hand, it allows the training workers to aggregate the new version of the global model into a local model, which is being optimized even in the middle of a training epoch.
-
 **Key Contributions**:
 - Bidirectional aggregation algorithms for server and workers
 - Handling obsolete information in asynchronous settings
@@ -221,8 +219,6 @@ This research has resulted in four peer-reviewed publications covering different
 > **Published**: Future Generation Computer Systems, Vol. 175, 2026  
 > **DOI**: [10.1016/j.future.2025.108046](https://doi.org/10.1016/j.future.2025.108046)  
 > **Pages**: Article 108046
-
-**Abstract**: The proliferation of edge data availability alongside advanced federated and distributed machine learning training techniques calls for new developments of machine learning (ML) with distributed and private edge data providers. Most existing works, however, focus on the development and optimization of federated ML communication and aggregation techniques and under-research the quality of training based on the impact of the quality of data and contributions of distributed data sources from such providers to the building of ML models. In this paper, we introduce an Edge marketplAce for DistRibuted AI/ML traiNing (EADRAN), a comprehensive platform for federated learning (FL) with independent edge data providers. The key distinguishable feature of EADRAN is to enable the explainable quality of training (eQoT) approach based on the quality of data and the contributions of provided data to the target-trained ML models.
 
 **Key Contributions**:
 - Conceptual architecture for federated ML marketplaces
@@ -242,8 +238,6 @@ This research has resulted in four peer-reviewed publications covering different
 > **DOI**: [10.1007/978-3-031-94892-3_42](https://doi.org/10.1007/978-3-031-94892-3_42)  
 > **Pages**: 568-581
 
-**Abstract**: This paper addresses the challenge of detecting subtle data manipulations in federated learning marketplaces, focusing on synthetically generated datasets introduced by data providers to inflate their contributions' value. We propose a novel approach incorporating enhanced monitoring features and sophisticated analysis of local model weight movements. Our method measures the moving distance of local model weights, applies time series anomaly detection, and analyzes cross-client correlations to distinguish between genuine learning divergence and manipulation attempts.
-
 **Key Contributions**:
 - Enhanced monitoring features for malicious behavior detection
 - Weight movement analysis using Wasserstein distance
@@ -260,8 +254,6 @@ This research has resulted in four peer-reviewed publications covering different
 > **DOI**: [10.1109/UCC56403.2022.00015](https://doi.org/10.1109/UCC56403.2022.00015)  
 > **Pages**: 41-50
 
-**Abstract**: The proliferation of data and machine learning (ML) as a service, coupled with advanced federated and distributed training techniques, fosters the development of federated ML marketplaces. One important, but under-researched, aspect is to enable the stakeholder interactions centered around the quality of training and costs in the marketplace and the service models in federated ML training. This paper conceptualizes a federated ML marketplace and proposes a framework to enable the awareness of the quality of training and a variety of costs where both data providers and ML model consumers can easily value the contribution of each data source to ML model performance in nearly real-time.
-
 **Key Contributions**:
 - Conceptualization of federated ML marketplace stakeholders
 - Definition of quality of training (QoT) metrics
@@ -274,8 +266,8 @@ This research has resulted in four peer-reviewed publications covering different
 ### 📊 Research Impact
 
 **Publication Venues**:
-- IEEE TETC (Q1 Journal, Impact Factor: 6.4)
-- Future Generation Computer Systems (Q1 Journal, Impact Factor: 7.5)
+- IEEE TETC (Q1)
+- Future Generation Computer Systems (Q1)
 - IEEE/ACM UCC (Rank A Conference)
 - ICMLC (International Conference)
 
@@ -311,17 +303,17 @@ This research has resulted in four peer-reviewed publications covering different
 
 ### Collaborators
 
-**Hong-Linh Truong, PhD**  
+**Prof. Hong-Linh Truong, PhD**  
 🏛️ Department of Computer Science, Aalto University, Finland  
 🔬 **Research Interests**: Cloud Computing, Service Engineering, Data Engineering  
 **Contribution**: Conceptual architecture, marketplace design, cost models
 
-**Tram Truong-Huu, PhD, Senior Member IEEE**  
+**A.Prof. Tram Truong-Huu, PhD, Senior Member IEEE**  
 🏛️ Singapore Institute of Technology & Agency for Science, Technology and Research (A*STAR), Singapore  
 🔬 **Research Interests**: Cybersecurity, Federated Learning, Distributed Systems  
 **Contribution**: Algorithm design, convergence analysis, security aspects
 
-**Binh T. Nguyen**  
+**A.Prof. Binh T. Nguyen, PhD**  
 🏛️ Faculty of Mathematics, University of Science, VNU-HCMC, Vietnam  
 🔬 **Research Interests**: Machine Learning, Computer Vision, and Scientific Computing
 **Contribution**: Statistical analysis, methodology
@@ -330,14 +322,14 @@ This research has resulted in four peer-reviewed publications covering different
 ### Graduate Students & Research Assistants
 
 **Nguyen T. Vuong**  
-🏛️ Aalto University, Finland (Research Intern) & Tan Tao University, Vietnam  
+🏛️ Tan Tao University, Vietnam  & Aalto University, Finland (Research Intern)
 **Contribution**: ASYN2F implementation, experiments, analysis
 
-**Hong-Tri Nguyen**  
+**Hong-Tri Nguyen, PhD**  
 🏛️ Aalto University, Finland  
 **Contribution**: EADRAN platform development, integration
 
-**Minh-Tri Nguyen**  
+**Minh-Tri Nguyen, PhD**  
 🏛️ Aalto University, Finland  
 **Contribution**: System implementation, monitoring services
 
@@ -369,12 +361,6 @@ This research is supported by:
 - **CSC IT Center for Science, Finland**  
   Cloud computing resources and infrastructure
 
-- **Aalto University, Finland**  
-  Research collaboration and support
-
-- **Singapore Institute of Technology**  
-  Research collaboration
-
 We would like to express our gratitude to all students and staff at Tan Tao University who contributed to the implementation and testing of the platforms.
 
 ---
@@ -401,8 +387,6 @@ We welcome collaboration opportunities, questions, and feedback:
 
 ### Related Frameworks & Tools
 - 🌐 [Flower Federated Learning Framework](https://flower.ai/)
-- 🌐 [OpenFL](https://www.openfl.org/)
-- 🌐 [FedML](https://fedml.ai/)
 
 ---
 
