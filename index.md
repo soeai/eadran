@@ -308,12 +308,12 @@ This research has resulted in four peer-reviewed publications covering different
 🔬 **Research Interests**: Cloud Computing, Service Engineering, Data Engineering  
 **Contribution**: Conceptual architecture, marketplace design, cost models
 
-**A.Prof. Tram Truong-Huu, PhD, Senior Member IEEE**  
+**A.Prof. Tram Truong-Huu, PhD**
 🏛️ Singapore Institute of Technology & Agency for Science, Technology and Research (A*STAR), Singapore  
 🔬 **Research Interests**: Cybersecurity, Federated Learning, Distributed Systems  
 **Contribution**: Algorithm design, convergence analysis, security aspects
 
-**A.Prof. Binh T. Nguyen, PhD**  
+**A.Prof. Binh T. Nguyen, PhD**
 🏛️ Faculty of Mathematics, University of Science, VNU-HCMC, Vietnam  
 🔬 **Research Interests**: Machine Learning, Computer Vision, and Scientific Computing
 **Contribution**: Statistical analysis, methodology
