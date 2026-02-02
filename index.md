@@ -323,7 +323,7 @@ This research has resulted in four peer-reviewed publications covering different
 ### Graduate Students & Research Assistants
 
 **Nguyen T. Vuong**  
-🏛️ Tan Tao University, Vietnam  & Aalto University, Finland (Research Intern)
+🏛️ Tan Tao University, Vietnam  & Aalto University, Finland (Research Intern)  
 **Contribution**: ASYN2F implementation, experiments, analysis
 
 **Hong-Tri Nguyen, PhD**  
